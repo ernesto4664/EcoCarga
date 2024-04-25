@@ -1,0 +1,7 @@
+{
+  "name": "EcoCarga",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

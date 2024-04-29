@@ -1,0 +1,34 @@
+// Definir variables para los tamaños de las columnas
+$column-width: 50%;
+$gutter-width: 20px;
+
+// Mixin para crear una columna
+@mixin column($width: $column-width) {
+  flex: 0 0 $width;
+  max-width: $width;
+  display: flex; // Agregar display flex
+  justify-content: center; // Centrar horizontalmente
+  align-items: center; // Centrar verticalmente
+}
+
+// Estilo para el contenedor de las columnas
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -$gutter-width;
+}
+
+// Estilo para cada columna
+.column {
+  padding: 0 $gutter-width;
+  box-sizing: border-box;
+}
+
+// Utiliza el mixin para crear dos columnas
+.column-1 {
+  @include column;
+}
+
+.column-2 {
+  @include column;
+}

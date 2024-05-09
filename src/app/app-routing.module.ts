@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { InformacionpreliminarPage } from './informacionpreliminar/informacionpreliminar.page';
 
 const routes: Routes = [
   {
@@ -18,6 +19,16 @@ const routes: Routes = [
   {
     path: 'tabs',
     loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
+  },
+  {
+    path: 'informacionpreliminar',
+    loadChildren: () => import('./informacionpreliminar/informacionpreliminar.module').then( m => m.InformacionpreliminarPageModule) 
+  },
+  // Manejo de páginas no encontradas
+  {
+    path: '**',
+    redirectTo: 'welcome',
+    pathMatch: 'full'
   }
 ];
 

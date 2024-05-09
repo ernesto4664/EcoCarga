@@ -1,0 +1,28 @@
+<app-layout>
+    <ion-content [fullscreen]="true">
+      <ion-header collapse="condense">
+        <ion-toolbar>
+          <ion-title size="large"></ion-title>
+        </ion-toolbar>
+      </ion-header>
+    <!-- informacionpreliminar.page.html -->
+    <swiper-container loop="true" slides-per-view="1">
+      <swiper-slide>
+        <h2>Título del Slide 1</h2>
+        <p>Descripción del Slide 1</p>
+      </swiper-slide>
+      <swiper-slide>
+        <h2>Título del Slide 2</h2>
+        <p>Descripción del Slide 2</p>
+      </swiper-slide>
+      <swiper-slide>
+        <h2>Título del Slide 3</h2>
+        <p>Descripción del Slide 3</p>
+      </swiper-slide>
+    </swiper-container>
+  
+    <ion-button (click)="next()">Siguiente</ion-button>
+    <ion-button (click)="prev()">Atrás</ion-button>
+    </ion-content>
+</app-layout>
+

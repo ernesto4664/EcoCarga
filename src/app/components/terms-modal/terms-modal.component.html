@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Términos y Condiciones</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="modal-content">
+    <p>Este es el texto de los términos y condiciones.</p>
+    <ion-item>
+      <ion-label>Acepto los términos y condiciones</ion-label>
+      <ion-checkbox slot="start"></ion-checkbox>
+    </ion-item>
+    <ion-button expand="full" (click)="dismiss()">Aceptar</ion-button>
+  </div>
+</ion-content>

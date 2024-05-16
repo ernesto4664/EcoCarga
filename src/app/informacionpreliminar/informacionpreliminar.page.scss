@@ -1,0 +1,90 @@
+ion-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  h2{
+    font-weight: 500;
+    font-size: 25px;
+    line-height: 29.3px;
+    color: #2A2A2A;
+  }
+
+  p{
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 25px;
+    color: #2A2A2A;
+  }
+  
+  .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .swiper-container-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+  
+  swiper-container {
+    width: 80%;  /* Ajusta el ancho según sea necesario */
+    height: 70%; /* Ajusta la altura según sea necesario */
+    max-width: 850px;
+    max-height: 600px;
+    /*background: #fff;  Opcional: añade un fondo */
+    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  Opcional: añade una sombra */
+    /*border-radius: 8px;  Opcional: añade bordes redondeados */
+    margin-bottom: 20px;  /* Añade margen inferior para separar de los botones */
+  }
+
+  swiper-slide {
+    text-align: center;
+}
+
+.button-group-top {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  gap: 10px;  /* Espacio entre los botones */
+}
+  
+  .button-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;  /* Espacio entre los botones */
+  }
+
+  /* Estilos personalizados para los botones */
+ion-button {
+    --width: 127px;
+    --height: 40px;
+    --background: #279769; /* Color de fondo */
+    --color: #fff; /* Color del texto */
+    --border-radius: 100px; /* Bordes redondeados */
+    --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra */
+    padding: 10px 20px; /* Espaciado interno */
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 18.75px;
+  }
+
+  .container.img {
+    background-image: url('/assets/bann.png');
+    background-size: cover; /* Ajusta la imagen para cubrir completamente el contenedor */
+    background-position: center; /* Centra la imagen en el contenedor */
+    background-repeat: no-repeat; /* Evita que la imagen se repita */
+    width: 655;
+    height: 295px; /* Ajusta la altura del contenedor si es necesario */
+    text-align-last: center; /* Mantiene el texto centrado si hay texto dentro del contenedor */
+  }

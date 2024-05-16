@@ -5,8 +5,8 @@ import { ComponentsModule } from '../components/components.module';
 import { IonicModule } from '@ionic/angular';
 
 import { ViewonePageRoutingModule } from './viewone-routing.module';
-
 import { ViewonePage } from './viewone.page';
+import { TermsModalComponent } from '../components/terms-modal/terms-modal.component'; // Importa aquí
 
 @NgModule({
   imports: [
@@ -16,6 +16,6 @@ import { ViewonePage } from './viewone.page';
     ViewonePageRoutingModule,
     ComponentsModule
   ],
-  declarations: [ViewonePage]
+  declarations: [ViewonePage, TermsModalComponent]
 })
 export class ViewonePageModule {}

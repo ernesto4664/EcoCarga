@@ -46,3 +46,12 @@ ion-footer {
     line-height: 11.72px;
     color: #A6B8B2;
   }
+
+  .icon-col {
+    cursor: pointer;  /* Cambia el cursor a una mano cuando se pasa el ratón por encima */
+  
+    &:hover {
+      transform: scale(1.05);  /* Efecto de zoom opcional */
+      transition: transform 0.3s ease;  /* Animación suave */
+    }
+  }

@@ -20,16 +20,19 @@ const routes: Routes = [
     path: 'tabs',
     loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
   },
-  {
+  { 
     path: 'informacionpreliminar',
-    loadChildren: () => import('./informacionpreliminar/informacionpreliminar.module').then( m => m.InformacionpreliminarPageModule) 
+    loadChildren: () => import('./informacionpreliminar/informacionpreliminar.module').then(m => m.InformacionpreliminarPageModule) 
   },
-  // Manejo de páginas no encontradas
+  {
+    path: 'electrolineras',
+    loadChildren: () => import('./electrolineras/electrolineras.module').then( m => m.ElectrolinerasPageModule)
+  },
   {
     path: '**',
     redirectTo: 'welcome',
     pathMatch: 'full'
-  }
+  },
 ];
 
 @NgModule({

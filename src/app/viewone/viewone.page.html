@@ -1,99 +1,43 @@
 <!--<ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title></ion-title>
+    <ion-title>View One</ion-title>
   </ion-toolbar>
-</ion-header>--> 
+</ion-header>-->
 <app-layout>
   <ion-content [fullscreen]="true">
-    <ion-header collapse="condense">
-      <ion-toolbar>
-        <ion-title size="large"></ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <div class="container terminos">
       <div class="row">
         <div class="col-md-12">
-           <h1>Términos de servicio</h1>
-
-           <p class="terminos">Por favor, revisar nuestros términos y condiciones y política
-             de privacidad si deseas saber más sobre los detalles de uso de
-              Ecocarga.</p>
-
-            <div class="container">
-              <div class="row">
-                <div class="col-md-12">
-                  <ul>
-                    <li>
-                      <p class="mi-option">Términos y condiciones</p>
-                    </li>
-                    <li>
-                      <p class="mi-option">Política de privacidad</p>
-                    </li>
-                  </ul>
-                </div>
+          <h1>Términos de servicio</h1>
+  
+          <p class="terminos">
+            Por favor, revisar nuestros términos y condiciones y política de privacidad si deseas saber más sobre los detalles de uso de Ecocarga.
+          </p>
+  
+          <div class="container">
+            <div class="row">
+              <div class="col-md-12">
+                <ul>
+                  <li>
+                    <p class="mi-option" (click)="openTermsModal()">Términos y condiciones</p>
+                  </li>
+                  <li>
+                    <p class="mi-option">Política de privacidad</p>
+                  </li>
+                </ul>
               </div>
             </div>
+          </div>
         </div>
       </div>
       <div class="container" style="margin-top: 50px;">
         <div class="row">
           <div class="">
-            <button class="btn-acepto" [routerLink]="['/informacionpreliminar']">HE LEÍDO Y ACEPTO</button>
+            <button class="btn-acepto" (click)="navigateToInformacionPreliminar()">HE LEÍDO Y ACEPTO</button>
           </div>
         </div>
       </div>
     </div>
-     <!--  Contenedor para los conectores 
-      <div class="conector-container">
-        <p style="font-size: 20px;color: #FFFFFF;"><strong>Selecciona tu tipo de conector</strong></p>
-         Conector Tipo 1 
-        <div class="conector">
-          <img src="assets/icon/tipo1.jpg" alt="Conector Tipo 1">
-          <p>Especificaciones: Tipo 1, 220V, 16A</p>
-        </div>
-  
-         Conector Tipo 2 
-        <div class="conector">
-          <img src="assets/icon/tipo2.jpg" alt="Conector Tipo 2">
-          <p>Especificaciones: Tipo 2, 400V, 32A</p>
-        </div>
-        
-         Conector Tipo 3 
-        <div class="conector">
-          <img src="assets/icon/tipo2.jpg" alt="Conector Tipo 2">
-          <p>Especificaciones: Tipo 3, 400V, 32A</p>
-        </div>
-  
-         Conector Tipo 4 
-        <div class="conector">
-          <img src="assets/icon/tipo2.jpg" alt="Conector Tipo 2">
-          <p>Especificaciones: Tipo 4, 400V, 32A</p>
-        </div>
-  
-         Conector Tipo 5 
-        <div class="conector">
-          <img src="assets/icon/tipo2.jpg" alt="Conector Tipo 2">
-          <p>Especificaciones: Tipo 5, 400V, 32A</p>
-        </div>
-  
-         Conector Tipo 6 
-        <div class="conector">
-          <img src="assets/icon/tipo2.jpg" alt="Conector Tipo 2">
-          <p>Especificaciones: Tipo 6, 400V, 32A</p>
-        </div>
-  
-         Conector Tipo 7 
-        <div class="conector">
-          <img src="assets/icon/tipo2.jpg" alt="Conector Tipo 2">
-          <p>Especificaciones: Tipo 7, 400V, 32A</p>
-        </div>
-  
-         Conector Tipo 8 
-        <div class="conector">
-          <img src="assets/icon/tipo2.jpg" alt="Conector Tipo 2">
-          <p>Especificaciones: Tipo 8, 400V, 32A</p>
-        </div>
-      </div>-->
   </ion-content>
 </app-layout>
+

@@ -1,10 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../api.service';
 import { ModalController } from '@ionic/angular';
-import { InfiniteScrollCustomEvent } from '@ionic/angular';
-import { Router } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
-
+import { Router, ActivatedRoute } from '@angular/router';
 import { TermsModalComponent } from '../components/terms-modal/terms-modal.component'; // Verifica esta ruta
 
 @Component({
@@ -14,6 +10,7 @@ import { TermsModalComponent } from '../components/terms-modal/terms-modal.compo
 })
 export class ViewonePage implements OnInit {
   termsAccepted = false;  // Propiedad para rastrear la aceptación de términos
+  showAlert = false; // Variable para controlar la visibilidad de la alerta
 
   constructor(private router: Router, private route: ActivatedRoute, private modalController: ModalController) {}
   
@@ -50,7 +47,11 @@ export class ViewonePage implements OnInit {
         }
       });
     } else {
-      alert('Debes aceptar los términos y condiciones para continuar.');
+      this.showAlert = true; // Mostrar la alerta si los términos no han sido aceptados
     }
+  }
+
+  onAlertDismiss() {
+    this.showAlert = false; // Resetear la visibilidad de la alerta al cerrarla
   }
 }

@@ -1,19 +1,12 @@
-<!--<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>View One</ion-title>
-  </ion-toolbar>
-</ion-header>-->
 <app-layout>
   <ion-content [fullscreen]="true">
     <div class="container terminos">
       <div class="row">
         <div class="col-md-12">
           <h1>Términos de servicio</h1>
-  
           <p class="terminos">
             Por favor, revisar nuestros términos y condiciones y política de privacidad si deseas saber más sobre los detalles de uso de Ecocarga.
           </p>
-  
           <div class="container">
             <div class="row">
               <div class="col-md-12">
@@ -39,5 +32,13 @@
       </div>
     </div>
   </ion-content>
+  
+  <!-- Añade el IonAlert aquí -->
+  <ion-alert
+    [isOpen]="showAlert"
+    header="Advertencia"
+    message="Debes aceptar los términos y condiciones para continuar."
+    buttons="OK"
+    (didDismiss)="onAlertDismiss()">
+  </ion-alert>
 </app-layout>
-

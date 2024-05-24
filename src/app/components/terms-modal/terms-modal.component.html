@@ -12,8 +12,16 @@
     <p>Este es el texto de los términos y condiciones.</p>
     <ion-item>
       <ion-label>Acepto los términos y condiciones</ion-label>
-      <ion-checkbox slot="start"></ion-checkbox>
+      <ion-checkbox slot="start" [(ngModel)]="termsAccepted"></ion-checkbox>
     </ion-item>
-    <ion-button expand="full" (click)="dismiss()">Aceptar</ion-button>
+    <ion-button expand="full" (click)="accept()">Aceptar</ion-button>
   </div>
+
+  <ion-alert
+    [isOpen]="showAlert"
+    header="Advertencia"
+    message="Debes aceptar los términos y condiciones para continuar."
+    buttons="OK"
+    (didDismiss)="onAlertDismiss()">
+  </ion-alert>
 </ion-content>

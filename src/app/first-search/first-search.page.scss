@@ -1,0 +1,73 @@
+$colors: (
+   blue:       #387ef5,
+   secondary:  #31B17D,
+   danger:     #f53d3d,
+   light:      #f4f4f4,  
+   dark:       #222,
+   white:      #FFF,
+);
+
+ion-header{
+    box-shadow: none;
+}
+
+ion-toolbar{
+    --background: #31B17D;
+    color: white !important;
+}
+
+.custom-header {
+    background: #31B17D !important;
+    color: white !important;
+    text-align: center;
+  }
+
+  .toolbar-background  {
+    background: #31B17D !important;
+    color: white !important;
+}
+
+p.msj-principal{
+    padding: 20px;
+    height: 68px;
+    align-content: center;
+    text-align: center;
+    background-color: #F5F5F5;
+    border-radius: 30px 30px 0px 0px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: #2A2A2A;
+}
+
+  
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px; /* Espacio entre los elementos */
+    margin: 20px 0; /* Margen superior e inferior */
+  }
+  
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+  }
+  
+  .checkbox-item ion-checkbox {
+    margin-right: 5px; /* Espacio entre el checkbox y la etiqueta */
+  }
+  
+  .checkbox-item ion-label {
+    font-size: 1.2em; /* Tamaño del texto */
+    color: #31B17D; /* Color del texto */
+  }
+  
+  .search-button {
+    background: transparent; /* Fondo transparente */
+    padding: 10px 20px; /* Espaciado interno */
+    font-size: 1em; /* Tamaño del texto */
+  }
+  
+  
+  

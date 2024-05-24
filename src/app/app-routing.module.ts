@@ -29,10 +29,19 @@ const routes: Routes = [
     loadChildren: () => import('./electrolineras/electrolineras.module').then( m => m.ElectrolinerasPageModule)
   },
   {
+    path: 'first-search',
+    loadChildren: () => import('./first-search/first-search.module').then( m => m.FirstSearchPageModule)
+  },
+  {
+    path: 'second-search',
+    loadChildren: () => import('./second-search/second-search.module').then( m => m.SecondSearchPageModule)
+  },
+  {
     path: '**',
     redirectTo: 'welcome',
     pathMatch: 'full'
   },
+
 ];
 
 @NgModule({

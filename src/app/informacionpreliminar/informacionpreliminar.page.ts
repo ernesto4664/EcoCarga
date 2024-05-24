@@ -1,4 +1,5 @@
 import { Component, AfterViewInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-informacionpreliminar',
@@ -6,14 +7,17 @@ import { Component, AfterViewInit } from '@angular/core';
   styleUrls: ['./informacionpreliminar.page.scss'],
 })
 export class InformacionpreliminarPage implements AfterViewInit {
+  showSkipButton = false; // Variable para controlar la visibilidad del botón "Saltar"
 
-  constructor() {}
+  constructor(private router: Router) {}
 
   ngAfterViewInit() {
     // Acceder a Swiper aquí
     const swiper = (document.querySelector('swiper-container') as any)?.swiper;
     if (swiper) {
-      // Swiper está disponible, puedes llamar a los métodos slideNext() y slidePrev() aquí
+      swiper.on('slideChange', () => {
+        this.showSkipButton = swiper.isEnd; // Mostrar el botón "Saltar" solo en el último slide
+      });
     }
   }
 
@@ -31,5 +35,10 @@ export class InformacionpreliminarPage implements AfterViewInit {
     if (swiper) {
       swiper.slidePrev();
     }
+  }
+
+  skip() {
+    // Redirigir a otra página
+    this.router.navigate(['/first-search']);
   }
 }

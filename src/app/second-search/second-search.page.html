@@ -1,0 +1,55 @@
+<app-layout></app-layout>
+<ion-header class="custom-header">
+  <ion-toolbar>
+    <ion-title>CAPACIDAD DE LA BATERÍA EN KWH</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="false">
+  <div class="container" style="background: #31B17D !important; margin-top: -16px;">
+    <p class="msj-principal">Selecciona la capacidad de la batería de tu vehículo en kWh; opción obligatoria!</p>
+  </div>
+  <div class="container">
+    <ion-item>
+      <ion-label position="floating">Capacidad de la Batería (kWh)</ion-label>
+      <ion-input [(ngModel)]="batteryCapacity" (ionInput)="searchBatteryCapacities($event)" type="text" debounce="300"></ion-input>
+    </ion-item>
+    <ion-list *ngIf="suggestedCapacities.length > 0">
+      <ion-item *ngFor="let capacity of suggestedCapacities" (click)="selectCapacity(capacity)">
+        {{ capacity }}
+      </ion-item>
+    </ion-list>
+
+    <div *ngIf="selectedBattery">
+      <ion-item>
+        <ion-thumbnail slot="start">
+          <img src="{{ selectedBattery.image }}" alt="Battery Image">
+        </ion-thumbnail>
+        <ion-label>
+          <h2>{{ selectedBattery.name }}</h2>
+          <p>{{ selectedBattery.specifications }}</p>
+        </ion-label>
+      </ion-item>
+    </div>
+
+    <div class="filters" *ngIf="selectedBattery">
+      <h2>Filtros Avanzados (Opcional)</h2>
+      <ion-item>
+        <ion-label>Proveedor de Servicios de Carga (PSE)</ion-label>
+        <ion-select [(ngModel)]="selectedPSE" (ionChange)="filterByPSE()">
+          <ion-select-option *ngFor="let pse of pseOptions" [value]="pse">{{ pse }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label>Filtrar por Distancia</ion-label>
+        <ion-select [(ngModel)]="selectedDistance" (ionChange)="filterByDistance()">
+          <ion-select-option value="20">20 km</ion-select-option>
+          <ion-select-option value="30">30 km</ion-select-option>
+          <ion-select-option value="50">50 km</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </div>
+
+    <ion-button expand="full" (click)="getFilteredStations()">Buscar Estaciones</ion-button>
+  </div>
+</ion-content>

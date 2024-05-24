@@ -1,33 +1,32 @@
 <app-layout></app-layout>
-  <ion-content [fullscreen]="false">
-    <div class="container img" style="text-align-last: center;">
-      <!-- Tu contenido aquí -->
-    </div>
-    <div class="content-wrapper">
-      <div class="swiper-container-wrapper">
-        <div class="button-group-top">
-          <ion-button class="mi-btn" (click)="prev()">Saltar</ion-button>
-        </div>
-        <swiper-container loop="true" slides-per-view="1">
-          <swiper-slide>
-            <h2>¡Hola!</h2>
-            <p>Te damos la bienvenida a la mayor comunidad de movilidad eléctrica.</p>
-          </swiper-slide>
-          <swiper-slide>
-            <h2>Todos los cargadores a tu alcance con tan solo un clic</h2>
-            <p>Conoce la ubicación donde y cuando quieras.</p>
-          </swiper-slide>
-          <swiper-slide>
-            <h2>Todos los cargadores a tu alcance con tan solo un clic</h2>
-            <p>Conoce la ubicación donde y cuando quieras.</p>
-          </swiper-slide>
-        </swiper-container>
-        <div class="swiper-pagination"></div>
-        <div class="button-group">
-          <ion-button class="mi-btn" (click)="prev()">Atrás</ion-button>
-          <ion-button class="mi-btn" (click)="next()">Siguiente</ion-button>
-        </div>
+<ion-content [fullscreen]="false">
+  <div class="container img" style="text-align-last: center;">
+    <!-- Tu contenido aquí -->
+  </div>
+  <div class="content-wrapper">
+    <div class="swiper-container-wrapper">
+      <div class="button-group-top">
+        <ion-button class="mi-btn" *ngIf="showSkipButton" (click)="skip()">Continuar</ion-button>
+      </div>
+      <swiper-container [loop]="false" [slidesPerView]="1">
+        <swiper-slide>
+          <h2>¡Hola!</h2>
+          <p>Te damos la bienvenida a la mayor comunidad de movilidad eléctrica.</p>
+        </swiper-slide>
+        <swiper-slide>
+          <h2>Todos los cargadores a tu alcance con tan solo un clic</h2>
+          <p>Conoce la ubicación donde y cuando quieras.</p>
+        </swiper-slide>
+        <swiper-slide>
+          <h2>Todos los cargadores a tu alcance con tan solo un clic</h2>
+          <p>Conoce la ubicación donde y cuando quieras.</p>
+        </swiper-slide>
+      </swiper-container>
+      <div class="swiper-pagination"></div>
+      <div class="button-group">
+        <ion-button class="mi-btn" (click)="prev()">Atrás</ion-button>
+        <ion-button class="mi-btn" (click)="next()">Siguiente</ion-button>
       </div>
     </div>
-  </ion-content>
-
+  </div>
+</ion-content>

@@ -9,8 +9,8 @@
   <div class="container" style="background: #31B17D !important; margin-top: -16px;">
     <p class="msj-principal">Selecciona el o los conectores disponibles en tu vehículo; opción obligatoria!</p>
   </div>
-  <div class="container">
-    <div class="checkbox-group">
+  <div class="container checkbox-grid-container">
+    <div class="checkbox-grid">
       <div class="checkbox-item">
         <ion-checkbox slot="start" [(ngModel)]="typeAC" (ionChange)="onCheckboxChange()"></ion-checkbox>
         <ion-label>Tipo AC</ion-label>
@@ -23,24 +23,11 @@
   </div>
 
   <div *ngIf="connectors.length > 0">
-    <h2>Conectores Disponibles:</h2>
-    <div *ngFor="let connector of connectors">
-      <p>{{ connector.standard }}</p>
-      <p>{{ connector.format }}</p>
-      <p>{{ connector.power_type }}</p>
-      <!-- Agrega más detalles según sea necesario -->
-    </div>
+    <h2>Conectores Disponibles</h2>
+    <ion-list>
+      <ion-item *ngFor="let connector of connectors; let i = index" (click)="selectConnector(i)" [ngClass]="{'selected': selectedIndexes.includes(i)}">
+        {{ connector.standard }} ({{ connector.format }} - {{ connector.power_type }})
+      </ion-item>
+    </ion-list>
   </div>
-
-  <ion-button expand="full" (click)="confirmSelection()">Siguiente</ion-button>
-
-  <!-- IonAlert para la confirmación -->
-  <ion-alert
-  [isOpen]="showAlert"
-  header="¿Está seguro de su selección?"
-  message="Si está seguro puede continuar con su proceso de selección de las especificaciones de su vehículo."
-  [buttons]="alertButtons"
-  cssClass="my-custom-class"
-  (didDismiss)="onAlertDismiss()">
-  </ion-alert>
 </ion-content>

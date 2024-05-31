@@ -1,13 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
+import { tap, mergeMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'https://vn1oyckreb.execute-api.us-east-1.amazonaws.com/prod';
-  private token = 'eyJraWQiOiJvSWM1K3NpU25yWnZ3Y3YxS294UVwvR29HWEM3VVc2VVVPOHV2dXVjT095OD0iLCJhbGciOiJSUzI1NiJ9.eyJjdXN0b206cmVnaW9uIjoiQW50b2ZhZ2FzdGEiLCJzdWIiOiIzNDg4ODQ2OC0yMDYxLTcwMGQtZGRhOS0xMDc0ZTgyNTE3NjEiLCJlbWFsbF92ZXJpZmllZCI6dHJ1ZSwiY3VzdG9tOmFkZHJlc3MiOiJMYSBHbG9yaWEgNzciLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9wbHdaNTBkeHUiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOmZhbHNlLCJjb2duaXRvOnVzZXJuYW1lIjoiNTA5OTk4ODgyIiwiY3VzdG9tOmNvbW11bmUiOiJPbGxhZ8O8ZSIsIm9yaWdpbl9qdGkiOiIwZDliMWRiZi1iMzI0LTQxZGUtYmEzMS1jYzUwYmNjNTgwMjQiLCJhdWQiOiI0M3NmdHNkcml0bHAzcm1xM2cwNXE4cTNyaSIsImV2ZW50X2lkIjoiYWIyZTVjNTctYTA3Yi00OTQxLTg5YzctZjg3ZmRjZmM3NDY4IiwidG9rZW5fdXNlIjoiaWQiLCJjdXN0b206c2VjX3ZhbGlkYXRpb24iOiJUcnVlIiwiYXV0aF90aW1lIjoxNzE2NDg0ODU1LCJuYW1lIjoidXNlciAwMiIsInBob25lX251bWJlciI6Iis1Njk3Mjk0NzgyMSIsImN1c3RvbTpkYl91c2VyaWQiOiIxMTYiLCJleHAiOjE3MTY0ODg0NTUsImlhdCI6MTcxNjQ4NDg1NSwianRpIjoiOGQxZjM3NjEtNDJlYy00NDQ5LWExNmUtMTFiNjM5ODNkNWJmIiwiZW1haWwiOiJjbW9udG95YUBhcmtoby5pbyJ9.NOzcBzlnOjDX6mcYQWYBYekBWuyWGhHWmi2jjxrZpTTCtpP_liEDh5dEezblYXZ20ESJFRHo17QwIWoouC28E2nr1ruzu_j7Jj7bxIHcoAIs0MvxhZKxQJGfL7zSK2bR2sYQ4EqoPYdKPsLP0ceUOu2glYgWmpKldcMaQuFlHAEJrXTuf2OWoaVxykeRml72_7JhEfjdoXaASqO-itW9cbjIbbiJjRFo9eckAk65dAAtWl8KyP7Dq5arRapxnSt-y0Tf2S2hI_TwATcPFW4NkAjFwsqYYiLZ9ierGDrrlqRpcYltztJ5LIyeph3QCekMsqd4xIKwkcS6PnUrNOji1g';
+  private apiUrl = 'https://backend.electromovilidadenlinea.cl/locations';
+  private token = 'eyJraWQiOiJvSWM1K3NpU25yWnZ3Y3YxS294UVwvR29HWEM3VVc2VVVPOHV2dXVjT095OD0iLCJhbGciOiJSUzI1NiJ9.eyJjdXN0b206cmVnaW9uIjoiVGFyYXBhY8OhIiwic3ViIjoiNDRjOGI0MzgtNjAxMS03MGQ3LWVkZDgtNWYwY2Y5MzMwZGFhIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImN1c3RvbTphZGRyZXNzIjoiQ2hpbGUiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9wbHdaNTBkeHUiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOmZhbHNlLCJjb2duaXRvOnVzZXJuYW1lIjoiMTExMTEyMjIzIiwiY3VzdG9tOmNvbW11bmUiOiJDYW1pw7FhIiwib3JpZ2luX2p0aSI6IjgzZGRlODgxLTI2YzgtNDRjMS1hNzJmLTVjODdkNWIzMGYwZiIsImF1ZCI6IjQzc2Z0c2RyaXRscDNybXEzZzA1cThxM3JpIiwiZXZlbnRfaWQiOiI4OWJhOWQ5Zi1hYjk0LTQ3NGMtYWM0NS0xYmU3NDU1YjQyZWYiLCJ0b2tlbl91c2UiOiJpZCIsImN1c3RvbTpzZWNfdmFsaWRhdGlvbiI6ImZhbHNlIiwiYXV0aF90aW1lIjoxNzE3MDg2NDc1LCJuYW1lIjoiU3VwZXJ2aXNvcjEiLCJwaG9uZV9udW1iZXIiOiIrNTY5NzI5NDc4MjMiLCJjdXN0b206ZGJfdXNlcmlkIjoiMTExIiwiZXhwIjoxNzE3MDkwMDc1LCJpYXQiOjE3MTcwODY0NzUsImp0aSI6Ijk1ZWU2NmY1LWQx';
+
+  private cache: any[] = [];
+  private cacheLifetime = 12 * 3600 * 1000; // 12 hours in milliseconds
+  private lastFetchTime: number = 0;
 
   constructor(private http: HttpClient) {}
 
@@ -18,8 +23,60 @@ export class ApiService {
     });
   }
 
+  private isCacheValid(): boolean {
+    return (Date.now() - this.lastFetchTime) < this.cacheLifetime;
+  }
+
+  private fetchLocations(page: number): Observable<any> {
+    const url = `${this.apiUrl}?page=${page}`;
+    return this.http.get<any>(url, { headers: this.getHeaders() });
+  }
+
+  fetchAllLocations(): Observable<any> {
+    if (this.cache.length > 0 && this.isCacheValid()) {
+      return of(this.cache);
+    }
+
+    const initialFetch = this.fetchLocations(1).pipe(
+      tap(response => {
+        this.cache = response.items || [];
+        this.lastFetchTime = Date.now();
+      })
+    );
+
+    return initialFetch.pipe(
+      mergeMap(response => {
+        const totalPages = response.total_pages;
+        const requests: Observable<any>[] = [];
+
+        for (let page = 2; page <= totalPages; page++) {
+          requests.push(this.fetchLocations(page));
+        }
+
+        return forkJoin(requests).pipe(
+          tap(responses => {
+            responses.forEach(res => {
+              this.cache = this.cache.concat(res.items || []);
+            });
+          }),
+          mergeMap(() => of(this.cache))
+        );
+      })
+    );
+  }
+
   getConnectors(): Observable<any> {
-    const url = `${this.apiUrl}/connectors`;
-    return this.http.get(url, { headers: this.getHeaders() });
+    return this.fetchAllLocations().pipe(
+      mergeMap((locations: any[]) => {
+        const connectors = locations.reduce((acc, location) => {
+          const locationConnectors = location.evses.reduce((innerAcc: string | any[], evse: { connectors: any; }) => {
+            return innerAcc.concat(evse.connectors);
+          }, []);
+          return acc.concat(locationConnectors);
+        }, []);
+        this.cache = connectors;
+        return of(this.cache);
+      })
+    );
   }
 }

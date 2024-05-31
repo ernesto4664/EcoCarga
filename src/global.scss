@@ -47,7 +47,11 @@
   .my-custom-class {
     --width: 500px !important;
     --max-width: 380px;
+    text-align: center;
     border-radius: 50px 50px 0px 0px !important; 
+  }
+  .my-custom-class .alert-head{
+    text-align: center;
   }
 .my-custom-class .alert-button {
   /* Estilos para los botones */
@@ -59,4 +63,14 @@
 .my-custom-class .alert-button-group {
   /* Estilos para el grupo de botones */
   justify-content: space-around; /* Espaciado entre botones */
+}
+
+.selected {
+  background-color: #31B17D !important;
+  color: white !important;
+}
+
+.selected .item-native {
+  background-color: #31B17D !important;
+  color: white !important;
 }

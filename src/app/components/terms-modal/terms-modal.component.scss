@@ -2,3 +2,18 @@
     padding: 16px;
   }
   
+  .custom-header {
+    background: #31B17D !important;
+    color: white !important;
+    text-align: center;
+}
+
+ion-toolbar {
+  --background: #31B17D;
+  color: white !important;
+}
+
+.custom-button {
+  background: #31B17D !important;
+  color: white !important;
+}

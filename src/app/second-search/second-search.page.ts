@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Geolocation } from '@capacitor/geolocation';
+import { ApiService } from '../api.service';
 
 @Component({
   selector: 'app-second-search',
@@ -17,9 +18,15 @@ export class SecondSearchPage implements OnInit {
   selectedDistance: number = 0;
   userLocation: { latitude: number; longitude: number } | null = null;
   selectedConnectors: any[] = [];
+  stations: any[] = [];  // To store the filtered stations
   private apiUrl = 'https://backend.electromovilidadenlinea.cl'; // URL de tu API real
 
-  constructor(private http: HttpClient, private router: Router, private activatedRoute: ActivatedRoute) {
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private apiService: ApiService
+  ) {
     this.activatedRoute.queryParams.subscribe(() => {
       const navigation = this.router.getCurrentNavigation();
       if (navigation?.extras.state) {
@@ -31,6 +38,7 @@ export class SecondSearchPage implements OnInit {
 
   ngOnInit() {
     this.getUserLocation();
+    this.loadPSEOptions();  // Load PSE options on init
   }
 
   async getUserLocation() {
@@ -72,10 +80,22 @@ export class SecondSearchPage implements OnInit {
     this.http.get<any>(`${this.apiUrl}/battery-details?capacity=${capacity}`).subscribe(
       (battery) => {
         this.selectedBattery = battery;
+        console.log(this.selectedBattery); // Verifica que tenga datos
         this.fetchPSEOptions(battery.id);
       },
       (error) => {
         console.error('Error fetching battery details:', error);
+      }
+    );
+  }
+
+  loadPSEOptions() {
+    this.http.get<string[]>(`${this.apiUrl}/pse-options`).subscribe(
+      (options) => {
+        this.pseOptions = options;
+      },
+      (error) => {
+        console.error('Error fetching PSE options:', error);
       }
     );
   }
@@ -92,12 +112,10 @@ export class SecondSearchPage implements OnInit {
   }
 
   filterByPSE() {
-    // Implementar lógica para filtrar por PSE si es necesario
     console.log('Filtrar por PSE:', this.selectedPSE);
   }
 
   filterByDistance() {
-    // Implementar lógica para filtrar por distancia si es necesario
     console.log('Filtrar por distancia:', this.selectedDistance);
   }
 
@@ -107,24 +125,11 @@ export class SecondSearchPage implements OnInit {
       return;
     }
 
-    const params: any = {
-      batteryCapacity: this.batteryCapacity,
-      userLat: this.userLocation.latitude,
-      userLng: this.userLocation.longitude,
-      connectors: this.selectedConnectors.map(c => c.id)  // Assuming each connector has an id
-    };
+    const connectorIds = this.selectedConnectors.map(c => c.connector_id);
 
-    if (this.selectedPSE) {
-      params.pse = this.selectedPSE;
-    }
-
-    if (this.selectedDistance) {
-      params.distance = this.selectedDistance;
-    }
-
-    this.http.get<any[]>(`${this.apiUrl}/stations`, { params }).subscribe(
+    this.apiService.getStationsByConnectors(connectorIds).subscribe(
       (stations) => {
-        // Aquí puedes manejar los resultados filtrados
+        this.stations = stations;
         console.log('Estaciones filtradas:', stations);
       },
       (error) => {

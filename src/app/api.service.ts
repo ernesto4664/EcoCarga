@@ -69,14 +69,43 @@ export class ApiService {
     return this.fetchAllLocations().pipe(
       mergeMap((locations: any[]) => {
         const connectors = locations.reduce((acc, location) => {
-          const locationConnectors = location.evses.reduce((innerAcc: string | any[], evse: { connectors: any; }) => {
+          const locationConnectors = location.evses.reduce((innerAcc: any[], evse: { connectors: any; }) => {
             return innerAcc.concat(evse.connectors);
           }, []);
           return acc.concat(locationConnectors);
         }, []);
-        this.cache = connectors;
-        return of(this.cache);
+        
+        const unifiedConnectors = this.unifyConnectors(connectors);
+        return of(unifiedConnectors);
       })
     );
+  }
+
+  getStationsByConnectors(connectorIds: number[]): Observable<any> {
+    return this.fetchAllLocations().pipe(
+      mergeMap((locations: any[]) => {
+        const filteredLocations = locations.filter(location =>
+          location.evses.some((evse: { connectors: { connector_id: number; }[]; }) =>
+            evse.connectors.some((connector: { connector_id: number; }) =>
+              connectorIds.includes(connector.connector_id)
+            )
+          )
+        );
+        return of(filteredLocations);
+      })
+    );
+  }
+
+  private unifyConnectors(connectors: any[]): any[] {
+    const uniqueConnectors = new Map<string, any>();
+
+    connectors.forEach(connector => {
+      const key = connector.standard;
+      if (!uniqueConnectors.has(key)) {
+        uniqueConnectors.set(key, connector);
+      }
+    });
+
+    return Array.from(uniqueConnectors.values());
   }
 }

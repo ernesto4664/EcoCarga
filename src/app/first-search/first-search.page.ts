@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ApiService } from '../api.service';
 import { AlertController } from '@ionic/angular';
@@ -18,7 +17,6 @@ export class FirstSearchPage implements OnInit {
   showAlert = false;
 
   constructor(
-    private http: HttpClient,
     private router: Router,
     private apiService: ApiService,
     private alertController: AlertController
@@ -38,7 +36,7 @@ export class FirstSearchPage implements OnInit {
         console.log('API Response:', response);
         if (Array.isArray(response)) {
           this.allConnectors = response;
-          console.log('Items:', response);
+          console.log('All connectors:', this.allConnectors);
           this.filterConnectors();
         } else {
           console.error('Unexpected API response format:', response);
@@ -50,38 +48,41 @@ export class FirstSearchPage implements OnInit {
     );
   }
 
+  fetchGeneralConnectors() {
+    this.apiService.getConnectors().subscribe(
+      (response: any) => {
+        console.log('General API Response:', response);
+        if (Array.isArray(response)) {
+          this.connectors = response;
+          console.log('General connectors:', this.connectors);
+        } else {
+          console.error('Unexpected API response format:', response);
+        }
+      },
+      (error) => {
+        console.error('Error fetching general connectors:', error);
+      }
+    );
+  }
+
   filterConnectors() {
     console.log('Filtering connectors');
-    const filteredConnectors: any[] = [];
-
-    if (this.typeAC || this.typeDC) {
-      this.allConnectors.forEach((connector) => {
-        const match =
-          (this.typeAC && connector.power_type.startsWith('AC')) ||
-          (this.typeDC && connector.power_type === 'DC');
-
-        if (match) {
-          filteredConnectors.push(connector);
-        }
-      });
-
-      // Remove duplicates based on standard, format, and power_type
-      const uniqueConnectors = filteredConnectors.filter(
-        (connector, index, self) =>
-          index ===
-          self.findIndex(
-            (t) =>
-              t.standard === connector.standard &&
-              t.format === connector.format &&
-              t.power_type === connector.power_type
-          )
-      );
-
-      this.connectors = uniqueConnectors;
-      console.log('Filtered connectors:', this.connectors);
-    } else {
+    if (!this.typeAC && !this.typeDC) {
       this.connectors = [];
+      console.log('No type selected, connectors:', this.connectors);
+      return;
     }
+
+    const filteredConnectors: any[] = [];
+    if (this.typeAC) {
+      filteredConnectors.push(...this.allConnectors.filter(connector => connector.power_type.startsWith('AC')));
+    }
+    if (this.typeDC) {
+      filteredConnectors.push(...this.allConnectors.filter(connector => connector.power_type.startsWith('DC')));
+    }
+
+    this.connectors = filteredConnectors;
+    console.log('Filtered connectors:', this.connectors);
   }
 
   async selectConnector(index: number) {
@@ -119,12 +120,7 @@ export class FirstSearchPage implements OnInit {
     }
   }
 
-  async showAlertMessage(
-    header: string,
-    message: string,
-    cancelButtonText: string,
-    confirmButtonText: string = ''
-  ) {
+  async showAlertMessage(header: string, message: string, cancelButtonText: string, confirmButtonText: string = '') {
     const buttons = [
       {
         text: cancelButtonText,
@@ -151,14 +147,9 @@ export class FirstSearchPage implements OnInit {
       header,
       message,
       buttons,
-      cssClass: 'my-custom-class',
     });
 
     await alert.present();
-  }
-
-  onAlertDismiss() {
-    this.showAlert = false;
   }
 
   navigateToSecondSearch() {

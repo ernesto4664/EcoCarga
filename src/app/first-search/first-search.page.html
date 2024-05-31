@@ -22,8 +22,10 @@
     </div>
   </div>
 
-  <div *ngIf="connectors.length > 0">
-    <h2>Conectores Disponibles</h2>
+  <!--<ion-button expand="full" (click)="fetchGeneralConnectors()">Buscar todos los conectores</ion-button>-->
+
+  <div class="container" *ngIf="connectors.length > 0">
+    <h2 style="text-align: center;">Conectores Disponibles</h2>
     <ion-list>
       <ion-item *ngFor="let connector of connectors; let i = index" (click)="selectConnector(i)" [ngClass]="{'selected': selectedIndexes.includes(i)}">
         {{ connector.standard }} ({{ connector.format }} - {{ connector.power_type }})

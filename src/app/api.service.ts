@@ -74,9 +74,8 @@ export class ApiService {
           }, []);
           return acc.concat(locationConnectors);
         }, []);
-        
-        const unifiedConnectors = this.unifyConnectors(connectors);
-        return of(unifiedConnectors);
+        // No unification here, return all connectors
+        return of(connectors);
       })
     );
   }
@@ -94,18 +93,5 @@ export class ApiService {
         return of(filteredLocations);
       })
     );
-  }
-
-  private unifyConnectors(connectors: any[]): any[] {
-    const uniqueConnectors = new Map<string, any>();
-
-    connectors.forEach(connector => {
-      const key = connector.standard;
-      if (!uniqueConnectors.has(key)) {
-        uniqueConnectors.set(key, connector);
-      }
-    });
-
-    return Array.from(uniqueConnectors.values());
   }
 }

@@ -13,7 +13,9 @@ export class FirstSearchPage implements OnInit {
   typeDC: boolean = false;
   connectors: any[] = [];
   allConnectors: any[] = [];
+  uniqueConnectors: any[] = [];
   selectedIndexes: number[] = [];
+  selectedConnectors: any[] = [];
   showAlert = false;
 
   constructor(
@@ -48,65 +50,70 @@ export class FirstSearchPage implements OnInit {
     );
   }
 
-  fetchGeneralConnectors() {
-    this.apiService.getConnectors().subscribe(
-      (response: any) => {
-        console.log('General API Response:', response);
-        if (Array.isArray(response)) {
-          this.connectors = response;
-          console.log('General connectors:', this.connectors);
-        } else {
-          console.error('Unexpected API response format:', response);
-        }
-      },
-      (error) => {
-        console.error('Error fetching general connectors:', error);
-      }
-    );
-  }
-
   filterConnectors() {
     console.log('Filtering connectors');
     if (!this.typeAC && !this.typeDC) {
       this.connectors = [];
+      this.uniqueConnectors = [];
       console.log('No type selected, connectors:', this.connectors);
       return;
     }
 
-    const filteredConnectors: any[] = [];
+    let filteredConnectors: any[] = [];
     if (this.typeAC) {
-      filteredConnectors.push(...this.allConnectors.filter(connector => connector.power_type.startsWith('AC')));
+      filteredConnectors = filteredConnectors.concat(this.allConnectors.filter(connector => connector.power_type.startsWith('AC')));
     }
     if (this.typeDC) {
-      filteredConnectors.push(...this.allConnectors.filter(connector => connector.power_type.startsWith('DC')));
+      filteredConnectors = filteredConnectors.concat(this.allConnectors.filter(connector => connector.power_type.startsWith('DC')));
     }
 
     this.connectors = filteredConnectors;
-    console.log('Filtered connectors:', this.connectors);
+    console.log('All filtered connectors:', this.connectors); // Mantiene todos los conectores filtrados
+
+    // Unificar conectores por standard para visualización
+    this.uniqueConnectors = this.getUniqueConnectors(filteredConnectors);
+    console.log('Unique connectors for display:', this.uniqueConnectors);
+  }
+
+  getUniqueConnectors(connectors: any[]): any[] {
+    const uniqueConnectors = new Map<string, any>();
+
+    connectors.forEach(connector => {
+      const key = connector.standard;
+      if (!uniqueConnectors.has(key)) {
+        uniqueConnectors.set(key, connector);
+      }
+    });
+
+    return Array.from(uniqueConnectors.values());
   }
 
   async selectConnector(index: number) {
-    const selectedConnector = this.connectors[index];
-    
+    const selectedConnector = this.uniqueConnectors[index];
+
     if (this.selectedIndexes.includes(index)) {
       this.selectedIndexes = this.selectedIndexes.filter(i => i !== index);
+      this.selectedConnectors = this.selectedConnectors.filter(connector => connector.standard !== selectedConnector.standard || connector.power_type !== selectedConnector.power_type);
     } else {
       if (this.selectedIndexes.length < 2) {
         this.selectedIndexes.push(index);
+        this.selectedConnectors.push(selectedConnector);
       } else {
         await this.showAlertMessage(
           'Atención',
-          'Solo puedes seleccionar hasta dos conectores. Deselecciona uno antes de seleccionar otro.',
+          'Solo puedes seleccionar hasta dos estándares de conectores. Deselecciona uno antes de seleccionar otro.',
           'REGRESAR'
         );
         return;
       }
     }
 
+    this.printSelectedConnectors();
+
     if (this.selectedIndexes.length === 1) {
       await this.showAlertMessage(
         'Atención',
-        'Recuerda que puedes seleccionar dos conectores.',
+        'Recuerda que puedes seleccionar dos estándares de conectores.',
         'REGRESAR',
         'CONTINUAR'
       );
@@ -153,12 +160,23 @@ export class FirstSearchPage implements OnInit {
   }
 
   navigateToSecondSearch() {
-    const selectedConnectors = this.selectedIndexes.map(index => this.connectors[index]);
     const navigationExtras = {
       state: {
-        selectedConnectors
+        selectedConnectors: this.selectedConnectors,
+        allFilteredConnectors: this.connectors.filter(connector => 
+          this.selectedConnectors.some(selected => 
+            selected.standard === connector.standard && selected.power_type === connector.power_type
+          )
+        )
       },
     };
     this.router.navigate(['/second-search'], navigationExtras);
+  }
+
+  printSelectedConnectors() {
+    this.selectedConnectors.forEach(selected => {
+      const matchingConnectors = this.connectors.filter(connector => connector.standard === selected.standard);
+      console.log(`Conectores seleccionados para el estándar ${selected.standard}:`, matchingConnectors);
+    });
   }
 }

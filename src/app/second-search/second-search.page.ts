@@ -18,6 +18,7 @@ export class SecondSearchPage implements OnInit {
   selectedDistance: number = 0;
   userLocation: { latitude: number; longitude: number } | null = null;
   selectedConnectors: any[] = [];
+  allFilteredConnectors: any[] = [];
   stations: any[] = [];  // To store the filtered stations
   private apiUrl = 'https://backend.electromovilidadenlinea.cl'; // URL de tu API real
 
@@ -31,7 +32,9 @@ export class SecondSearchPage implements OnInit {
       const navigation = this.router.getCurrentNavigation();
       if (navigation?.extras.state) {
         this.selectedConnectors = navigation.extras.state['selectedConnectors'] || [];
+        this.allFilteredConnectors = navigation.extras.state['allFilteredConnectors'] || [];
         console.log('Selected Connectors:', this.selectedConnectors);
+        console.log('All Filtered Connectors:', this.allFilteredConnectors);
       }
     });
   }
@@ -125,14 +128,14 @@ export class SecondSearchPage implements OnInit {
       return;
     }
 
-    const connectorIds = this.selectedConnectors.map(c => c.connector_id);
+    const connectorIds = this.allFilteredConnectors.map(c => c.connector_id);
 
     this.apiService.getStationsByConnectors(connectorIds).subscribe(
-      (stations) => {
+      (stations: any) => {
         this.stations = this.removeDuplicateStations(stations);
         console.log('Estaciones filtradas:', this.stations);
       },
-      (error) => {
+      (error: any) => {
         console.error('Error fetching stations:', error);
       }
     );
@@ -193,7 +196,7 @@ export class SecondSearchPage implements OnInit {
   getConnectorStatus(station: any) {
     const connectorsInStation = station.evses.map((evse: any) => evse.connectors).flat();
     const filteredConnectors = connectorsInStation.filter((connector: any) =>
-      this.selectedConnectors.some(selected => selected.standard === connector.standard)
+      this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
     );
 
     const statusCounts = filteredConnectors.reduce((acc: any, connector: any) => {

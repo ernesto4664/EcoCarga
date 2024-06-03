@@ -129,12 +129,85 @@ export class SecondSearchPage implements OnInit {
 
     this.apiService.getStationsByConnectors(connectorIds).subscribe(
       (stations) => {
-        this.stations = stations;
-        console.log('Estaciones filtradas:', stations);
+        this.stations = this.removeDuplicateStations(stations);
+        console.log('Estaciones filtradas:', this.stations);
       },
       (error) => {
         console.error('Error fetching stations:', error);
       }
     );
+  }
+
+  removeDuplicateStations(stations: any[]): any[] {
+    const uniqueStations = new Map<string, any>();
+
+    stations.forEach(station => {
+      if (!uniqueStations.has(station.location_id)) {
+        uniqueStations.set(station.location_id, station);
+      }
+    });
+
+    return Array.from(uniqueStations.values());
+  }
+
+  selectStation(station: any) {
+    console.log('Estación seleccionada:', station);
+
+    const navigationExtras = {
+      state: {
+        station,
+        selectedConnectors: this.selectedConnectors
+      }
+    };
+    this.router.navigate(['/station-details'], navigationExtras);
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'AVAILABLE':
+        return 'Disponibles';
+      case 'CHARGING':
+        return 'Cargando';
+      case 'INOPERATIVE':
+      case 'REMOVED':
+        return 'No disponibles';
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'AVAILABLE':
+        return 'green';
+      case 'CHARGING':
+        return 'orange';
+      case 'INOPERATIVE':
+      case 'REMOVED':
+        return 'red';
+      default:
+        return 'gray';
+    }
+  }
+
+  getConnectorStatus(station: any) {
+    const connectorsInStation = station.evses.map((evse: any) => evse.connectors).flat();
+    const filteredConnectors = connectorsInStation.filter((connector: any) =>
+      this.selectedConnectors.some(selected => selected.standard === connector.standard)
+    );
+
+    const statusCounts = filteredConnectors.reduce((acc: any, connector: any) => {
+      if (!acc[connector.status]) {
+        acc[connector.status] = 0;
+      }
+      acc[connector.status]++;
+      return acc;
+    }, {});
+
+    return Object.keys(statusCounts).map(status => ({
+      label: this.getStatusLabel(status),
+      count: statusCounts[status],
+      color: this.getStatusColor(status)
+    }));
   }
 }

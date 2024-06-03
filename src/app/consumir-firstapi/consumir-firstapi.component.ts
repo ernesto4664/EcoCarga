@@ -13,9 +13,9 @@ export class ConsumirFirstapiComponent  implements OnInit {
   constructor(private apiService: ApiService) { }
 
   ngOnInit() {
-    this.cargarDatos();
+   /* this.cargarDatos();*/
   }
-
+/*
   cargarDatos() {
     this.apiService.getDatos().subscribe({
       next: (res) => {
@@ -24,5 +24,5 @@ export class ConsumirFirstapiComponent  implements OnInit {
       },
       error: (err) => console.error('Error al obtener los datos:', err)
     });
-  }
+  }*/
 }

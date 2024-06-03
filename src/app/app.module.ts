@@ -10,11 +10,11 @@ import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { register } from 'swiper/element/bundle';
 
-
+import { SafeUrlPipe } from './station-details/safe-url.pipe';
 register(); // Registra los componentes personalizados de Swiper
 
 @NgModule({
-  declarations: [AppComponent], // Declara aquí
+  declarations: [AppComponent, SafeUrlPipe], // Declara aquí
 
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule,  HttpClientModule, ComponentsModule ],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],

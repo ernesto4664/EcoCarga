@@ -55,10 +55,15 @@
     <div *ngIf="stations.length > 0">
       <h2>Estaciones Filtradas</h2>
       <ion-list>
-        <ion-item *ngFor="let station of stations">
+        <ion-item *ngFor="let station of stations" (click)="selectStation(station)">
           <ion-label>
             <h2>{{ station.name }}</h2>
-            <p>{{ station.address }}</p>
+            <p><span>Dirección:</span> {{ station.address }}</p>
+            <p><span>Region:</span> {{ station.region }}</p>
+            <p><span>Comuna:</span> {{ station.commune }}</p>
+            <div *ngFor="let status of getConnectorStatus(station)">
+              <p [style.background-color]="status.color">{{ status.count }} <span>Conectores:</span> {{ status.label }} </p>
+            </div>
           </ion-label>
         </ion-item>
       </ion-list>

@@ -37,11 +37,14 @@ const routes: Routes = [
     loadChildren: () => import('./second-search/second-search.module').then( m => m.SecondSearchPageModule)
   },
   {
+    path: 'station-details',
+    loadChildren: () => import('./station-details/station-details.module').then( m => m.StationDetailsPageModule)
+  },
+  {
     path: '**',
     redirectTo: 'welcome',
     pathMatch: 'full'
   },
-
 ];
 
 @NgModule({

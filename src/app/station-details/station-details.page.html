@@ -1,0 +1,30 @@
+<app-layout></app-layout>
+<ion-header class="custom-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/second-search"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalles de la Estación</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="false">
+  <div class="container">
+    <h2>E/S {{ station.name }}</h2>
+    <p><span>Dirección:</span> {{ station.address }}</p>
+    <p><span>Región:</span> {{ station.region }}</p>
+    <p><span>Comuna:</span> {{ station.commune }}</p>
+
+    <div id="map" style="height: 300px;"></div>
+    <ion-button expand="full" [href]="externalMapUrl" target="_blank">Cómo llegar</ion-button>
+
+    <h2>Conectores seleccionados en la estación:</h2>
+    <ion-list>
+      <ion-item *ngFor="let status of getConnectorStatus()">
+        <ion-label>
+          <p [style.background-color]="status.color">{{ status.label }}: {{ status.count }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>

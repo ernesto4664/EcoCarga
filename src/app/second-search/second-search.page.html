@@ -50,23 +50,31 @@
       </ion-item>
     </div>
 
-    <ion-button expand="full" (click)="getFilteredStations()">Buscar Estaciones</ion-button>
+    <ion-button class="mi-btn" expand="full" (click)="getFilteredStations()">Buscar Estaciones</ion-button>
 
-    <div *ngIf="stations.length > 0">
-      <h2>Estaciones Filtradas</h2>
-      <ion-list>
-        <ion-item *ngFor="let station of stations" (click)="selectStation(station)">
-          <ion-label>
-            <h2>{{ station.name }}</h2>
-            <p><span>Dirección:</span> {{ station.address }}</p>
-            <p><span>Region:</span> {{ station.region }}</p>
-            <p><span>Comuna:</span> {{ station.commune }}</p>
-            <div *ngFor="let status of getConnectorStatus(station)">
-              <p [style.background-color]="status.color">{{ status.count }} <span>Conectores:</span> {{ status.label }} </p>
-            </div>
-          </ion-label>
-        </ion-item>
-      </ion-list>
-    </div>
+    <div class="container pb-5" style="margin-bottom: 50px; padding-bottom: 50px;">
+      <div class="row">
+          <div *ngIf="stations.length > 0">
+            <h2>Estaciones Filtradas</h2>
+            <ion-list>
+              <ion-item *ngFor="let station of stations" (click)="selectStation(station)">
+                <ion-label>
+                  <h2>{{ station.name }}</h2>
+                  <p><span>Dirección:</span> {{ station.address }}</p>
+                  <p><span>Region:</span> {{ station.region }}</p>
+                  <p><span>Comuna:</span> {{ station.commune }}</p>
+                  <div *ngFor="let status of getConnectorStatus(station)">
+                    <p [style.background-color]="status.color">{{ status.count }} <span>Conectores:</span> {{ status.label }} </p>
+                  </div>
+                  <div *ngIf="showPowerTypeCounts()">
+                    <p>Total de conectores de corriente alterna: {{ getPowerTypeCounts(station).acCount }}</p>
+                    <p>Total de conectores de corriente continua: {{ getPowerTypeCounts(station).dcCount }}</p>
+                  </div>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </div>
+        </div>
+      </div>
   </div>
 </ion-content>

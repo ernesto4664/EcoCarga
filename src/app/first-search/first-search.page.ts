@@ -68,9 +68,8 @@ export class FirstSearchPage implements OnInit {
     }
 
     this.connectors = filteredConnectors;
-    console.log('All filtered connectors:', this.connectors); // Mantiene todos los conectores filtrados
+    console.log('All filtered connectors:', this.connectors);
 
-    // Unificar conectores por standard para visualización
     this.uniqueConnectors = this.getUniqueConnectors(filteredConnectors);
     console.log('Unique connectors for display:', this.uniqueConnectors);
   }
@@ -160,14 +159,16 @@ export class FirstSearchPage implements OnInit {
   }
 
   navigateToSecondSearch() {
+    let allSelectedConnectors: any[] = [];
+    this.selectedConnectors.forEach(selected => {
+      allSelectedConnectors = allSelectedConnectors.concat(
+        this.connectors.filter(connector => connector.standard === selected.standard)
+      );
+    });
+
     const navigationExtras = {
       state: {
-        selectedConnectors: this.selectedConnectors,
-        allFilteredConnectors: this.connectors.filter(connector => 
-          this.selectedConnectors.some(selected => 
-            selected.standard === connector.standard && selected.power_type === connector.power_type
-          )
-        )
+        selectedConnectors: allSelectedConnectors
       },
     };
     this.router.navigate(['/second-search'], navigationExtras);

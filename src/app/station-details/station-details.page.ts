@@ -83,7 +83,7 @@ export class StationDetailsPage implements OnInit {
   getConnectorStatus() {
     const connectorsInStation = this.station.evses.map((evse: any) => evse.connectors).flat();
     const filteredConnectors = connectorsInStation.filter((connector: any) =>
-      this.selectedConnectors.some(selected => selected.standard === connector.standard)
+      this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
     );
 
     const statusCounts = filteredConnectors.reduce((acc: any, connector: any) => {
@@ -99,6 +99,15 @@ export class StationDetailsPage implements OnInit {
       count: statusCounts[status],
       color: this.getStatusColor(status)
     }));
+  }
+
+  getDetailedConnectors() {
+    return this.station.evses.map((evse: any) => ({
+      ...evse,
+      connectors: evse.connectors.filter((connector: any) =>
+        this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
+      )
+    })).filter((evse: any) => evse.connectors.length > 0);
   }
 
   async loadMap() {

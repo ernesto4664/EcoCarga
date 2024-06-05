@@ -10,21 +10,49 @@
 
 <ion-content [fullscreen]="false">
   <div class="container">
-    <h2>E/S {{ station.name }}</h2>
-    <p><span>Dirección:</span> {{ station.address }}</p>
-    <p><span>Región:</span> {{ station.region }}</p>
-    <p><span>Comuna:</span> {{ station.commune }}</p>
+    <div class="row" style="padding: 10px;">
+      <h2>E/S {{ station.name }}</h2>
+      <p><span>Dirección:</span> {{ station.address }}</p>
+      <p><span>Región:</span> {{ station.region }}</p>
+      <p><span>Comuna:</span> {{ station.commune }}</p>
+    </div>
 
     <div id="map" style="height: 300px;"></div>
-    <ion-button expand="full" [href]="externalMapUrl" target="_blank">Cómo llegar</ion-button>
+    <ion-button class="mi-btn" expand="full" [href]="externalMapUrl" target="_blank">Cómo llegar</ion-button>
 
-    <h2>Conectores seleccionados en la estación:</h2>
-    <ion-list>
-      <ion-item *ngFor="let status of getConnectorStatus()">
-        <ion-label>
-          <p [style.background-color]="status.color">{{ status.label }}: {{ status.count }}</p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
+    <div class="container pb-5" style="margin-bottom: 50px; padding-bottom: 50px;">
+      <div class="row">
+        <h2 style="padding: 10px;">Conectores seleccionados en la estación:</h2>
+        <ion-list>
+          <ion-item *ngFor="let status of getConnectorStatus()">
+            <ion-label>
+              <p style="color: #fff; font-size: 16px; padding: 10px;" [style.background-color]="status.color">Conectores: {{ status.label }} {{ status.count }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+
+        <div *ngFor="let evse of getDetailedConnectors()">
+          <ion-list>
+            <ion-item *ngFor="let connector of evse.connectors">
+              <ion-label>
+                <h3><strong>Conector nombre:</strong> {{ connector.standard }} ({{ connector.format }})</h3>
+                <p><strong>Dirección:</strong> {{ evse.directions }}</p>
+                <p><strong>Nivel de piso:</strong> {{ evse.floor_level || 'N/A' }}</p>
+                <p><strong>Modelo:</strong> {{ evse.model }}</p>
+                <p><strong>Marca:</strong> {{ evse.brand }}</p>
+                <p><strong>Permite carga simultánea:</strong> {{ evse.permite_carga_simultanea ? 'Sí' : 'No' }}</p>
+                <p><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
+                <p><strong>Voltaje:</strong> {{ connector.voltage }} V</p>
+                <p><strong>Amperaje:</strong> {{ connector.amperage }} A</p>
+                <p><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
+                <div *ngFor="let tariff of connector.tariffs">
+                  <p><strong>Tarifa:</strong>Tarifa: {{ tariff }}</p>
+                </div>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+      </div>
+    </div>
   </div>
 </ion-content>

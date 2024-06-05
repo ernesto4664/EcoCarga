@@ -18,7 +18,6 @@ export class SecondSearchPage implements OnInit {
   selectedDistance: number = 0;
   userLocation: { latitude: number; longitude: number } | null = null;
   selectedConnectors: any[] = [];
-  allFilteredConnectors: any[] = [];
   stations: any[] = [];  // To store the filtered stations
   private apiUrl = 'https://backend.electromovilidadenlinea.cl'; // URL de tu API real
 
@@ -32,9 +31,7 @@ export class SecondSearchPage implements OnInit {
       const navigation = this.router.getCurrentNavigation();
       if (navigation?.extras.state) {
         this.selectedConnectors = navigation.extras.state['selectedConnectors'] || [];
-        this.allFilteredConnectors = navigation.extras.state['allFilteredConnectors'] || [];
         console.log('Selected Connectors:', this.selectedConnectors);
-        console.log('All Filtered Connectors:', this.allFilteredConnectors);
       }
     });
   }
@@ -128,17 +125,48 @@ export class SecondSearchPage implements OnInit {
       return;
     }
 
-    const connectorIds = this.allFilteredConnectors.map(c => c.connector_id);
+    const connectorIds = this.selectedConnectors.map(c => c.connector_id);
 
     this.apiService.getStationsByConnectors(connectorIds).subscribe(
       (stations: any) => {
-        this.stations = this.removeDuplicateStations(stations);
+        this.stations = this.sortStationsByDistance(stations);
         console.log('Estaciones filtradas:', this.stations);
       },
       (error: any) => {
         console.error('Error fetching stations:', error);
       }
     );
+  }
+
+  sortStationsByDistance(stations: any[]): any[] {
+    return stations
+      .map(station => {
+        station.distance = this.calculateDistance(
+          this.userLocation!.latitude,
+          this.userLocation!.longitude,
+          parseFloat(station.coordinates.latitude),
+          parseFloat(station.coordinates.longitude)
+        );
+        return station;
+      })
+      .sort((a, b) => a.distance - b.distance);
+  }
+
+  calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Radius of the earth in km
+    const dLat = this.deg2rad(lat2 - lat1); 
+    const dLon = this.deg2rad(lon2 - lon1); 
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
+      Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+    const distance = R * c; // Distance in km
+    return distance;
+  }
+
+  deg2rad(deg: number): number {
+    return deg * (Math.PI / 180);
   }
 
   removeDuplicateStations(stations: any[]): any[] {
@@ -168,12 +196,12 @@ export class SecondSearchPage implements OnInit {
   getStatusLabel(status: string): string {
     switch (status) {
       case 'AVAILABLE':
-        return 'Disponibles';
+        return 'Disponible';
       case 'CHARGING':
         return 'Cargando';
       case 'INOPERATIVE':
       case 'REMOVED':
-        return 'No disponibles';
+        return 'No disponible';
       default:
         return 'Desconocido';
     }
@@ -212,5 +240,20 @@ export class SecondSearchPage implements OnInit {
       count: statusCounts[status],
       color: this.getStatusColor(status)
     }));
+  }
+
+  getPowerTypeCounts(station: any) {
+    const connectorsInStation = station.evses.map((evse: any) => evse.connectors).flat();
+    const acCount = connectorsInStation.filter((connector: any) => connector.power_type.startsWith('AC')).length;
+    const dcCount = connectorsInStation.filter((connector: any) => connector.power_type.startsWith('DC')).length;
+
+    return {
+      acCount,
+      dcCount
+    };
+  }
+
+  showPowerTypeCounts(): boolean {
+    return this.selectedConnectors.some(c => c.power_type.startsWith('AC')) && this.selectedConnectors.some(c => c.power_type.startsWith('DC'));
   }
 }

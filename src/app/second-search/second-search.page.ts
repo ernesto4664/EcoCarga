@@ -31,7 +31,6 @@ export class SecondSearchPage implements OnInit {
       const navigation = this.router.getCurrentNavigation();
       if (navigation?.extras.state) {
         this.selectedConnectors = navigation.extras.state['selectedConnectors'] || [];
-        console.log('Selected Connectors:', this.selectedConnectors);
       }
     });
   }
@@ -43,7 +42,11 @@ export class SecondSearchPage implements OnInit {
 
   async getUserLocation() {
     try {
-      const coordinates = await Geolocation.getCurrentPosition();
+      const coordinates = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
       this.userLocation = {
         latitude: coordinates.coords.latitude,
         longitude: coordinates.coords.longitude,
@@ -80,7 +83,6 @@ export class SecondSearchPage implements OnInit {
     this.http.get<any>(`${this.apiUrl}/battery-details?capacity=${capacity}`).subscribe(
       (battery) => {
         this.selectedBattery = battery;
-        console.log(this.selectedBattery); // Verifica que tenga datos
         this.fetchPSEOptions(battery.id);
       },
       (error) => {
@@ -129,8 +131,8 @@ export class SecondSearchPage implements OnInit {
 
     this.apiService.getStationsByConnectors(connectorIds).subscribe(
       (stations: any) => {
-        this.stations = this.sortStationsByDistance(stations);
-        console.log('Estaciones filtradas:', this.stations);
+        this.stations = this.applyDistanceFilter(this.sortStationsByDistance(stations));
+        this.printConnectorTotals();
       },
       (error: any) => {
         console.error('Error fetching stations:', error);
@@ -146,10 +148,10 @@ export class SecondSearchPage implements OnInit {
           this.userLocation!.longitude,
           parseFloat(station.coordinates.latitude),
           parseFloat(station.coordinates.longitude)
-        );
+        ).toFixed(1); // Redondear la distancia a un decimal
         return station;
       })
-      .sort((a, b) => a.distance - b.distance);
+      .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
   }
 
   calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -169,21 +171,34 @@ export class SecondSearchPage implements OnInit {
     return deg * (Math.PI / 180);
   }
 
-  removeDuplicateStations(stations: any[]): any[] {
-    const uniqueStations = new Map<string, any>();
+  applyDistanceFilter(stations: any[]): any[] {
+    if (this.selectedDistance > 0) {
+      return stations.filter(station => station.distance <= this.selectedDistance);
+    }
+    return stations;
+  }
 
-    stations.forEach(station => {
-      if (!uniqueStations.has(station.location_id)) {
-        uniqueStations.set(station.location_id, station);
-      }
+  printConnectorTotals() {
+    this.stations.forEach(station => {
+      const { acCount, dcCount, totalConnectors } = this.getConnectorTotals(station);
+      console.log(`Estación ${station.name} tiene ${totalConnectors} conectores: ${acCount} AC y ${dcCount} DC`);
     });
+  }
 
-    return Array.from(uniqueStations.values());
+  getConnectorTotals(station: any) {
+    const connectorsInStation = station.evses.map((evse: any) => evse.connectors).flat();
+    const filteredConnectors = connectorsInStation.filter((connector: any) =>
+      this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
+    );
+
+    const acCount = filteredConnectors.filter((connector: any) => connector.power_type.startsWith('AC')).length;
+    const dcCount = filteredConnectors.filter((connector: any) => connector.power_type.startsWith('DC')).length;
+    const totalConnectors = acCount + dcCount;
+
+    return { acCount, dcCount, totalConnectors };
   }
 
   selectStation(station: any) {
-    console.log('Estación seleccionada:', station);
-
     const navigationExtras = {
       state: {
         station,
@@ -222,32 +237,13 @@ export class SecondSearchPage implements OnInit {
   }
 
   getConnectorStatus(station: any) {
-    const connectorsInStation = station.evses.map((evse: any) => evse.connectors).flat();
-    const filteredConnectors = connectorsInStation.filter((connector: any) =>
-      this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
-    );
-
-    const statusCounts = filteredConnectors.reduce((acc: any, connector: any) => {
-      if (!acc[connector.status]) {
-        acc[connector.status] = 0;
-      }
-      acc[connector.status]++;
-      return acc;
-    }, {});
-
-    return Object.keys(statusCounts).map(status => ({
-      label: this.getStatusLabel(status),
-      count: statusCounts[status],
-      color: this.getStatusColor(status)
-    }));
-  }
-
-  getPowerTypeCounts(station: any) {
-    const connectorsInStation = station.evses.map((evse: any) => evse.connectors).flat();
-    const acCount = connectorsInStation.filter((connector: any) => connector.power_type.startsWith('AC')).length;
-    const dcCount = connectorsInStation.filter((connector: any) => connector.power_type.startsWith('DC')).length;
+    const { acCount, dcCount, totalConnectors } = this.getConnectorTotals(station);
 
     return {
+      totalConnectors,
+      statusDetails: [
+        { label: 'Disponible', count: totalConnectors, color: 'green' }
+      ],
       acCount,
       dcCount
     };

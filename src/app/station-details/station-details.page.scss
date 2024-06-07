@@ -52,3 +52,19 @@ ion-list {
   .sc-ion-label-md-s>p {
 
 }
+
+.icon-text {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px; // Ajusta el espacio entre líneas si es necesario
+
+  .icon {
+    margin-right: 8px; // Ajusta el espacio entre el icono y el texto
+    width: 33px;
+    height: 35px;
+  }
+
+  h2, p {
+    margin: 0; // Ajusta los márgenes para que los textos se alineen correctamente
+  }
+}

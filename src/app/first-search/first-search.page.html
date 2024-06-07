@@ -22,11 +22,17 @@
     </div>
   </div>
 
-  <div class="container" *ngIf="uniqueConnectors.length > 0">
+  <div class="container" style="margin-bottom: 50px; padding-bottom: 50px;" *ngIf="uniqueConnectors.length > 0">
     <h2 style="text-align: center;">Conectores Disponibles</h2>
     <ion-list>
       <ion-item *ngFor="let connector of uniqueConnectors; let i = index" (click)="selectConnector(i)" [ngClass]="{'selected': selectedIndexes.includes(i)}">
-        {{ connector.standard }} ({{ connector.format }} - {{ connector.power_type }})
+        <ion-thumbnail slot="start">
+          <img [src]="getIconPath(connector)" alt="Icono Conector">
+        </ion-thumbnail>
+        <div class="connector-info">
+          <p style="margin-bottom:10px;">{{ connector.standard }}</p>
+          <p style="margin-top:0px;">Formato: {{ connector.format }} - Tipo de corriente: {{ connector.power_type }}</p>
+        </div>
       </ion-item>
     </ion-list>
   </div>

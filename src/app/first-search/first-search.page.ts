@@ -17,6 +17,7 @@ export class FirstSearchPage implements OnInit {
   selectedIndexes: number[] = [];
   selectedConnectors: any[] = [];
   showAlert = false;
+  private iconPath = 'assets/icon/';
 
   constructor(
     private router: Router,
@@ -179,5 +180,22 @@ export class FirstSearchPage implements OnInit {
       const matchingConnectors = this.connectors.filter(connector => connector.standard === selected.standard);
       console.log(`Conectores seleccionados para el estándar ${selected.standard}:`, matchingConnectors);
     });
+  }
+
+  getIconPath(connector: any): string {
+    // Mapeo de conectores a iconos
+    const iconMap: { [key: string]: string } = {
+      'IEC_62196_T2 (SOCKET - AC_1_PHASE)': 'Tipo2AC.png',
+      'IEC_62196_T2_COMBO (CABLE - AC_3_PHASE)': 'Tipo1AC.png',
+      'GBT_AC (CABLE - AC_1_PHASE)': 'GBT_AC.png',
+      'IEC_62196_T1 (CABLE - AC_1_PHASE)': 'Tipo1AC.png',
+      'CHADEMO (CABLE - DC)': 'CHADEMO.png',
+      'IEC_62196_T1_COMBO (CABLE - DC)': 'Tipo1DC.png',
+      'GBT_DC (CABLE - DC)': 'GBT_DC.png',
+      // Agrega más mapeos según sea necesario
+    };
+
+    const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
+    return this.iconPath + (iconMap[key] || 'default.png'); // 'default.png' si no se encuentra el conector
   }
 }

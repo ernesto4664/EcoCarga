@@ -88,7 +88,7 @@ p.msj-principal{
   }
   
   ion-item:hover {
-    --background: #31B17D;
+    --background: #255944;
     --color: #fff;
   }
   
@@ -113,4 +113,20 @@ ion-button {
   font-weight: 500;
   font-size: 16px;
   line-height: 18.75px;
+}
+
+.icon-text {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px; // Ajusta el espacio entre líneas si es necesario
+
+  .icon {
+    margin-right: 8px; // Ajusta el espacio entre el icono y el texto
+    width: 24px; // Ajusta el tamaño de la imagen según sea necesario
+    height: 24px; // Ajusta el tamaño de la imagen según sea necesario
+  }
+
+  h2, p {
+    margin: 0; // Ajusta los márgenes para que los textos se alineen correctamente
+  }
 }

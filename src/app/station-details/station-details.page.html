@@ -30,7 +30,7 @@
         <ion-list>
           <ion-item *ngFor="let status of getConnectorStatus()">
             <ion-label>
-              <p style="color: #fff; font-size: 16px; padding: 10px;" [style.background-color]="status.color">Conectores: {{ status.label }} {{ status.count }}</p>
+              <p style="color: #fff; font-size: 16px; padding: 10px; max-width: fit-content; border-radius: 10px;" [style.background-color]="status.color">Conectores: {{ status.label }} {{ status.count }}</p>
             </ion-label>
           </ion-item>
         </ion-list>
@@ -38,8 +38,8 @@
         <div *ngFor="let evse of getDetailedConnectors()">
           <ion-list>
             <ion-item *ngFor="let connector of evse.connectors">
-              <ion-thumbnail slot="start">
-                <img [src]="getIconPath(connector)" alt="{{ connector.standard }}">
+              <ion-thumbnail slot="start" style="margin-right: 15px;">
+                <img [src]="getIconPath(connector)" alt="{{ connector.standard }}" style="width: 50px; height: 50px;object-fit: contain;">
               </ion-thumbnail>
               <ion-label>
                 <h3><strong>Conector nombre:</strong> {{ connector.standard }} ({{ connector.format }})</h3>

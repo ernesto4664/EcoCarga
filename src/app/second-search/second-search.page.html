@@ -47,11 +47,15 @@
           <ion-item>
             <ion-label>Filtrar por Distancia</ion-label>
             <ion-select [(ngModel)]="selectedDistance" (ionChange)="filterByDistance()">
+              <ion-select-option value="5">5 km</ion-select-option>
+              <ion-select-option value="10">10 km</ion-select-option>
+              <ion-select-option value="15">15 km</ion-select-option>
               <ion-select-option value="20">20 km</ion-select-option>
               <ion-select-option value="30">30 km</ion-select-option>
               <ion-select-option value="50">50 km</ion-select-option>
             </ion-select>
           </ion-item>
+          <ion-button expand="full" color="medium" (click)="resetFilters()">Limpiar Búsqueda</ion-button>
         </div>
       </ion-accordion>
     </ion-accordion-group>

@@ -115,10 +115,22 @@ export class SecondSearchPage implements OnInit {
 
   filterByPSE() {
     console.log('Filtrar por PSE:', this.selectedPSE);
+    this.applyAllFilters();
   }
 
   filterByDistance() {
     console.log('Filtrar por distancia:', this.selectedDistance);
+    this.applyAllFilters();
+  }
+
+  resetFilters() {
+    this.selectedPSE = '';
+    this.selectedDistance = 0;
+    this.applyAllFilters();
+  }
+
+  applyAllFilters() {
+    this.getFilteredStations();
   }
 
   getFilteredStations() {
@@ -131,7 +143,15 @@ export class SecondSearchPage implements OnInit {
 
     this.apiService.getStationsByConnectors(connectorIds).subscribe(
       (stations: any) => {
-        this.stations = this.applyDistanceFilter(this.sortStationsByDistance(stations));
+        this.stations = this.sortStationsByDistance(stations);
+        // Aplica el filtro de distancia
+        if (this.selectedDistance > 0) {
+          this.stations = this.stations.filter(station => parseFloat(station.distance) <= this.selectedDistance);
+        }
+        // Aplica el filtro de PSE
+        if (this.selectedPSE) {
+          this.stations = this.stations.filter(station => station.pse && station.pse.includes(this.selectedPSE));
+        }
         this.updateConnectorsStatus(); // Actualizar el estado de los conectores
         this.printConnectorTotals();
       },

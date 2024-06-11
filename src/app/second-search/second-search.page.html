@@ -76,9 +76,9 @@
                 
                 <div *ngIf="getConnectorStatus(station).totalConnectors > 0">
                   <div class="mt-2 mb-2" style="max-width: fit-content;" *ngFor="let status of getConnectorStatus(station).statusDetails">
-                    <p [style.background-color]="status.color" style="padding: 5px; border-radius: 10px;">{{ status.count }} Conectores: {{ status.label }}</p>
+                    <p [style.background-color]="status.color" style="padding: 5px; border-radius: 10px; margin-bottom: 10px;">{{ status.count }} Conectores: {{ status.label }}</p>
                   </div>
-                  <div *ngIf="true">
+                  <div class="mt-2 mb-2" *ngIf="true">
                     <div class="icon-text">
                       <img src="assets/icon/iconoAC.png" alt="electrolineraAC.png Icon" class="icon">
                       <p>Conectores AC: {{ getConnectorStatus(station).acCount }}</p>
@@ -87,6 +87,21 @@
                       <img src="assets/icon/iconoDC.png" alt="electrolineraDC.png Icon" class="icon">
                       <p>Conectores DC: {{ getConnectorStatus(station).dcCount }}</p>
                     </div>
+                  </div>
+                </div>
+
+                <div class="icon-text">
+                  <img src="assets/icon/hours.png" alt="horarios" class="icon">
+                  <p>Horarios: {{ getOpeningHours(station) }}</p>
+                </div>
+                <div *ngIf="station.opening_times.exceptional_openings.length > 0">
+                  <div class="icon-text">
+                    <p>Excepcionales Aperturas: {{ getExceptionalOpenings(station) }}</p>
+                  </div>
+                </div>
+                <div *ngIf="station.opening_times.exceptional_closings.length > 0">
+                  <div class="icon-text">
+                    <p>Excepcionales Cierres: {{ getExceptionalClosings(station) }}</p>
                   </div>
                 </div>
               </ion-label>

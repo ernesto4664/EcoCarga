@@ -12,10 +12,10 @@
   <div class="container">
     <div class="row" style="padding: 10px;">
       <div class="icon-text" style="margin-left: 3px;">
-        <img src="assets/icon/electrolineras.png" alt="electrolineras.png Icon" class="icon">
+        <img style="width: 46px !important; height: 46px !important;" src="assets/icon/electrolineras.png" alt="electrolineras.png Icon" class="icon">
         <h2>E/S. {{ station.name }}</h2>
       </div>
-      <div class="icon-text">
+      <div class="icon-text" style="margin-left: 6px;">
         <img style="width:25px !important; height: 40px !important;" src="assets/icon/location.png" alt="Pin Icon" class="icon">
         <p><span>Dirección:</span> {{ station.address }}, <span>Región:</span> {{ station.region }}, {{ station.commune }}</p>
       </div>
@@ -42,16 +42,43 @@
                 <img [src]="getIconPath(connector)" alt="{{ connector.standard }}" style="width: 50px; height: 50px;object-fit: contain;">
               </ion-thumbnail>
               <ion-label>
-                <h3><strong>Conector nombre:</strong> {{ connector.standard }} ({{ connector.format }})</h3>
-                <p><strong>Dirección:</strong> {{ evse.directions }}</p>
-                <p><strong>Nivel de piso:</strong> {{ evse.floor_level || 'N/A' }}</p>
-                <p><strong>Modelo:</strong> {{ evse.model }}</p>
-                <p><strong>Marca:</strong> {{ evse.brand }}</p>
-                <p><strong>Permite carga simultánea:</strong> {{ evse.permite_carga_simultanea ? 'Sí' : 'No' }}</p>
-                <p><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
-                <p><strong>Voltaje:</strong> {{ connector.voltage }} V</p>
-                <p><strong>Amperaje:</strong> {{ connector.amperage }} A</p>
-                <p><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
+                <h3><strong>Conector nombre:</strong> {{ connector.standard }} ({{ connector.format }} - {{ connector.power_type }})</h3>
+                <div class="icon-text">
+                  <img style="margin-left: 3px; height: 20px !important; width: 15px !important;" src="assets/icon/location.png" alt="Dirección Icon" class="icon">
+                  <p><strong>Dirección:</strong> {{ evse.directions }}</p>
+                </div>
+                <div class="icon-text">
+                  <img src="assets/icon/voltios.png" alt="Piso Icon" class="icon">
+                  <p><strong>Nivel de piso:</strong> {{ evse.floor_level || 'N/A' }}</p>
+                </div>
+                <div class="icon-text">
+                  <img src="assets/icon/voltios.png" alt="Modelo Icon" class="icon">
+                  <p><strong>Modelo:</strong> {{ evse.model }}</p>
+                </div>
+                <div class="icon-text">
+                  <img src="assets/icon/voltios.png" alt="Marca Icon" class="icon">
+                  <p><strong>Marca:</strong> {{ evse.brand }}</p>
+                </div>
+                <div class="icon-text">
+                  <img src="assets/icon/voltios.png" alt="Simultáneo Icon" class="icon">
+                  <p><strong>Permite carga simultánea:</strong> {{ evse.permite_carga_simultanea ? 'Sí' : 'No' }}</p>
+                </div>
+                <div class="icon-text">
+                  <img src="assets/icon/voltios.png" alt="Potencia Icon" class="icon">
+                  <p><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
+                </div>
+                <div class="icon-text">
+                  <img src="assets/icon/voltios.png" alt="Voltaje Icon" class="icon">
+                  <p><strong>Voltaje:</strong> {{ connector.voltage }} V</p>
+                </div>
+                <div class="icon-text">
+                  <img src="assets/icon/voltios.png" alt="Amperaje Icon" class="icon">
+                  <p><strong>Amperaje:</strong> {{ connector.amperage }} A</p>
+                </div>
+                <div class="icon-text">
+                  <img src="assets/icon/voltios.png" alt="Estado Icon" class="icon">
+                  <p><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
+                </div>
                 <div *ngFor="let tariff of connector.tariffs">
                   <p><strong>Tarifa:</strong> {{ tariff }}</p>
                 </div>

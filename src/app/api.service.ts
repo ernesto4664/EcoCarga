@@ -11,7 +11,7 @@ export class ApiService {
   private token = 'eyJraWQiOiJvSWM1K3NpU25yWnZ3Y3YxS294UVwvR29HWEM3VVc2VVVPOHV2dXVjT095OD0iLCJhbGciOiJSUzI1NiJ9.eyJjdXN0b206cmVnaW9uIjoiVGFyYXBhY8OhIiwic3ViIjoiNDRjOGI0MzgtNjAxMS03MGQ3LWVkZDgtNWYwY2Y5MzMwZGFhIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImN1c3RvbTphZGRyZXNzIjoiQ2hpbGUiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9wbHdaNTBkeHUiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOmZhbHNlLCJjb2duaXRvOnVzZXJuYW1lIjoiMTExMTEyMjIzIiwiY3VzdG9tOmNvbW11bmUiOiJDYW1pw7FhIiwib3JpZ2luX2p0aSI6IjgzZGRlODgxLTI2YzgtNDRjMS1hNzJmLTVjODdkNWIzMGYwZiIsImF1ZCI6IjQzc2Z0c2RyaXRscDNybXEzZzA1cThxM3JpIiwiZXZlbnRfaWQiOiI4OWJhOWQ5Zi1hYjk0LTQ3NGMtYWM0NS0xYmU3NDU1YjQyZWYiLCJ0b2tlbl91c2UiOiJpZCIsImN1c3RvbTpzZWNfdmFsaWRhdGlvbiI6ImZhbHNlIiwiYXV0aF90aW1lIjoxNzE3MDg2NDc1LCJuYW1lIjoiU3VwZXJ2aXNvcjEiLCJwaG9uZV9udW1iZXIiOiIrNTY5NzI5NDc4MjMiLCJjdXN0b206ZGJfdXNlcmlkIjoiMTExIiwiZXhwIjoxNzE3MDkwMDc1LCJpYXQiOjE3MTcwODY0NzUsImp0aSI6Ijk1ZWU2NmY1LWQx';
 
   private cache: any[] = [];
-  private cacheLifetime = 12 * 3600 * 1000; // 12 hours in milliseconds
+  private cacheLifetime = 12 * 3600 * 1000; // 12 horas en milisegundos
   private lastFetchTime: number = 0;
 
   constructor(private http: HttpClient) {}
@@ -74,7 +74,7 @@ export class ApiService {
           }, []);
           return acc.concat(locationConnectors);
         }, []);
-        // No unification here, return all connectors
+        // NO TENEMOS UNIFICACION ACA, AQUI DEVOLVEMOS TODOS LOS CONECTORES
         return of(connectors);
       })
     );
@@ -93,5 +93,22 @@ export class ApiService {
         return of(filteredLocations);
       })
     );
+  }
+
+  getConnectorStatus(connectorId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/connector-status?connectorId=${connectorId}`);
+  }
+
+  updateCacheWithConnectorStatus(updatedConnector: any) {
+    this.cache.forEach(location => {
+      location.evses.forEach((evse: { connectors: any[]; }) => {
+        evse.connectors.forEach((connector: any) => {
+          if (connector.connector_id === updatedConnector.connector_id) {
+            connector.status = updatedConnector.status;
+            connector.last_updated = updatedConnector.last_updated;
+          }
+        });
+      });
+    });
   }
 }

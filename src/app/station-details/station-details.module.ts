@@ -5,10 +5,10 @@ import { IonicModule } from '@ionic/angular';
 import { StationDetailsPageRoutingModule } from './station-details-routing.module';
 import { StationDetailsPage } from './station-details.page';
 
-import { ComponentsModule } from "../components/components.module"; // Importa el pipe
+import { ComponentsModule } from "../components/components.module";
 
 @NgModule({
-    declarations: [StationDetailsPage] // Declara el pipe
+    declarations: [StationDetailsPage] 
     ,
     imports: [
         CommonModule,

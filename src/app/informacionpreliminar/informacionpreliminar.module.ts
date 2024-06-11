@@ -18,7 +18,7 @@ register();
     IonicModule,
     ComponentsModule,
     InformacionpreliminarPageRoutingModule
-    // otros imports necesarios
+    
   ],
   declarations: [InformacionpreliminarPage],
 })

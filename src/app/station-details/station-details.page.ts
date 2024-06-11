@@ -29,8 +29,8 @@ export class StationDetailsPage implements OnInit {
       if (navigation?.extras.state) {
         this.station = navigation.extras.state['station'];
         this.selectedConnectors = navigation.extras.state['selectedConnectors'] || [];
-        console.log('Station:', this.station);
-        console.log('Selected Connectors:', this.selectedConnectors);
+        console.log('Estacion:', this.station);
+        console.log('Conectores seleccionados:', this.selectedConnectors);
       }
     });
 
@@ -147,7 +147,7 @@ export class StationDetailsPage implements OnInit {
           title: this.station.name
         });
       } else {
-        console.error('Map element not found');
+        console.error('Elemento del mapa no encontrado');
       }
     }
   }

@@ -6,10 +6,10 @@ import { RouterModule } from '@angular/router';
 
 import { FirstSearchPage } from './first-search.page';
 
-import { ComponentsModule } from "../components/components.module";  // Asegúrate de importar la directiva
+import { ComponentsModule } from "../components/components.module"; 
 
 @NgModule({
-    declarations: [FirstSearchPage] // Agrega la directiva aquí
+    declarations: [FirstSearchPage] 
     ,
     imports: [
         CommonModule,

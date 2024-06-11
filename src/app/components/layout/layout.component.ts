@@ -19,9 +19,9 @@ export class LayoutComponent {
     console.log('Navigating to ElectrolinerasPage');
     this.router.navigate(['/electrolineras']).then(success => {
       if (success) {
-        console.log('Navigation to ElectrolinerasPage successful');
+        console.log('Navegación a la página de Electrolineras exitosa');
       } else {
-        console.log('Navigation to ElectrolinerasPage failed');
+        console.log('Falló la navegación a la página de Electrolineras');
       }
     });
   }

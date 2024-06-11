@@ -36,27 +36,27 @@ export class FirstSearchPage implements OnInit {
   fetchAllConnectors() {
     this.apiService.getConnectors().subscribe(
       (response: any) => {
-        console.log('API Response:', response);
+        console.log('Respuesta API:', response);
         if (Array.isArray(response)) {
           this.allConnectors = response;
-          console.log('All connectors:', this.allConnectors);
+          console.log('Todos los conectores:', this.allConnectors);
           this.filterConnectors();
         } else {
-          console.error('Unexpected API response format:', response);
+          console.error('Formato de respuesta API inesperado:', response);
         }
       },
       (error) => {
-        console.error('Error fetching connectors:', error);
+        console.error('Error al recuperar conectores:', error);
       }
     );
   }
 
   filterConnectors() {
-    console.log('Filtering connectors');
+    console.log('Filtrado de conectores');
     if (!this.typeAC && !this.typeDC) {
       this.connectors = [];
       this.uniqueConnectors = [];
-      console.log('No type selected, connectors:', this.connectors);
+      console.log('Ningún tipo de conector seleccionado :', this.connectors);
       return;
     }
 
@@ -69,10 +69,10 @@ export class FirstSearchPage implements OnInit {
     }
 
     this.connectors = filteredConnectors;
-    console.log('All filtered connectors:', this.connectors);
+    console.log('Todos los conectores filtrados:', this.connectors);
 
     this.uniqueConnectors = this.getUniqueConnectors(filteredConnectors);
-    console.log('Unique connectors for display:', this.uniqueConnectors);
+    console.log('Conectores únicos para pantalla.:', this.uniqueConnectors);
   }
 
   getUniqueConnectors(connectors: any[]): any[] {
@@ -90,7 +90,7 @@ export class FirstSearchPage implements OnInit {
 
   async selectConnector(index: number) {
     const selectedConnector = this.uniqueConnectors[index];
-
+  
     if (this.selectedIndexes.includes(index)) {
       this.selectedIndexes = this.selectedIndexes.filter(i => i !== index);
       this.selectedConnectors = this.selectedConnectors.filter(connector => connector.standard !== selectedConnector.standard || connector.power_type !== selectedConnector.power_type);
@@ -107,9 +107,9 @@ export class FirstSearchPage implements OnInit {
         return;
       }
     }
-
+  
     this.printSelectedConnectors();
-
+  
     if (this.selectedIndexes.length === 1) {
       await this.showAlertMessage(
         'Atención',
@@ -126,19 +126,19 @@ export class FirstSearchPage implements OnInit {
       );
     }
   }
-
+  
   async showAlertMessage(header: string, message: string, cancelButtonText: string, confirmButtonText: string = '') {
     const buttons = [
       {
         text: cancelButtonText,
         role: 'cancel',
-        cssClass: 'secondary',
+        cssClass: 'alert-button secondary',
         handler: () => {
           console.log('Confirmación cancelada');
         },
       },
     ];
-
+  
     if (confirmButtonText) {
       buttons.push({
         text: confirmButtonText,
@@ -146,18 +146,20 @@ export class FirstSearchPage implements OnInit {
           this.navigateToSecondSearch();
         },
         role: '',
-        cssClass: ''
+        cssClass: 'alert-button',
       });
     }
-
+  
     const alert = await this.alertController.create({
       header,
       message,
       buttons,
+      cssClass: 'custom-alert',
     });
-
+  
     await alert.present();
   }
+  
 
   navigateToSecondSearch() {
     let allSelectedConnectors: any[] = [];

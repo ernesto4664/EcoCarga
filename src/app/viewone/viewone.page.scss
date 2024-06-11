@@ -1,13 +1,13 @@
 :host {
     display: block;
-    height: 100vh; // Asegura que tome toda la altura de la pantalla visible
+    height: 100vh;
     
   }
   
   ion-content {
     width: 100%;
     height: 100%;
-    position: absolute; // Esto asegura que ocupe toda la pantalla
+    position: absolute; 
     left: 0;
   }
 
@@ -16,8 +16,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; // Centra verticalmente
-  gap: 20px; // Espacio entre los conectores
+  justify-content: center; 
+  gap: 20px; 
   height: 950px;
 }
 
@@ -34,24 +34,24 @@
 .conector {
   display: flex;
   align-items: center;
-  gap: 10px; // Espacio entre la imagen y el texto
+  gap: 10px; 
   text-align: center;
   margin-bottom: 10px;
 
   img {
-    width: 70px; // Ajusta el tamaño de la imagen según tus necesidades
-    height: auto; // Mantén la proporción
+    width: 70px; 
+    height: auto; 
     border-radius: 10px;
   }
 
   p {
     font-size: 16px;
-    color: #333; // Color del texto
+    color: #333; 
   }
 }
 
 li {
-  color: #279769; /* Cambia el color del texto y del punto */
+  color: #279769; 
 }
 
 p.terminos{

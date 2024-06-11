@@ -18,8 +18,8 @@ export class SecondSearchPage implements OnInit {
   selectedDistance: number = 0;
   userLocation: { latitude: number; longitude: number } | null = null;
   selectedConnectors: any[] = [];
-  stations: any[] = [];  // To store the filtered stations
-  private apiUrl = 'https://backend.electromovilidadenlinea.cl'; // URL de tu API real
+  stations: any[] = [];  // Para almacenar las estaciones filtradas
+  private apiUrl = 'https://backend.electromovilidadenlinea.cl'; 
 
   constructor(
     private http: HttpClient,
@@ -37,7 +37,7 @@ export class SecondSearchPage implements OnInit {
 
   ngOnInit() {
     this.getUserLocation();
-    this.loadPSEOptions();  // Load PSE options on init
+    this.loadPSEOptions();  // cargamos las opciones del PSE en init
   }
 
   async getUserLocation() {
@@ -52,7 +52,7 @@ export class SecondSearchPage implements OnInit {
         longitude: coordinates.coords.longitude,
       };
     } catch (error) {
-      console.error('Error getting location', error);
+      console.error('Error al obtener la ubicación', error);
     }
   }
 
@@ -64,7 +64,7 @@ export class SecondSearchPage implements OnInit {
           this.suggestedCapacities = capacities.map(capacity => capacity.name);
         },
         (error) => {
-          console.error('Error fetching capacities:', error);
+          console.error('Error al obtener capacidades:', error);
           this.suggestedCapacities = [];
         }
       );
@@ -86,7 +86,7 @@ export class SecondSearchPage implements OnInit {
         this.fetchPSEOptions(battery.id);
       },
       (error) => {
-        console.error('Error fetching battery details:', error);
+        console.error('Error al recuperar el detalle de las baterias:', error);
       }
     );
   }
@@ -97,7 +97,7 @@ export class SecondSearchPage implements OnInit {
         this.pseOptions = options;
       },
       (error) => {
-        console.error('Error fetching PSE options:', error);
+        console.error('Error al recuperar las opciones de PSE:', error);
       }
     );
   }
@@ -108,7 +108,7 @@ export class SecondSearchPage implements OnInit {
         this.pseOptions = options;
       },
       (error) => {
-        console.error('Error fetching PSE options:', error);
+        console.error('Error al recuperar las opciones de PSE:', error);
       }
     );
   }
@@ -132,12 +132,42 @@ export class SecondSearchPage implements OnInit {
     this.apiService.getStationsByConnectors(connectorIds).subscribe(
       (stations: any) => {
         this.stations = this.applyDistanceFilter(this.sortStationsByDistance(stations));
+        this.updateConnectorsStatus(); // Actualizar el estado de los conectores
         this.printConnectorTotals();
       },
       (error: any) => {
-        console.error('Error fetching stations:', error);
+        console.error('Error al recuperar estaciones:', error);
       }
     );
+  }
+
+  updateConnectorsStatus() {
+    const currentDate = new Date();
+
+    this.stations.forEach(station => {
+      station.evses.forEach((evse: { connectors: any[]; }) => {
+        evse.connectors.forEach((connector: any) => {
+          const lastUpdatedDate = new Date(connector.last_updated);
+
+          // Si el conector ha sido actualizado recientemente, actualizamos su estado
+          if (lastUpdatedDate < currentDate) {
+            this.apiService.getConnectorStatus(connector.connector_id).subscribe(
+              (updatedConnector: any) => {
+                // Actualizamos el conector con los datos más recientes
+                connector.status = updatedConnector.status;
+                connector.last_updated = updatedConnector.last_updated;
+
+                // Actualizamos la caché global con los datos más recientes
+                this.apiService.updateCacheWithConnectorStatus(updatedConnector);
+              },
+              (error: any) => {
+                console.error('Error al recuperar los estatus de los conectores:', error);
+              }
+            );
+          }
+        });
+      });
+    });
   }
 
   sortStationsByDistance(stations: any[]): any[] {
@@ -155,7 +185,7 @@ export class SecondSearchPage implements OnInit {
   }
 
   calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371; // Radius of the earth in km
+    const R = 6371; // Radio de la Tierra en km.
     const dLat = this.deg2rad(lat2 - lat1); 
     const dLon = this.deg2rad(lon2 - lon1); 
     const a = 
@@ -163,7 +193,7 @@ export class SecondSearchPage implements OnInit {
       Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
       Math.sin(dLon / 2) * Math.sin(dLon / 2); 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
-    const distance = R * c; // Distance in km
+    const distance = R * c; // Distancia en Km
     return distance;
   }
 
@@ -251,5 +281,37 @@ export class SecondSearchPage implements OnInit {
 
   showPowerTypeCounts(): boolean {
     return this.selectedConnectors.some(c => c.power_type.startsWith('AC')) && this.selectedConnectors.some(c => c.power_type.startsWith('DC'));
+  }
+
+  // NUEVOS METODOS PARA MANEJAR LOS HORARIOS DE APERTURAS Y CIERRES DE LAS ESTACIONES
+  getOpeningHours(station: any): string {
+    if (station.opening_times.twentyfourseven) {
+      return 'Abierto 24/7';
+    }
+
+    const regularHours = station.opening_times.regular_hours;
+    if (regularHours.length > 0) {
+      const firstDay = regularHours[0];
+      const lastDay = regularHours[regularHours.length - 1];
+      return `De ${this.getDayName(firstDay.weekday)} ${firstDay.period_begin} a ${this.getDayName(lastDay.weekday)} ${lastDay.period_end}`;
+    }
+    return 'No disponible';
+  }
+
+  getExceptionalOpenings(station: any): string {
+    return station.opening_times.exceptional_openings.map((opening: any) => {
+      return `${opening.period_begin} a ${opening.period_end}`;
+    }).join(', ');
+  }
+
+  getExceptionalClosings(station: any): string {
+    return station.opening_times.exceptional_closings.map((closing: any) => {
+      return `${closing.period_begin} a ${closing.period_end}`;
+    }).join(', ');
+  }
+
+  getDayName(dayNumber: number): string {
+    const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    return days[dayNumber - 1];
   }
 }

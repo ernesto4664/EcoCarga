@@ -55,14 +55,14 @@
   }
 .my-custom-class .alert-button {
   /* Estilos para los botones */
-  color: #ffffff; /* Color del texto */
-  background: #31B17D; /* Color de fondo */
-  border-radius: 100px; /* Bordes redondeados */
+  color: #ffffff; 
+  background: #31B17D;
+  border-radius: 100px; 
 }
 
 .my-custom-class .alert-button-group {
   /* Estilos para el grupo de botones */
-  justify-content: space-around; /* Espaciado entre botones */
+  justify-content: space-around;
 }
 
 .selected {
@@ -73,4 +73,14 @@
 .selected .item-native {
   background-color: #31B17D !important;
   color: white !important;
+}
+
+.alert-button.sc-ion-alert-md {
+  background-color: #31B17D !important;
+  color: white !important;
+  border-radius: 100px;
+}
+
+.alert-button-group.sc-ion-alert-md {
+  place-content: space-evenly;
 }

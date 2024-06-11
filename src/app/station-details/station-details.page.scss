@@ -39,11 +39,11 @@ ion-list {
   ion-button {
     --width: 127px;
     --height: 40px;
-    --background: #279769; /* Color de fondo */
-    --color: #fff; /* Color del texto */
-    --border-radius: 100px; /* Bordes redondeados */
-    --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra */
-    padding: 10px 20px; /* Espaciado interno */
+    --background: #279769;
+    --color: #fff;
+    --border-radius: 100px; 
+    --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    padding: 10px 20px; 
     font-weight: 500;
     font-size: 16px;
     line-height: 18.75px;
@@ -56,15 +56,27 @@ ion-list {
 .icon-text {
   display: flex;
   align-items: center;
-  margin-bottom: 10px; // Ajusta el espacio entre líneas si es necesario
+  margin-bottom: 10px;
 
   .icon {
-    margin-right: 8px; // Ajusta el espacio entre el icono y el texto
+    margin-right: 8px; 
     width: 33px;
     height: 35px;
   }
 
   h2, p {
-    margin: 0; // Ajusta los márgenes para que los textos se alineen correctamente
+    margin: 0; 
+  }
+}
+
+.icon-text {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
   }
 }

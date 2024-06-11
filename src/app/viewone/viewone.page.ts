@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
-import { TermsModalComponent } from '../components/terms-modal/terms-modal.component'; // Verifica esta ruta
+import { TermsModalComponent } from '../components/terms-modal/terms-modal.component';
 
 @Component({
   selector: 'app-viewone',
@@ -28,22 +28,22 @@ export class ViewonePage implements OnInit {
 
       return await modal.present();
     } catch (error) {
-      console.error("Error creating modal: ", error);
+      console.error("Error al crear modal: ", error);
     }
   }
 
   ngOnInit() {
-    this.route.url.subscribe(url => console.log('Current URL:', url));
+    this.route.url.subscribe(url => console.log('URL actual:', url));
   }
 
   navigateToInformacionPreliminar() {
     if (this.termsAccepted) {
-      console.log("Navigating to InformacionpreliminarPage");
+      console.log("Navegando a la página de información preliminar");
       this.router.navigateByUrl('/informacionpreliminar').then(success => {
         if (success) {
-          console.log('Navigation successful');
+          console.log('Navegación exitosa');
         } else {
-          console.log('Navigation failed');
+          console.log('Error de navegación');
         }
       });
     } else {

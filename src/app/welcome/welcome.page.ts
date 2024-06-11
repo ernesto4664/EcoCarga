@@ -13,7 +13,7 @@ export class WelcomePage implements OnInit {
 
   ngOnInit() {
     setTimeout(() => {
-      this.router.navigateByUrl('/viewone');  // Asegúrate que esta ruta esté bien definida en tu archivo de rutas
+      this.router.navigateByUrl('/viewone');
     }, 5000); // Redirecciona después de 5 segundos
   }
 

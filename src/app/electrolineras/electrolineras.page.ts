@@ -13,7 +13,7 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit  {
   constructor() {}
 
   ngOnInit() {
-    console.log('ElectrolinerasPage loaded');
+    console.log('ElectrolinerasPágina cargada');
   }
 
   async ngAfterViewInit() {
@@ -26,7 +26,7 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit  {
     this.map = await GoogleMap.create({
       id: 'my-map',
       element: document.getElementById('map') as HTMLElement,
-      apiKey: 'AIzaSyCNM9lXDeD3hLfe7Es4KNqkL8J2jsZ_W8I', // Puedes omitir esto si ya lo configuraste en capacitor.config.ts
+      apiKey: 'AIzaSyCNM9lXDeD3hLfe7Es4KNqkL8J2jsZ_W8I',
       config: {
         center: {
           lat: -34.9290,
@@ -95,7 +95,6 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit  {
           {
             path: polyline,
             strokeColor: '#007AFF',
-            // width: 5, // No se usa ya que no está disponible
             geodesic: true
           }
         ]);

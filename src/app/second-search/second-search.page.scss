@@ -40,7 +40,6 @@ p.msj-principal{
     color: #2A2A2A;
 }
 
-  
   .checkbox-group {
     display: flex;
     align-items: center;
@@ -63,17 +62,91 @@ p.msj-principal{
     color: #31B17D; 
   }
   
-  .search-button {
-    background: transparent; 
-    padding: 10px 20px;
-    font-size: 1em;
+  .capacidad {
+    background-color: #f5f5f5; 
+    padding: 5px 10px; 
+    margin-bottom: 10px; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    --background: #f5f5f5; 
+  
+    ion-label, ion-input {
+      --background: transparent; 
+      --color: #31B17D;
+      font-weight: bold;
+    }
+  
+    ion-input {
+      --padding-start: 10px;
+      --padding-end: 10px; 
+      --border: none; 
+      --box-shadow: none; 
+      background-color: transparent; 
+    }
+  
+    ion-item-inner, ion-item-native, .item-inner {
+      --background: transparent; 
+      background-color: transparent; 
+    }
   }
   
+  .filter-item {
+    background-color: #f5f5f5;
+    border-radius: 10px; 
+    margin-bottom: 10px; 
+    --background: #f5f5f5; 
   
-  ion-item {
-    margin-bottom: 20px;
+    ion-label {
+      color: #2A2A2A;
+      font-weight: 600; 
+      font-size: 16px;
+    }
+  
+    ion-select {
+      --background: #f5f5f5; 
+    }
+  
+    ion-select-option {
+      --background: #f5f5f5; 
+    }
   }
+
+  .filter {
+    background-color: #f5f5f5; 
+    border-radius: 25px; 
+    padding: 5px 10px; 
+    margin-bottom: 10px; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --background: #f5f5f5; 
   
+    ion-label, ion-input {
+      --background: transparent; 
+      --color: #31B17D; 
+      font-weight: 700; 
+    }
+  
+    ion-input {
+      --padding-start: 10px;
+      --padding-end: 10px;
+      --border: none; 
+      --box-shadow: none;
+      background-color: transparent; 
+    }
+  
+    ion-item-inner, ion-item-native, .item-inner {
+      --background: transparent; 
+      background-color: transparent; 
+      border:none;
+    }
+  }
+
+  ion-accordion.md.accordion-animated.hydrated.accordion-expanded {
+    background-color: #f5f5f5;
+  }
+
+  .item-native {
+    background-color: #f5f5f5 !important;
+  }
+
   ion-list {
     background: #f9f9f9;
     border: 1px solid #ccc;
@@ -81,17 +154,36 @@ p.msj-principal{
     max-height: 300px;
     overflow-y: auto;
   }
-  
-  ion-item {
-    --background: #fff;
-    --color: #333;
+ 
+   .filter{
+    --background-color: #F5F5F5;
+    font-weight: 700;
+    --color: #31B17D;
+    border-radius: 100px;
+  }
+
+  .result-station{
+    background-color: #FFFFFF;
+    border-radius: 0px; 
+    padding: 10px;
+    margin-bottom: 10px; 
+  }
+
+  .result-station .h2 .ion-label {
+    color: #333; 
+    font-weight: bold; 
   }
   
-  ion-item:hover {
-    --background: #255944;
-    --color: #fff;
+  .result-station .icon {
+    width: 24px; 
+    height: 24px; 
+    margin-right: 8px; 
   }
   
+  h2 {
+    color: black;
+}
+   
   .filters {
     margin-top: 20px;
   }
@@ -103,16 +195,15 @@ p.msj-principal{
 
 /* Estilos personalizados para los botones */
 ion-button {
-  --width: 127px;
   --height: 40px;
   --background: #279769; 
   --color: #fff; 
-  --border-radius: 100px; 
   --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 10px 20px;
+  border-radius: 100px; 
   font-weight: 500;
   font-size: 16px;
   line-height: 18.75px;
+  width: fit-content;
 }
 
 .icon-text {
@@ -126,7 +217,59 @@ ion-button {
     height: 24px; 
   }
 
-  h2, p {
+  p {
     margin: 0;
+    color: #7C7C7C;
+  }
+}
+
+.status-container {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 5px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  color: #FFFFFF;
+}
+
+.custom-button {
+  margin-top: 5px;
+  text-align: -webkit-center;
+
+  ion-button {
+    border-radius: 100px; 
+  }
+}
+
+.result-station {
+  --background: white; /* Fondo por defecto */
+
+  &:hover {
+    --background: #F5F5F5; /* Fondo cuando se pasa el ratón por encima */
+  }
+
+  .icon-text {
+    display: flex;
+    align-items: center;
+  }
+
+  .status-container {
+    display: inline-block;
+    margin-right: 10px;
+  }
+
+  .status-pill {
+    padding: 5px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  .icon {
+    margin-right: 5px;
   }
 }

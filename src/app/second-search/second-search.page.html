@@ -1,7 +1,7 @@
 <app-layout></app-layout>
 <ion-header class="custom-header">
   <ion-toolbar>
-    <ion-title>CAPACIDAD DE LA BATERÍA EN KWH</ion-title>
+    <ion-title>ESTACIONES</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -10,7 +10,7 @@
     <p class="msj-principal">Selecciona la capacidad de la batería de tu vehículo en kWh; opción obligatoria!</p>
   </div>
   <div class="container">
-    <ion-item>
+    <ion-item class="capacidad">
       <ion-label position="floating">Capacidad de la Batería (kWh)</ion-label>
       <ion-input [(ngModel)]="batteryCapacity" (ionInput)="searchBatteryCapacities($event)" type="text" debounce="300"></ion-input>
     </ion-item>
@@ -34,17 +34,17 @@
 
     <ion-accordion-group>
       <ion-accordion value="filters">
-        <ion-item slot="header">
+        <ion-item class="filter" slot="header">
           <ion-label>Filtros Avanzados (Opcionales)</ion-label>
         </ion-item>
         <div class="ion-padding" slot="content">
-          <ion-item>
+          <ion-item class="filter-item">
             <ion-label>Proveedor de Servicios de Carga (PSE)</ion-label>
             <ion-select [(ngModel)]="selectedPSE" (ionChange)="filterByPSE()">
               <ion-select-option *ngFor="let pse of pseOptions" [value]="pse">{{ pse }}</ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-item>
+          <ion-item class="filter-item">
             <ion-label>Filtrar por Distancia</ion-label>
             <ion-select [(ngModel)]="selectedDistance" (ionChange)="filterByDistance()">
               <ion-select-option value="5">5 km</ion-select-option>
@@ -55,41 +55,51 @@
               <ion-select-option value="50">50 km</ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-button expand="full" color="medium" (click)="resetFilters()">Limpiar Búsqueda</ion-button>
+    
+          <div class="custom-button mt-2">
+            <ion-button class="mt-2" expand="full" color="medium" (click)="resetFilters()">Limpiar Búsqueda</ion-button>
+          </div>
         </div>
       </ion-accordion>
     </ion-accordion-group>
 
-    <ion-button class="mi-btn" expand="full" (click)="getFilteredStations()">Buscar Estaciones</ion-button>
-
+    <div class="custom-button">
+      <ion-button class="custom-button" expand="full" (click)="getFilteredStations()">Buscar Estaciones</ion-button>
+    </div>
+    
     <div class="container pb-5" style="margin-bottom: 50px; padding-bottom: 50px;">
       <div class="row">
         <div *ngIf="stations.length > 0">
           <h2 style="padding: 10px;">Estaciones Filtradas</h2>
           <ion-list>
-            <ion-item *ngFor="let station of stations" (click)="selectStation(station)">
+            <ion-item class="result-station" *ngFor="let station of stations" (click)="selectStation(station)">
               <ion-label>
                 <div class="icon-text">
                   <img src="assets/icon/electrolineras.png" alt="electrolineras.png Icon" class="icon">
-                  <h2><strong>E/S. {{ station.name }}</strong> ({{ station.distance }} km)</h2>
+                  <h2><strong>E/S. {{ station.name }}</strong> / {{ station.distance }} km</h2>
                 </div>
                 
                 <div class="icon-text">
+                  <img style="width: 17px !important;" src="assets/icon/location.png" alt="ubicacion Icon" class="icon">
                   <p><span>Dirección:</span> {{ station.address }}, <span>Región:</span> {{ station.region }}, {{ station.commune }}</p>
                 </div>
                 
                 <div *ngIf="getConnectorStatus(station).totalConnectors > 0">
-                  <div class="mt-2 mb-2" style="max-width: fit-content;" *ngFor="let status of getConnectorStatus(station).statusDetails">
-                    <p [style.background-color]="status.color" style="padding: 5px; border-radius: 10px; margin-bottom: 10px;">{{ status.count }} Conectores: {{ status.label }}</p>
+                  <div class="status-container" *ngFor="let status of getConnectorStatus(station).statusDetails">
+                    <p [style.background-color]="status.color" class="status-pill">
+                      {{ status.count }} Conectores: {{ status.label }}
+                    </p>
                   </div>
                   <div class="mt-2 mb-2" *ngIf="true">
                     <div class="icon-text">
                       <img src="assets/icon/iconoAC.png" alt="electrolineraAC.png Icon" class="icon">
                       <p>Conectores AC: {{ getConnectorStatus(station).acCount }}</p>
+                      <p *ngIf="getConnectorStatus(station).acChargingCount > 0">Cargando: {{ getConnectorStatus(station).acChargingCount }}</p>
                     </div>
                     <div class="icon-text">
                       <img src="assets/icon/iconoDC.png" alt="electrolineraDC.png Icon" class="icon">
                       <p>Conectores DC: {{ getConnectorStatus(station).dcCount }}</p>
+                      <p *ngIf="getConnectorStatus(station).dcChargingCount > 0">Cargando: {{ getConnectorStatus(station).dcChargingCount }}</p>
                     </div>
                   </div>
                 </div>

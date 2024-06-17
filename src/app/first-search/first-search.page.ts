@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from '../api.service';
 import { AlertController } from '@ionic/angular';
@@ -8,7 +8,7 @@ import { AlertController } from '@ionic/angular';
   templateUrl: './first-search.page.html',
   styleUrls: ['./first-search.page.scss'],
 })
-export class FirstSearchPage implements OnInit {
+export class FirstSearchPage implements OnInit, OnDestroy {
   typeAC: boolean = false;
   typeDC: boolean = false;
   connectors: any[] = [];
@@ -29,16 +29,22 @@ export class FirstSearchPage implements OnInit {
     this.fetchAllConnectors();
   }
 
+  ngOnDestroy() {
+    this.apiService.stopConnectorStatusUpdates();
+  }
+
   onCheckboxChange() {
     this.filterConnectors();
   }
 
   fetchAllConnectors() {
-    this.apiService.getConnectors().subscribe(
+    this.apiService.fetchAllLocations().subscribe(
       (response: any) => {
         console.log('Respuesta API:', response);
         if (Array.isArray(response)) {
-          this.allConnectors = response;
+          this.allConnectors = response.reduce((acc: any[], station: any) => 
+            acc.concat(station.evses.reduce((innerAcc: any[], evse: { connectors: any; }) => 
+              innerAcc.concat(evse.connectors), [])), []);
           console.log('Todos los conectores:', this.allConnectors);
           this.filterConnectors();
         } else {
@@ -159,7 +165,6 @@ export class FirstSearchPage implements OnInit {
   
     await alert.present();
   }
-  
 
   navigateToSecondSearch() {
     let allSelectedConnectors: any[] = [];
@@ -185,7 +190,6 @@ export class FirstSearchPage implements OnInit {
   }
 
   getIconPath(connector: any): string {
-    // Mapeo de conectores a iconos
     const iconMap: { [key: string]: string } = {
       'IEC_62196_T2 (SOCKET - AC_1_PHASE)': 'Tipo2AC.png',
       'IEC_62196_T2_COMBO (CABLE - AC_3_PHASE)': 'Tipo1AC.png',
@@ -194,10 +198,9 @@ export class FirstSearchPage implements OnInit {
       'CHADEMO (CABLE - DC)': 'CHADEMO.png',
       'IEC_62196_T1_COMBO (CABLE - DC)': 'Tipo1DC.png',
       'GBT_DC (CABLE - DC)': 'GBT_DC.png',
-      // Agrega más mapeos según sea necesario
     };
 
     const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
-    return this.iconPath + (iconMap[key] || 'default.png'); // 'default.png' si no se encuentra el conector
+    return this.iconPath + (iconMap[key] || 'default.png'); 
   }
 }

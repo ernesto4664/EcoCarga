@@ -5,8 +5,8 @@
   </div>
   <div class="content-wrapper">
     <div class="swiper-container-wrapper">
-      <div class="button-group-top">
-        <ion-button class="mi-btn" *ngIf="showSkipButton" (click)="skip()">Continuar</ion-button>
+      <div class="button-group-top"style="align-self: self-end;">
+        <ion-button class="mi-btn" (click)="skip()">Saltar</ion-button>
       </div>
       <swiper-container [loop]="false" [slidesPerView]="1">
         <swiper-slide>
@@ -24,8 +24,9 @@
       </swiper-container>
       <div class="swiper-pagination"></div>
       <div class="button-group">
-        <ion-button class="mi-btn" (click)="prev()">Atrás</ion-button>
-        <ion-button class="mi-btn" (click)="next()">Siguiente</ion-button>
+        <ion-button class="mi-btn" *ngIf="showPrevButton" (click)="prev()">Atrás</ion-button>
+        <ion-button class="mi-btn" *ngIf="!showSkipButton" (click)="next()">{{ nextButtonText }}</ion-button>
+        <ion-button class="mi-btn" *ngIf="showSkipButton" (click)="skip()">Continuar</ion-button>
       </div>
     </div>
   </div>

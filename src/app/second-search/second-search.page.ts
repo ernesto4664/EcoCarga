@@ -143,6 +143,7 @@ export class SecondSearchPage implements OnInit {
 
     this.apiService.getStationsByConnectors(connectorIds).subscribe(
       (stations: any) => {
+        this.filterUnavailableEVSEs(stations); // Filtrar los EVSEs no disponibles
         this.stations = this.sortStationsByDistance(stations);
         // Aplica el filtro de distancia
         if (this.selectedDistance > 0) {
@@ -166,7 +167,7 @@ export class SecondSearchPage implements OnInit {
 
     this.stations.forEach(station => {
       station.evses.forEach((evse: { connectors: any[]; }) => {
-        evse.connectors.forEach((connector: any) => {
+        evse.connectors.forEach((connector: any) => {/*
           const lastUpdatedDate = new Date(connector.last_updated);
 
           // Si el conector ha sido actualizado recientemente, actualizamos su estado
@@ -182,11 +183,17 @@ export class SecondSearchPage implements OnInit {
               },
               (error: any) => {
                 console.error('Error al recuperar los estatus de los conectores:', error);
-              }
+               }
             );
-          }
-        });
+           }
+        */});
       });
+    });
+  }
+
+  filterUnavailableEVSEs(stations: any[]) {
+    stations.forEach(station => {
+      station.evses = station.evses.filter((evse: any) => evse.status === 'AVAILABLE');
     });
   }
 
@@ -219,13 +226,6 @@ export class SecondSearchPage implements OnInit {
 
   deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
-  }
-
-  applyDistanceFilter(stations: any[]): any[] {
-    if (this.selectedDistance > 0) {
-      return stations.filter(station => station.distance <= this.selectedDistance);
-    }
-    return stations;
   }
 
   printConnectorTotals() {
@@ -287,15 +287,40 @@ export class SecondSearchPage implements OnInit {
   }
 
   getConnectorStatus(station: any) {
-    const { acCount, dcCount, totalConnectors } = this.getConnectorTotals(station);
-
+    const connectorsInStation = station.evses.map((evse: any) => evse.connectors).flat();
+    const filteredConnectors = connectorsInStation.filter((connector: any) =>
+      this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
+    );
+  
+    const availableConnectors = filteredConnectors.filter((connector: any) => connector.status === 'AVAILABLE');
+    const chargingConnectors = filteredConnectors.filter((connector: any) => connector.status === 'CHARGING');
+  
+    const acCount = availableConnectors.filter((connector: any) => connector.power_type.startsWith('AC')).length;
+    const dcCount = availableConnectors.filter((connector: any) => connector.power_type.startsWith('DC')).length;
+  
+    const acChargingCount = chargingConnectors.filter((connector: any) => connector.power_type.startsWith('AC')).length;
+    const dcChargingCount = chargingConnectors.filter((connector: any) => connector.power_type.startsWith('DC')).length;
+  
+    const statusDetails = [
+      {
+        label: 'Disponible',
+        count: availableConnectors.length,
+        color: '#049F2F'
+      },
+      {
+        label: 'Cargando',
+        count: chargingConnectors.length,
+        color: '#F9A504'
+      }
+    ];
+  
     return {
-      totalConnectors,
-      statusDetails: [
-        { label: 'Disponible', count: totalConnectors, color: 'green' }
-      ],
+      totalConnectors: availableConnectors.length + chargingConnectors.length,
+      statusDetails,
       acCount,
-      dcCount
+      dcCount,
+      acChargingCount,
+      dcChargingCount
     };
   }
 

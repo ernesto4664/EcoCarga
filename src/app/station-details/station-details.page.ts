@@ -175,4 +175,14 @@ export class StationDetailsPage implements OnInit {
     const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
     return this.iconPath + (iconMap[key] || 'default.png'); // 'default.png' si no se encuentra el conector
   }
+
+  getCurrentType(powerType: string): string {
+    if (powerType.startsWith('AC')) {
+      return 'AC';
+    } else if (powerType.startsWith('DC')) {
+      return 'DC';
+    } else {
+      return powerType; // Devuelve el valor original si no es AC o DC
+    }
+  }
 }

@@ -1,0 +1,115 @@
+$colors: (
+   blue:       #387ef5,
+   secondary:  #31B17D,
+   danger:     #f53d3d,
+   light:      #f4f4f4,  
+   dark:       #222,
+   white:      #FFF,
+);
+
+ion-header{
+    box-shadow: none;
+}
+
+ion-toolbar{
+    --background: #31B17D;
+    color: white !important;
+}
+
+.custom-header {
+    background: #31B17D !important;
+    color: white !important;
+    text-align: center;
+  }
+
+  .toolbar-background  {
+    background: #31B17D !important;
+    color: white !important;
+}
+
+p.msj-principal {
+    padding: 20px;
+    height: 68px;
+    align-content: center;
+    text-align: center;
+    background-color: #F5F5F5;
+    border-radius: 30px 30px 0px 0px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: #2A2A2A;
+}
+
+.filter{
+  --background-color: #F5F5F5;
+  font-weight: 700;
+  --color: #31B17D;
+  border-radius: 100px;
+}
+
+.filter-area{
+  --background-color: #F5F5F5;
+  font-weight: 700;
+  --color: #31B17D;
+  border-radius: 0px;
+}
+
+ion-item.filter ion-input {
+  --padding-top: 15px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --border-radius: 10px;
+  --color:#7C7C7C;
+}
+
+ion-item.filter-area ion-textarea {
+  --padding-top: 15px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --border-radius: 10px;
+  --color:#7C7C7C;
+}
+
+  .custom-button {
+    margin-top: 5px;
+    text-align: -webkit-center;
+    --border-radius: 100px !important; /* Ajusta el valor según tus necesidades */
+   
+  
+    ion-button {
+        --height: 40px;
+        --background: #279769; 
+        --color: #fff; 
+        --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 100px; 
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 18.75px;
+        width: fit-content;
+    }
+  }
+
+  ion-item {
+    --background: #f7f7f7;
+    --border-radius: 10px;
+    margin-bottom: 15px;
+  }
+  
+  ion-label {
+    color: #3b873e;
+    font-weight: bold;
+  }
+  
+  ion-input, ion-textarea {
+    --padding-start: 10px;
+    --padding-end: 10px;
+  }
+  
+  ion-textarea {
+    min-height: 100px;
+  }
+  
+  ion-button {
+    --background: #3b873e;
+    color: white;
+  }

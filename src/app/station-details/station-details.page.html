@@ -1,4 +1,4 @@
-<app-layout></app-layout>
+
 <ion-header class="custom-header">
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -8,7 +8,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="false">
+<ion-content [fullscreen]="true">
   <div class="container">
     <div class="row" style="padding: 10px;">
       <div class="icon-text" style="margin-left: 3px;">
@@ -20,10 +20,10 @@
         <p><span>Dirección:</span> {{ station.address }}, <span>Región:</span> {{ station.region }}, {{ station.commune }}</p>
       </div>
     </div>
-
     <div id="map" style="height: 300px;"></div>
-    <ion-button class="mi-btn" expand="full" [href]="externalMapUrl" target="_blank">Cómo llegar</ion-button>
-
+    <div class="custom-button">
+      <ion-button class="custom-button"  [href]="externalMapUrl" target="_blank">Cómo llegar</ion-button>
+    </div>
     <div class="container pb-5" style="margin-bottom: 50px; padding-bottom: 50px;">
       <div class="row">
         <h2 style="padding: 10px;">Conectores seleccionados en la estación:</h2>
@@ -98,3 +98,4 @@
     </div>
   </div>
 </ion-content>
+<app-layout></app-layout>

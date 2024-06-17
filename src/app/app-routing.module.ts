@@ -41,6 +41,10 @@ const routes: Routes = [
     loadChildren: () => import('./station-details/station-details.module').then( m => m.StationDetailsPageModule)
   },
   {
+    path: 'contact-us',
+    loadChildren: () => import('./contact-us/contact-us.module').then( m => m.ContactUsPageModule)
+  },
+  {
     path: '**',
     redirectTo: 'welcome',
     pathMatch: 'full'

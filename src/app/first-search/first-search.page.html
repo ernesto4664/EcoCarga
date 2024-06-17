@@ -1,39 +1,40 @@
-<app-layout></app-layout>
+
 <ion-header class="custom-header">
   <ion-toolbar>
     <ion-title>CONECTORES</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="false">
-  <div class="container" style="background: #31B17D !important; margin-top: -16px;">
-    <p class="msj-principal">Selecciona el o los conectores disponibles en tu vehículo; opción obligatoria!</p>
-  </div>
-  <div class="container checkbox-grid-container">
-    <div class="checkbox-grid">
-      <div class="checkbox-item">
-        <ion-checkbox slot="start" [(ngModel)]="typeAC" (ionChange)="onCheckboxChange()"></ion-checkbox>
-        <ion-label>Tipo AC</ion-label>
-      </div>
-      <div class="checkbox-item">
-        <ion-checkbox slot="start" [(ngModel)]="typeDC" (ionChange)="onCheckboxChange()"></ion-checkbox>
-        <ion-label>Tipo DC</ion-label>
+  <ion-content [fullscreen]="false">
+    <div class="container" style="background: #31B17D !important; margin-top: -16px;">
+      <p class="msj-principal">Selecciona el o los conectores disponibles en tu vehículo; opción obligatoria!</p>
+    </div>
+    <div class="container checkbox-grid-container">
+      <div class="checkbox-grid">
+        <div class="checkbox-item">
+          <ion-checkbox slot="start" [(ngModel)]="typeAC" (ionChange)="onCheckboxChange()"></ion-checkbox>
+          <ion-label>Tipo AC</ion-label>
+        </div>
+        <div class="checkbox-item">
+          <ion-checkbox slot="start" [(ngModel)]="typeDC" (ionChange)="onCheckboxChange()"></ion-checkbox>
+          <ion-label>Tipo DC</ion-label>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="container" style="margin-bottom: 50px; padding-bottom: 50px;" *ngIf="uniqueConnectors.length > 0">
-    <h2 style="text-align: center;">Conectores Disponibles</h2>
-    <ion-list>
-      <ion-item *ngFor="let connector of uniqueConnectors; let i = index" (click)="selectConnector(i)" [ngClass]="{'selected': selectedIndexes.includes(i)}">
-        <ion-thumbnail slot="start">
-          <img [src]="getIconPath(connector)" alt="Icono Conector">
-        </ion-thumbnail>
-        <div class="connector-info">
-          <p style="margin-bottom:10px;">{{ connector.standard }}</p>
-         <!--<p style="margin-top:0px;">Formato: {{ connector.format }} - Tipo de corriente: {{ connector.power_type }}</p>-->
-        </div>
-      </ion-item>
-    </ion-list>
-  </div>
-</ion-content>
+    <div class="container" style="margin-bottom: 50px; padding-bottom: 50px;" *ngIf="uniqueConnectors.length > 0">
+      <h2 style="text-align: center;">Conectores Disponibles</h2>
+      <ion-list>
+        <ion-item *ngFor="let connector of uniqueConnectors; let i = index" (click)="selectConnector(i)" [ngClass]="{'selected': selectedIndexes.includes(i)}">
+          <ion-thumbnail slot="start">
+            <img [src]="getIconPath(connector)" alt="Icono Conector">
+          </ion-thumbnail>
+          <div class="connector-info">
+            <p style="margin-bottom:10px;">{{ connector.standard }}</p>
+          <!--<p style="margin-top:0px;">Formato: {{ connector.format }} - Tipo de corriente: {{ connector.power_type }}</p>-->
+          </div>
+        </ion-item>
+      </ion-list>
+    </div>
+  </ion-content>
+  <app-layout></app-layout>

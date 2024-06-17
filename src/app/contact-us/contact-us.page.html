@@ -1,0 +1,39 @@
+
+<ion-header class="custom-header">
+  <ion-toolbar>
+    <ion-title>Contáctanos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="mb-5">
+  <div class="container" style="background: #31B17D !important; margin-top: -16px;">
+    <p class="msj-principal">Rellena los campos solicitados y comunicarte con nuestro equipo</p>
+  </div>
+  <form style="margin-bottom: 5rem;" class="mt-2 mb-5" [formGroup]="contactForm" (ngSubmit)="composeEmail()">
+    <ion-item class="filter">
+      <ion-label position="floating">Nombre</ion-label>
+      <ion-input class="milabel" formControlName="firstName" placeholder="Escriba su nombre"></ion-input>
+    </ion-item>
+    <ion-item class="filter">
+      <ion-label position="floating">Apellido</ion-label>
+      <ion-input class="milabel" formControlName="lastName" placeholder="Escriba su apellido"></ion-input>
+    </ion-item>
+    <ion-item class="filter"> 
+      <ion-label position="floating">Email</ion-label>
+      <ion-input class="milabel" type="email" formControlName="email" placeholder="Escriba su e-mail"></ion-input>
+    </ion-item>
+    <ion-item class="filter">
+      <ion-label position="floating">Teléfono</ion-label>
+      <ion-input class="milabel" type="tel" formControlName="phone" placeholder="Escriba su contacto" ></ion-input>
+    </ion-item>
+    <ion-item class="filter-area">
+      <ion-label position="floating">Mensaje</ion-label>
+      <ion-textarea class="mitextarea" formControlName="message" placeholder="Escriba aquí..."></ion-textarea>
+    </ion-item>
+    <div class="custom-button mb-5">
+      <ion-button class="custom-button" type="submit" [disabled]="contactForm.invalid">Enviar</ion-button>
+    </div>
+  </form>
+</ion-content>
+
+<app-layout></app-layout>

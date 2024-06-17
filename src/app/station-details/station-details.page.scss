@@ -49,9 +49,20 @@ ion-list {
     line-height: 18.75px;
   }
 
-  .sc-ion-label-md-s>p {
-
-}
+  .custom-button {
+    --border-radius: 100px !important; /* Ajusta el valor según tus necesidades */
+  }
+  
+  .custom-button {
+    margin-top: 5px;
+    text-align: -webkit-center;
+   
+  
+    ion-button {
+      --border-radius: 100px !important; 
+    }
+  }
+  
 
 .icon-text {
   display: flex;

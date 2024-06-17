@@ -38,14 +38,16 @@
         <img src="/assets/electrolineras.png" alt="Electrolineras" width="35px" height="38px">
         <ion-label>Electrolineras</ion-label>
       </ion-col>
-      <ion-col size="4" class="icon-col" routerLink="/buscador">
+      <ion-col size="4" class="icon-col" (click)="navigateTosearch()">
         <img src="/assets/search.png" alt="Buscador" width="34px" height="34px">
         <ion-label>Buscador</ion-label>
       </ion-col>
-      <ion-col size="4" class="icon-col" routerLink="/contacto">
+      <ion-col size="4" class="icon-col" (click)="navigateTocontact()">
         <img src="/assets/contact.png" alt="Contactos" width="40px" height="27px">
         <ion-label>Contacto</ion-label>
       </ion-col>
     </ion-row>
   </ion-grid>
 </div>
+
+

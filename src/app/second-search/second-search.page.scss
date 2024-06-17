@@ -238,11 +238,16 @@ ion-button {
 }
 
 .custom-button {
+  --border-radius: 100px !important; /* Ajusta el valor según tus necesidades */
+}
+
+.custom-button {
   margin-top: 5px;
   text-align: -webkit-center;
+ 
 
   ion-button {
-    border-radius: 100px; 
+    --border-radius: 100px !important; 
   }
 }
 

@@ -38,7 +38,7 @@
     [isOpen]="showAlert"
     header="Advertencia"
     message="Debes aceptar los términos y condiciones para continuar."
-    buttons="OK"
+    [buttons]="alertButtons"
     (didDismiss)="onAlertDismiss()">
   </ion-alert>
 </app-layout>

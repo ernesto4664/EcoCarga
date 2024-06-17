@@ -12,6 +12,15 @@ export class ViewonePage implements OnInit {
   termsAccepted = false;  // Propiedad para rastrear la aceptación de términos
   showAlert = false; // Variable para controlar la visibilidad de la alerta
 
+  alertButtons = [
+    {
+      text: 'Continuar',
+      handler: () => {
+        // No se necesita una acción adicional aquí, el botón cerrará la alerta automáticamente
+      }
+    }
+  ];
+
   constructor(private router: Router, private route: ActivatedRoute, private modalController: ModalController) {}
   
   async openTermsModal() {

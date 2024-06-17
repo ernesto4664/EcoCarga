@@ -10,6 +10,15 @@ export class TermsModalComponent {
   termsAccepted = false;
   showAlert = false;
 
+  alertButtons = [
+    {
+      text: 'Continuar',
+      handler: () => {
+        // No se necesita una acción adicional aquí, el botón cerrará la alerta automáticamente
+      }
+    }
+  ];
+
   constructor(private modalController: ModalController) {}
 
   dismiss() {

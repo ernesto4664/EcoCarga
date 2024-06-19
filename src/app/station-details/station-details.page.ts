@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Geolocation } from '@capacitor/geolocation';
 
 declare var google: any;
@@ -21,8 +20,7 @@ export class StationDetailsPage implements OnInit {
 
   constructor(
     private route: ActivatedRoute, 
-    private router: Router, 
-    private sanitizer: DomSanitizer
+    private router: Router
   ) {
     this.route.queryParams.subscribe(() => {
       const navigation = this.router.getCurrentNavigation();
@@ -44,13 +42,17 @@ export class StationDetailsPage implements OnInit {
   }
 
   async setMapUrl() {
-    const { latitude, longitude } = this.station.coordinates;
-    const userPosition = await Geolocation.getCurrentPosition();
-    const userLatitude = userPosition.coords.latitude;
-    const userLongitude = userPosition.coords.longitude;
+    if (this.station && this.station.coordinates) {
+      const { latitude, longitude } = this.station.coordinates;
+      const userPosition = await Geolocation.getCurrentPosition();
+      const userLatitude = userPosition.coords.latitude;
+      const userLongitude = userPosition.coords.longitude;
 
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${userLatitude},${userLongitude}&destination=${latitude},${longitude}&travelmode=driving`;
-    this.externalMapUrl = url;
+      const url = `https://www.google.com/maps/dir/?api=1&origin=${userLatitude},${userLongitude}&destination=${latitude},${longitude}&travelmode=driving`;
+      this.externalMapUrl = url;
+    } else {
+      console.error('No se pudieron obtener las coordenadas de la estación.');
+    }
   }
 
   getStatusLabel(status: string): string {
@@ -153,7 +155,6 @@ export class StationDetailsPage implements OnInit {
   }
 
   getIconPath(connector: any): string {
-    // Mapeo de conectores a iconos
     const iconMap: { [key: string]: string } = {
       'GBT_AC (CABLE - AC_1_PHASE)': 'GBT_AC.png',
       'IEC_62196_T1 (CABLE - AC_1_PHASE)': 'Tipo1AC.png',

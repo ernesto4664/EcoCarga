@@ -37,7 +37,7 @@ export class SecondSearchPage implements OnInit {
 
   ngOnInit() {
     this.getUserLocation();
-    this.loadPSEOptions();  // cargamos las opciones del PSE en init
+    //this.loadPSEOptions();  // cargamos las opciones del PSE en init
   }
 
   async getUserLocation() {
@@ -83,7 +83,7 @@ export class SecondSearchPage implements OnInit {
     this.http.get<any>(`${this.apiUrl}/battery-details?capacity=${capacity}`).subscribe(
       (battery) => {
         this.selectedBattery = battery;
-        this.fetchPSEOptions(battery.id);
+       // this.fetchPSEOptions(battery.id);
       },
       (error) => {
         console.error('Error al recuperar el detalle de las baterias:', error);
@@ -91,7 +91,7 @@ export class SecondSearchPage implements OnInit {
     );
   }
 
-  loadPSEOptions() {
+/*  loadPSEOptions() {
     this.http.get<string[]>(`${this.apiUrl}/pse-options`).subscribe(
       (options) => {
         this.pseOptions = options;
@@ -111,12 +111,12 @@ export class SecondSearchPage implements OnInit {
         console.error('Error al recuperar las opciones de PSE:', error);
       }
     );
-  }
+  }*/
 
-  filterByPSE() {
+ /* filterByPSE() {
     console.log('Filtrar por PSE:', this.selectedPSE);
     this.applyAllFilters();
-  }
+  }*/
 
   filterByDistance() {
     console.log('Filtrar por distancia:', this.selectedDistance);

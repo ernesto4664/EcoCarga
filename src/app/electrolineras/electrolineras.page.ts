@@ -39,7 +39,7 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit  {
 
   async getCurrentLocation() {
     const coordinates = await Geolocation.getCurrentPosition();
-    console.log('Current position:', coordinates);
+    console.log('Posición actual:', coordinates);
 
     if (this.map) {
       // Centra el mapa en la ubicación actual del usuario

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // Asegúrate de importar ReactiveFormsModule
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'; 
 import { IonicModule } from '@ionic/angular';
 
 import { ContactUsPageRoutingModule } from './contact-us-routing.module';
@@ -13,7 +13,7 @@ import { ComponentsModule } from "../components/components.module";
     imports: [
         CommonModule,
         FormsModule,
-        ReactiveFormsModule, // Agrega ReactiveFormsModule aquí
+        ReactiveFormsModule, 
         IonicModule,
         ContactUsPageRoutingModule,
         ComponentsModule

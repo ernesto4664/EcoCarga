@@ -192,7 +192,7 @@ export class FirstSearchPage implements OnInit, OnDestroy {
   getIconPath(connector: any): string {
     const iconMap: { [key: string]: string } = {
       'IEC_62196_T2 (SOCKET - AC_1_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2_COMBO (CABLE - AC_3_PHASE)': 'Tipo1AC.png',
+      'IEC_62196_T2_COMBO (CABLE - AC_3_PHASE)': 'combinadotipo2.png',
       'GBT_AC (CABLE - AC_1_PHASE)': 'GBT_AC.png',
       'IEC_62196_T1 (CABLE - AC_1_PHASE)': 'Tipo1AC.png',
       'CHADEMO (CABLE - DC)': 'CHADEMO.png',

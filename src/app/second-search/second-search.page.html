@@ -41,12 +41,12 @@
           <ion-label>Filtros Avanzados (Opcionales)</ion-label>
         </ion-item>
         <div class="ion-padding" slot="content">
-          <ion-item class="filter-item">
+         <!--<ion-item class="filter-item">
             <ion-label>Proveedor de Servicios de Carga (PSE)</ion-label>
             <ion-select [(ngModel)]="selectedPSE" (ionChange)="filterByPSE()">
               <ion-select-option *ngFor="let pse of pseOptions" [value]="pse">{{ pse }}</ion-select-option>
             </ion-select>
-          </ion-item>
+          </ion-item>--> 
           <ion-item class="filter-item">
             <ion-label>Filtrar por Distancia</ion-label>
             <ion-select [(ngModel)]="selectedDistance" (ionChange)="filterByDistance()">

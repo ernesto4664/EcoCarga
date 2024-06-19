@@ -30,8 +30,7 @@
             <img [src]="getIconPath(connector)" alt="Icono Conector">
           </ion-thumbnail>
           <div class="connector-info">
-            <p style="margin-bottom:10px;">{{ connector.standard }}</p>
-          <!--<p style="margin-top:0px;">Formato: {{ connector.format }} - Tipo de corriente: {{ connector.power_type }}</p>-->
+            <p style="margin-bottom:10px;">{{ getConnectorDisplayName(connector) }}</p>
           </div>
         </ion-item>
       </ion-list>

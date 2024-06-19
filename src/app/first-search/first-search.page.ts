@@ -203,4 +203,19 @@ export class FirstSearchPage implements OnInit, OnDestroy {
     const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
     return this.iconPath + (iconMap[key] || 'default.png'); 
   }
+
+  getConnectorDisplayName(connector: any): string {
+    const displayNameMap: { [key: string]: string } = {
+      'IEC_62196_T2': 'Conector tipo 2',
+      'IEC_62196_T1': 'Conector tipo 1',
+      'IEC_62196_T1_COMBO': 'Combinado tipo 1',
+      'IEC_62196_T2_COMBO': 'Combinado tipo 2',
+      'CHADEMO': 'CHAdeMO',
+      'GBT_AC': 'Conector GBT AC',
+      'GBT_DC': 'Conector GBT DC',
+      // Agrega aquí más mapeos según sea necesario
+    };
+
+    return displayNameMap[connector.standard] || connector.standard;
+  }
 }

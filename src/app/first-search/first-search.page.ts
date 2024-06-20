@@ -17,6 +17,7 @@ export class FirstSearchPage implements OnInit, OnDestroy {
   selectedIndexes: number[] = [];
   selectedConnectors: any[] = [];
   showAlert = false;
+  loading: boolean = false; // Indicador de carga
   private iconPath = 'assets/icon/';
 
   constructor(
@@ -38,6 +39,7 @@ export class FirstSearchPage implements OnInit, OnDestroy {
   }
 
   fetchAllConnectors() {
+    this.loading = true; // Mostrar preloader
     this.apiService.fetchAllLocations().subscribe(
       (response: any) => {
         console.log('Respuesta API:', response);
@@ -50,9 +52,11 @@ export class FirstSearchPage implements OnInit, OnDestroy {
         } else {
           console.error('Formato de respuesta API inesperado:', response);
         }
+        this.loading = false; // Ocultar preloader
       },
       (error) => {
         console.error('Error al recuperar conectores:', error);
+        this.loading = false; // Ocultar preloader en caso de error
       }
     );
   }
@@ -96,7 +100,7 @@ export class FirstSearchPage implements OnInit, OnDestroy {
 
   async selectConnector(index: number) {
     const selectedConnector = this.uniqueConnectors[index];
-  
+
     if (this.selectedIndexes.includes(index)) {
       this.selectedIndexes = this.selectedIndexes.filter(i => i !== index);
       this.selectedConnectors = this.selectedConnectors.filter(connector => connector.standard !== selectedConnector.standard || connector.power_type !== selectedConnector.power_type);
@@ -113,9 +117,9 @@ export class FirstSearchPage implements OnInit, OnDestroy {
         return;
       }
     }
-  
+
     this.printSelectedConnectors();
-  
+
     if (this.selectedIndexes.length === 1) {
       await this.showAlertMessage(
         'Atención',
@@ -132,7 +136,7 @@ export class FirstSearchPage implements OnInit, OnDestroy {
       );
     }
   }
-  
+
   async showAlertMessage(header: string, message: string, cancelButtonText: string, confirmButtonText: string = '') {
     const buttons = [
       {
@@ -144,7 +148,7 @@ export class FirstSearchPage implements OnInit, OnDestroy {
         },
       },
     ];
-  
+
     if (confirmButtonText) {
       buttons.push({
         text: confirmButtonText,
@@ -155,14 +159,14 @@ export class FirstSearchPage implements OnInit, OnDestroy {
         cssClass: 'alert-button',
       });
     }
-  
+
     const alert = await this.alertController.create({
       header,
       message,
       buttons,
       cssClass: 'custom-alert',
     });
-  
+
     await alert.present();
   }
 
@@ -201,7 +205,7 @@ export class FirstSearchPage implements OnInit, OnDestroy {
     };
 
     const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
-    return this.iconPath + (iconMap[key] || 'default.png'); 
+    return this.iconPath + (iconMap[key] || 'default.png');
   }
 
   getConnectorDisplayName(connector: any): string {
@@ -213,7 +217,6 @@ export class FirstSearchPage implements OnInit, OnDestroy {
       'CHADEMO': 'CHAdeMO',
       'GBT_AC': 'Conector GBT AC',
       'GBT_DC': 'Conector GBT DC',
-      // Agrega aquí más mapeos según sea necesario
     };
 
     return displayNameMap[connector.standard] || connector.standard;

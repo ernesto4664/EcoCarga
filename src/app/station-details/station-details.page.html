@@ -48,11 +48,11 @@
                   <p><strong>Dirección:</strong> {{ evse.directions }}</p>
                 </div>
                 <div class="icon-text">
-                  <img style="margin-left: 3px; height: 20px !important; width: 15px !important;" src="assets/icon/location.png" alt="Dirección Icon" class="icon">
+                  <img style="margin-left: 3px; height: 20px !important; width: 15px !important;" src="assets/icon/formato.jpg" alt="formato Icon" class="icon">
                   <p><strong>Formato:</strong> {{ connector.format }}</p>
                 </div>
                 <div class="icon-text">
-                  <img style="margin-left: 3px; height: 20px !important; width: 15px !important;" src="assets/icon/location.png" alt="Dirección Icon" class="icon">
+                  <img style="margin-left: 3px; height: 20px !important; width: 15px !important;" src="assets/icon/tipocorriente.png" alt="tipocorriente Icon" class="icon">
                   <p><strong>Tipo de corriente:</strong> {{ getCurrentType(connector.power_type) }}</p>
                 </div>
               <!--<div class="icon-text">
@@ -84,7 +84,7 @@
                   <p><strong>Amperaje:</strong> {{ connector.amperage }} A</p>
                 </div>-->
                 <div class="icon-text">
-                  <img src="assets/icon/voltios.png" alt="Estado Icon" class="icon">
+                  <img src="assets/icon/status.png" alt="Estado Icon" class="icon">
                   <p><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
                 </div>
                 <div *ngFor="let tariff of connector.tariffs">

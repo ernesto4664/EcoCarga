@@ -16,10 +16,6 @@ const routes: Routes = [
     path: 'viewone',
     loadChildren: () => import('./viewone/viewone.module').then(m => m.ViewonePageModule)
   },
-  {
-    path: 'tabs',
-    loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
-  },
   { 
     path: 'informacionpreliminar',
     loadChildren: () => import('./informacionpreliminar/informacionpreliminar.module').then(m => m.InformacionpreliminarPageModule) 

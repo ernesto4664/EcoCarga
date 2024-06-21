@@ -1,21 +1,6 @@
-<!--<ion-header>
-  <ion-toolbar>
-    <ion-title>
-      <ion-buttons slot="start">
-        <ion-menu-button></ion-menu-button>
-      </ion-buttons>
-      Mi App
-    </ion-title>
-  </ion-toolbar>
-</ion-header>-->
-
-<ion-content>
-  <ng-content></ng-content> <!-- Aquí se insertará el contenido específico de cada página -->
-</ion-content>
-
 <ion-footer (click)="toggleMenu()" [class.active]="showMenu">
   <ion-toolbar>
-    <ion-buttons slot="start"></ion-buttons>  <!-- Espacio vacío para balancear -->
+    <ion-buttons slot="start"></ion-buttons>
     <ion-buttons class="center-buttons">
       <ion-button>
         <ion-icon slot="icon-only" name="menu"></ion-icon>
@@ -27,7 +12,7 @@
         <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-buttons slot="end"></ion-buttons>  <!-- Espacio vacío para balancear -->
+    <ion-buttons slot="end"></ion-buttons>
   </ion-toolbar>
 </ion-footer>
 
@@ -49,5 +34,3 @@
     </ion-row>
   </ion-grid>
 </div>
-
-

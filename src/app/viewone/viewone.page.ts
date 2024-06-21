@@ -16,7 +16,7 @@ export class ViewonePage implements OnInit {
     {
       text: 'Continuar',
       handler: () => {
-        // No se necesita una acción adicional aquí, el botón cerrará la alerta automáticamente
+        this.onAlertDismiss();
       }
     }
   ];
@@ -32,6 +32,9 @@ export class ViewonePage implements OnInit {
       modal.onDidDismiss().then((data) => {
         if (data.data && data.data.accepted) {
           this.termsAccepted = true;
+          console.log("Términos aceptados");
+        } else {
+          console.log("Términos no aceptados");
         }
       });
 

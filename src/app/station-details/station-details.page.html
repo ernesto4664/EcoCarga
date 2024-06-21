@@ -17,7 +17,7 @@
       </div>
       <div class="icon-text" style="margin-left: 6px;">
         <img style="width:25px !important; height: 40px !important;" src="assets/icon/location.png" alt="Pin Icon" class="icon">
-        <p><span>Dirección:</span> {{ station.address }}, <span>Región:</span> {{ station.region }}, {{ station.commune }}</p>
+        <p style="color:#7C7C7C;"><span>Dirección:</span> {{ station.address }}, <span>Región:</span> {{ station.region }}, {{ station.commune }}</p>
       </div>
     </div>
     <div id="map" style="height: 300px;"></div>
@@ -37,63 +37,38 @@
 
         <div *ngFor="let evse of getDetailedConnectors()">
           <ion-list>
-            <ion-item *ngFor="let connector of evse.connectors">
-              <ion-thumbnail slot="start" style="margin-right: 15px;">
-                <img [src]="getIconPath(connector)" alt="{{ connector.standard }}" style="width: 50px; height: 50px;object-fit: contain;">
-              </ion-thumbnail>
-              <ion-label>
-                <h3><strong>Conector nombre:</strong> {{ connector.standard }}</h3>
-                <div class="icon-text">
-                  <img style="margin-left: 3px; height: 20px !important; width: 15px !important;" src="assets/icon/location.png" alt="Dirección Icon" class="icon">
-                  <p><strong>Dirección:</strong> {{ evse.directions }}</p>
-                </div>
-                <div class="icon-text">
-                  <img style="margin-left: 3px; height: 20px !important; width: 15px !important;" src="assets/icon/formato.jpg" alt="formato Icon" class="icon">
-                  <p><strong>Formato:</strong> {{ connector.format }}</p>
-                </div>
-                <div class="icon-text">
-                  <img style="margin-left: 3px; height: 20px !important; width: 15px !important;" src="assets/icon/tipocorriente.png" alt="tipocorriente Icon" class="icon">
-                  <p><strong>Tipo de corriente:</strong> {{ getCurrentType(connector.power_type) }}</p>
-                </div>
-              <!--<div class="icon-text">
-                  <img src="assets/icon/voltios.png" alt="Piso Icon" class="icon">
-                  <p><strong>Nivel de piso:</strong> {{ evse.floor_level || 'N/A' }}</p>
-                </div>
-                <div class="icon-text">
-                  <img src="assets/icon/voltios.png" alt="Modelo Icon" class="icon">
-                  <p><strong>Modelo:</strong> {{ evse.model }}</p>
-                </div>
-                <div class="icon-text">
-                  <img src="assets/icon/voltios.png" alt="Marca Icon" class="icon">
-                  <p><strong>Marca:</strong> {{ evse.brand }}</p>
-                </div>
-                <div class="icon-text">
-                  <img src="assets/icon/voltios.png" alt="Simultáneo Icon" class="icon">
-                  <p><strong>Permite carga simultánea:</strong> {{ evse.permite_carga_simultanea ? 'Sí' : 'No' }}</p>
-                </div>-->
-                <div class="icon-text">
-                  <img src="assets/icon/voltios.png" alt="Potencia Icon" class="icon">
-                  <p><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
-                </div>
-              <!--  <div class="icon-text">
-                  <img src="assets/icon/voltios.png" alt="Voltaje Icon" class="icon">
-                  <p><strong>Voltaje:</strong> {{ connector.voltage }} V</p>
-                </div>
-                <div class="icon-text">
-                  <img src="assets/icon/voltios.png" alt="Amperaje Icon" class="icon">
-                  <p><strong>Amperaje:</strong> {{ connector.amperage }} A</p>
-                </div>-->
-                <div class="icon-text">
-                  <img src="assets/icon/status.png" alt="Estado Icon" class="icon">
-                  <p><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
-                </div>
-                <div *ngFor="let tariff of connector.tariffs">
-                  <p><strong>Tarifa:</strong> {{ tariff }}</p>
-                </div>
-              </ion-label>
+            <ion-item *ngFor="let connector of evse.connectors">      
+                <ion-label>
+                  <div class="icon-text" style="padding-bottom: 6px;border-bottom: 1px solid #DBDBDB;">          
+                    <img [src]="getIconPath(connector)" alt="{{ connector.standard }}" style="width: 45px; height: 40px; object-fit: contain;margin-right: 10px;">     
+                    <h3 style="margin: 0;"><strong> {{ connector.standard }}</strong> </h3>
+                  </div>
+                  <div class="container" style="padding: 5px 10px 5px 10px;">          
+                    <div class="icon-text">
+                      <img style="margin-left: 3px; height: 20px !important; width: 15px !important;" src="assets/icon/location.png" alt="Dirección Icon" class="icon">
+                      <p style="color:#7C7C7C;">Dirección: {{ evse.directions }}</p>
+                    </div>
+                    <div class="icon-text">
+                      <img src="assets/icon/voltios.png" alt="Potencia Icon" class="icon">
+                      <p style="color: #279769; font-weight: 700;"><strong style="color: #279769;">Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
+                    </div>
+                    <div class="icon-text">
+                      <p><strong>Formato:</strong> <span style="color:#7C7C7C;">{{ connector.format }}</span></p>
+                    </div>
+                    <div class="icon-text">
+                      <p><strong>Tipo de corriente:</strong> <span style="color:#7C7C7C;">{{ getCurrentType(connector.power_type) }}</span></p>
+                    </div>
+                    <div class="icon-text">
+                      <p><strong>Estado:</strong> <span style="color:#7C7C7C;">{{ getStatusLabel(connector.status) }}</span></p>
+                    </div>
+                    <div *ngFor="let tariff of connector.tariffs">
+                      <p><strong>Tarifa:</strong> <span style="color:#7C7C7C;">{{ tariff }}</span></p>
+                    </div>
+                  </div>
+                </ion-label>
             </ion-item>
           </ion-list>
-        </div>
+        </div>      
       </div>
     </div>
   </div>

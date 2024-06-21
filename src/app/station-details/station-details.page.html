@@ -53,16 +53,16 @@
                       <p style="color: #279769; font-weight: 700;"><strong style="color: #279769;">Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
                     </div>
                     <div class="icon-text">
-                      <p><strong>Formato:</strong> <span style="color:#7C7C7C;">{{ connector.format }}</span></p>
+                      <p><strong>Formato:</strong><span style="color:#7C7C7C;"> {{ connector.format }}</span></p>
                     </div>
                     <div class="icon-text">
-                      <p><strong>Tipo de corriente:</strong> <span style="color:#7C7C7C;">{{ getCurrentType(connector.power_type) }}</span></p>
+                      <p><strong>Tipo de corriente:</strong><span style="color:#7C7C7C;"> {{ getCurrentType(connector.power_type) }}</span></p>
                     </div>
                     <div class="icon-text">
-                      <p><strong>Estado:</strong> <span style="color:#7C7C7C;">{{ getStatusLabel(connector.status) }}</span></p>
+                      <p><strong>Estado:</strong><span style="color:#7C7C7C;"> {{ getStatusLabel(connector.status) }}</span></p>
                     </div>
                     <div *ngFor="let tariff of connector.tariffs">
-                      <p><strong>Tarifa:</strong> <span style="color:#7C7C7C;">{{ tariff }}</span></p>
+                      <p><strong>Tarifa:</strong><span style="color:#7C7C7C;"> {{ tariff }}</span></p>
                     </div>
                   </div>
                 </ion-label>

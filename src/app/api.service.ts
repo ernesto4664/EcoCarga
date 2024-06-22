@@ -7,6 +7,9 @@ import { tap, mergeMap, switchMap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ApiService {
+  getStations() {
+    throw new Error('Method not implemented.');
+  }
   private apiUrl = 'https://backend.electromovilidadenlinea.cl/locations';
   private token = 'your-token-here';
   private cache: any[] = [];

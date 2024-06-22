@@ -15,12 +15,20 @@ import { SafeUrlPipe } from './station-details/safe-url.pipe';
 import { GlobalDataService } from './global-data.service'; // Ajusta la ruta según sea necesario
 import { ApiService } from './api.service';
 
+import { IonicStorageModule } from '@ionic/storage-angular';
+
 register(); // Registra los componentes personalizados de Swiper
 
 @NgModule({
   declarations: [AppComponent, SafeUrlPipe], // Declara aquí
-
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule,  HttpClientModule, ComponentsModule ],
+  imports: [
+    BrowserModule, 
+    IonicModule.forRoot(),
+    AppRoutingModule, 
+    HttpClientModule,
+    ComponentsModule,
+    IonicStorageModule.forRoot() 
+  ],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     GlobalDataService,
     ApiService

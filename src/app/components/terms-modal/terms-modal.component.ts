@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ModalController } from '@ionic/angular';
-import { GlobalDataService } from '../../global-data.service'; // Ajusta la ruta según la estructura de tu proyecto
+import { GlobalDataService } from '../../global-data.service';
 
 @Component({
   selector: 'app-terms-modal',
@@ -22,7 +22,7 @@ export class TermsModalComponent {
 
   constructor(
     private modalController: ModalController,
-    private globalDataService: GlobalDataService // Inyectamos el servicio global
+    private globalDataService: GlobalDataService
   ) {}
 
   dismiss() {
@@ -31,6 +31,9 @@ export class TermsModalComponent {
 
   accept() {
     if (this.termsAccepted) {
+      // Guardar el estado de aceptación en localStorage
+      localStorage.setItem('termsAccepted', 'true');
+      
       // Llamamos a la función para adelantar la consulta a la API
       this.globalDataService.fetchAllConnectors();
 

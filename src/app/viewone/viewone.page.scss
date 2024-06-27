@@ -76,3 +76,13 @@ p.mi-option{
   font-weight: 500;
   font-size: 16px;
 }
+
+ion-alert .alert-title,
+ion-alert .alert-message {
+  text-align: center;
+}
+
+.custom-alert .alert-title,
+.custom-alert .alert-message {
+  text-align: center;
+}

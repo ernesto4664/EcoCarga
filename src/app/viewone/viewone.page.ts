@@ -32,6 +32,7 @@ export class ViewonePage implements OnInit {
       modal.onDidDismiss().then((data) => {
         if (data.data && data.data.accepted) {
           this.termsAccepted = true;
+          localStorage.setItem('termsAccepted', 'true');
           console.log("Términos aceptados");
         } else {
           console.log("Términos no aceptados");
@@ -45,6 +46,8 @@ export class ViewonePage implements OnInit {
   }
 
   ngOnInit() {
+    const termsAccepted = localStorage.getItem('termsAccepted') === 'true';
+    this.termsAccepted = termsAccepted;
     this.route.url.subscribe(url => console.log('URL actual:', url));
   }
 

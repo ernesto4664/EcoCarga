@@ -7,11 +7,8 @@ import { tap, mergeMap, switchMap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ApiService {
-  getStations() {
-    throw new Error('Method not implemented.');
-  }
   private apiUrl = 'https://backend.electromovilidadenlinea.cl/locations';
-  private token = 'your-token-here';
+  private token = 'eyJraWQiOiJvSWM1K3NpU25yWnZ3Y3YxS294UVwvR29HWEM3VVc2VVVPOHV2dXVjT095OD0iLCJhbGciOiJSUzI1NiJ9.eyJjdXN0b206cmVnaW9uIjoiVGFyYXBhY8OhIiwic3ViIjoiNDRjOGI0MzgtNjAxMS03MGQ3LWVkZDgtNWYwY2Y5MzMwZGFhIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImN1c3RvbTphZGRyZXNzIjoiQ2hpbGUiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9wbHdaNTBkeHUiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOmZhbHNlLCJjb2duaXRvOnVzZXJuYW1lIjoiMTExMTEyMjIzIiwiY3VzdG9tOmNvbW11bmUiOiJDYW1pw7FhIiwib3JpZ2luX2p0aSI6IjgzZGRlODgxLTI2YzgtNDRjMS1hNzJmLTVjODdkNWIzMGYwZiIsImF1ZCI6IjQzc2Z0c2RyaXRscDNybXEzZzA1cThxM3JpIiwiZXZlbnRfaWQiOiI4OWJhOWQ5Zi1hYjk0LTQ3NGMtYWM0NS0xYmU3NDU1YjQyZWYiLCJ0b2tlbl91c2UiOiJpZCIsImN1c3RvbTpzZWNfdmFsaWRhdGlvbiI6ImZhbHNlIiwiYXV0aF90aW1lIjoxNzE3MDg2NDc1LCJuYW1lIjoiU3VwZXJ2aXNvcjEiLCJwaG9uZV9udW1iZXIiOiIrNTY5NzI5NDc4MjMiLCJjdXN0b206ZGJfdXNlcmlkIjoiMTExIiwiZXhwIjoxNzE3MDkwMDc1LCJpYXQiOjE3MTcwODY0NzUsImp0aSI6Ijk1ZWU2NmY1LWQxMmYtNDRmZS1hMzViLTI2MjFhMTMyY2YxZiIsImVtYWlsIjoiY3ZpZGFsQHNlYy5jbCJ9.mOUtZ9y4YZKfklhvojbJNv-x7c09HpoKtQTNsl1o9j9fo-CzDtkC6FHB70ZV0COv2kRxRteXRn6pQPRH9_-bTCvgoT5WwXwSJiyibz-HhvSFfxOsCZoVCI24ck9FPMVnxHpYf8kGTQjpvs_yTu1zUJg4x93xJH44AlrSuUoFhL0tO0axvo6Ru1xUIXxfdapNKjGVT9HvWzANG3-ZWMjxKh_cXfALylZpe4-U-g3BJ9ediAejbRo7I0IniCwh0jqxModWLL3waMIds55C0vrvKKO-8P5deOI_5B0kux6wzd3ENKH9vLf7dx0nX5Ex264FjfNmQfUTuFki8_0_XF5XSA'; // Asegúrate de reemplazar esto con tu token real
   private cache: any[] = [];
   private cacheLifetime = 12 * 3600 * 1000; // 12 horas en milisegundos
   private lastFetchTime: number = 0;
@@ -30,7 +27,9 @@ export class ApiService {
   }
 
   private isCacheValid(): boolean {
-    return (Date.now() - this.lastFetchTime) < this.cacheLifetime;
+    const cacheValid = (Date.now() - this.lastFetchTime) < this.cacheLifetime;
+    console.log('Cache valid:', cacheValid, 'Cache age:', Date.now() - this.lastFetchTime, 'Cache lifetime:', this.cacheLifetime);
+    return cacheValid;
   }
 
   private fetchLocations(page: number): Observable<any> {
@@ -39,31 +38,40 @@ export class ApiService {
   }
 
   fetchAllLocations(): Observable<any> {
-    if (this.cache.length > 0 && this.isCacheValid()) {
+    const cachedData = localStorage.getItem('cache');
+    const cachedTime = localStorage.getItem('lastFetchTime');
+  
+    if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime, 10)) < this.cacheLifetime) {
+      console.log('Recuperando datos de la caché localStorage');
+      this.cache = JSON.parse(cachedData);
+      this.lastFetchTime = parseInt(cachedTime, 10);
       return of(this.cache);
     }
-
-    const initialFetch = this.fetchLocations(1).pipe(
+  
+    console.log('Realizando solicitud a la API');
+    return this.fetchLocations(1).pipe(
       tap(response => {
         this.cache = response.items || [];
         this.lastFetchTime = Date.now();
-      })
-    );
-
-    return initialFetch.pipe(
+        localStorage.setItem('cache', JSON.stringify(this.cache));
+        localStorage.setItem('lastFetchTime', this.lastFetchTime.toString());
+        console.log('Datos iniciales almacenados en caché:', this.cache);
+      }),
       mergeMap(response => {
         const totalPages = response.total_pages;
         const requests: Observable<any>[] = [];
-
+  
         for (let page = 2; page <= totalPages; page++) {
           requests.push(this.fetchLocations(page));
         }
-
+  
         return forkJoin(requests).pipe(
           tap(responses => {
             responses.forEach(res => {
               this.cache = this.cache.concat(res.items || []);
             });
+            localStorage.setItem('cache', JSON.stringify(this.cache));
+            console.log('Datos adicionales almacenados en caché:', this.cache);
           }),
           mergeMap(() => of(this.cache))
         );
@@ -135,7 +143,6 @@ export class ApiService {
     ).subscribe();
   }
 
-  // Método para detener las actualizaciones
   stopConnectorStatusUpdates() {
     if (this.updateSubscription) {
       this.updateSubscription.unsubscribe();

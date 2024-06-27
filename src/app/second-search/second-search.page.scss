@@ -179,11 +179,7 @@ p.msj-principal{
     height: 24px; 
     margin-right: 8px; 
   }
-  
-  h2 {
-    color: black;
-}
-   
+     
   .filters {
     margin-top: 20px;
   }
@@ -226,12 +222,14 @@ ion-button {
 .status-container {
   display: inline-block;
   margin-right: 10px;
+  border-radius: 100px;
+  padding: 5px 10px;
 }
 
 .status-pill {
   display: inline-block;
-  padding: 5px;
-  border-radius: 10px;
+  padding: 5px 10px !important;
+  border-radius: 100px !important;
   margin-bottom: 10px;
   white-space: nowrap;
   color: #FFFFFF;

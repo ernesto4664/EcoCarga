@@ -1,4 +1,3 @@
-
 <ion-header class="custom-header">
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -87,7 +86,7 @@
                   <p><span>Dirección:</span> {{ station.address }}, <span>Región:</span> {{ station.region }}, {{ station.commune }}</p>
                 </div>
                 
-                <div *ngIf="getConnectorStatus(station).totalConnectors > 0">
+                <div  *ngIf="getConnectorStatus(station).totalConnectors > 0">
                   <div class="status-container" *ngFor="let status of getConnectorStatus(station).statusDetails">
                     <p [style.background-color]="status.color" class="status-pill">
                       {{ status.count }} Conectores: {{ status.label }}

@@ -83,40 +83,12 @@ export class SecondSearchPage implements OnInit {
     this.http.get<any>(`${this.apiUrl}/battery-details?capacity=${capacity}`).subscribe(
       (battery) => {
         this.selectedBattery = battery;
-       // this.fetchPSEOptions(battery.id);
       },
       (error) => {
         console.error('Error al recuperar el detalle de las baterias:', error);
       }
     );
   }
-
-/*  loadPSEOptions() {
-    this.http.get<string[]>(`${this.apiUrl}/pse-options`).subscribe(
-      (options) => {
-        this.pseOptions = options;
-      },
-      (error) => {
-        console.error('Error al recuperar las opciones de PSE:', error);
-      }
-    );
-  }
-
-  fetchPSEOptions(batteryId: number) {
-    this.http.get<string[]>(`${this.apiUrl}/pse-options?batteryId=${batteryId}`).subscribe(
-      (options) => {
-        this.pseOptions = options;
-      },
-      (error) => {
-        console.error('Error al recuperar las opciones de PSE:', error);
-      }
-    );
-  }*/
-
- /* filterByPSE() {
-    console.log('Filtrar por PSE:', this.selectedPSE);
-    this.applyAllFilters();
-  }*/
 
   filterByDistance() {
     console.log('Filtrar por distancia:', this.selectedDistance);
@@ -144,7 +116,7 @@ export class SecondSearchPage implements OnInit {
     this.apiService.getStationsByConnectors(connectorIds).subscribe(
       (stations: any) => {
         this.filterUnavailableEVSEs(stations); // Filtrar los EVSEs no disponibles
-        this.stations = this.sortStationsByDistance(stations);
+        this.stations = this.removeDuplicateStations(this.sortStationsByDistance(stations));
         // Aplica el filtro de distancia
         if (this.selectedDistance > 0) {
           this.stations = this.stations.filter(station => parseFloat(station.distance) <= this.selectedDistance);
@@ -167,26 +139,9 @@ export class SecondSearchPage implements OnInit {
 
     this.stations.forEach(station => {
       station.evses.forEach((evse: { connectors: any[]; }) => {
-        evse.connectors.forEach((connector: any) => {/*
-          const lastUpdatedDate = new Date(connector.last_updated);
-
-          // Si el conector ha sido actualizado recientemente, actualizamos su estado
-          if (lastUpdatedDate < currentDate) {
-            this.apiService.getConnectorStatus(connector.connector_id).subscribe(
-              (updatedConnector: any) => {
-                // Actualizamos el conector con los datos más recientes
-                connector.status = updatedConnector.status;
-                connector.last_updated = updatedConnector.last_updated;
-
-                // Actualizamos la caché global con los datos más recientes
-                this.apiService.updateCacheWithConnectorStatus(updatedConnector);
-              },
-              (error: any) => {
-                console.error('Error al recuperar los estatus de los conectores:', error);
-               }
-            );
-           }
-        */});
+        evse.connectors.forEach((connector: any) => {
+          // Código para actualizar el estado del conector
+        });
       });
     });
   }
@@ -358,5 +313,16 @@ export class SecondSearchPage implements OnInit {
   getDayName(dayNumber: number): string {
     const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     return days[dayNumber - 1];
+  }
+
+  removeDuplicateStations(stations: any[]): any[] {
+    const stationMap = new Map();
+    stations.forEach(station => {
+      if (!stationMap.has(station.location_id)) {
+        stationMap.set(station.location_id, station);
+      }
+    });
+    console.log('Estaciones después de eliminar duplicados:', Array.from(stationMap.values()));
+    return Array.from(stationMap.values());
   }
 }

@@ -38,6 +38,7 @@
     header="Advertencia"
     message="Debes aceptar los términos y condiciones para continuar."
     [buttons]="alertButtons"
-    (didDismiss)="onAlertDismiss()">
+    (didDismiss)="onAlertDismiss()"
+    cssClass="custom-alert">
   </ion-alert>
   <app-layout></app-layout>

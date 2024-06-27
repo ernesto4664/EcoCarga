@@ -16,8 +16,21 @@ ion-toolbar {
 .custom-button {
   background: #31B17D !important;
   color: white !important;
+  border-radius: 100px; 
 }
 
 p {
   text-align: justify;
+}
+
+.custom-button ion-button {
+  --height: 40px;
+  --background: #279769; 
+  --color: #fff; 
+  --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 100px; 
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 18.75px;
+  width: fit-content;
 }

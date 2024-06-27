@@ -126,18 +126,35 @@ p.msj-principal {
   }
 
   /*first-search.page.scss  para las alertas*/
+
+  .custom-alert .alert-title,
+.custom-alert .alert-message {
+  text-align: center;
+}
+
+  .custom-alert .alert-head.sc-ion-alert-md {
+    text-align: center;
+}
+
 .custom-alert .alert-wrapper {
+    align-self: center;
+    text-align: center;
     background-color: #f8f9fa;
     border-radius: 10px;
   }
   
   .custom-alert .alert-header {
+    text-align: center;
+    align-self: center;
     color: #007bff;
     font-weight: bold;
   }
   
   .custom-alert .alert-message {
+    align-self: center;
+    text-align: center;
     color: #343a40;
+    text-align: center;
   }
   
   .custom-alert .alert-button {

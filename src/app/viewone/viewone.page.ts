@@ -53,8 +53,8 @@ export class ViewonePage implements OnInit {
 
   navigateToInformacionPreliminar() {
     if (this.termsAccepted) {
-      console.log("Navegando a la página de información preliminar");
-      this.router.navigateByUrl('/informacionpreliminar').then(success => {
+      console.log("Navegando a la página de primera busqueda");
+      this.router.navigateByUrl('/first-search').then(success => {
         if (success) {
           console.log('Navegación exitosa');
         } else {

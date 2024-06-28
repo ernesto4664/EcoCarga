@@ -15,7 +15,7 @@ export class WelcomePage implements OnInit {
   ngOnInit() {
     this.globalDataService.fetchAllConnectors();
     setTimeout(() => {
-      this.router.navigateByUrl('/viewone');
+      this.router.navigateByUrl('/informacionpreliminar');
     }, 5000); // Redirecciona después de 5 segundos
   }
 }

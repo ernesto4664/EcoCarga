@@ -43,6 +43,6 @@ export class InformacionpreliminarPage implements AfterViewInit {
 
   skip() {
     // Redirigir a otra página
-    this.router.navigate(['/first-search']);
+    this.router.navigate(['/viewone']);
   }
 }

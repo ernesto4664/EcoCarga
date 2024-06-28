@@ -1,5 +1,5 @@
 {
-    "appId": "io.ionic.starter",
+    "appId": "com.ministerio.ecocarga",
     "appName": "EcoCarga",
     "webDir": "www",
     "bundledWebRuntime": false

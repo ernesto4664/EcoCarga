@@ -1,7 +1,6 @@
 :host {
   display: block;
   height: 100vh;
- 
 }
 
 ion-header {
@@ -18,25 +17,30 @@ ion-content {
   top: 0;
   left: 0;
 }
+
 .welcome-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    text-align: center;
-  
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-  
-    h1 {
-      margin-top: 20px;
-    }
-  
-    p {
-      margin-top: 10px;
-      padding: 0 20px;
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  position: relative;
+}
+
+.welcome-container img {
+  max-width: 100%;
+  height: auto;
+}
+
+.logo-min {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 10px;  // Ajusta según sea necesario
+}
+
+.center-img {
+  margin-top: auto;
+}

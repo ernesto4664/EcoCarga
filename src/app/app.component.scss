@@ -1,0 +1,83 @@
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);  // Fondo semi-transparente para la superposición
+    z-index: 10;
+  }
+  
+  .menu-options {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 250px;
+    height: 100%;
+    background: #ffffff;  // Fondo blanco sólido
+    z-index: 20;
+    padding: 20px;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .menu-options.show {
+    transform: translateX(0);
+  }
+  
+  .icon-col {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: #ffffff;  // Fondo blanco sólido para las columnas
+  }
+  
+  .icon-col img {
+    margin-right: 10px;
+  }
+  
+  ion-label {
+    font-size: 1.2em;
+    color: #000;  // Color negro para el texto
+  }
+  
+  ion-grid, ion-row, ion-col {
+    background: #ffffff;  // Fondo blanco sólido para estos elementos
+  }
+  
+  ion-header {
+    box-shadow: none;
+  }
+  
+  ion-toolbar {
+    --background: #31B17D;
+    color: white !important;
+    position: relative;  // Para permitir la posición absoluta de los elementos hijos
+  }
+  
+  .toolbar-background {
+    background: #31B17D !important;
+    color: white !important;
+  }
+  
+  .custom-header {
+    background: #31B17D !important;
+    color: white !important;
+    text-align: center;
+  }
+  
+  .toolbar-title {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    width: auto;
+  }
+  
+  ion-buttons[slot="end"] {
+    position: absolute;
+    right: 0;
+  }
+  

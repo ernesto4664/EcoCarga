@@ -77,12 +77,34 @@ p.mi-option{
   font-size: 16px;
 }
 
-ion-alert .alert-title,
-ion-alert .alert-message {
+::ng-deep .custom-alert .alert-wrapper {
   text-align: center;
 }
 
-.custom-alert .alert-title,
-.custom-alert .alert-message {
+::ng-deep .custom-alert .alert-head {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   text-align: center;
+  width: 100%;
+}
+
+::ng-deep .custom-alert .alert-title {
+  text-align: center;
+  width: 100%;
+}
+
+::ng-deep .custom-alert .alert-message {
+  text-align: center;
+  width: 100%;
+}
+
+::ng-deep .custom-alert .alert-button-group {
+  display: flex;
+  justify-content: center;
+}
+
+::ng-deep .custom-alert .alert-button.sc-ion-alert-md {
+  background-color: #31B17D !important;
+  padding: 5px 15px;
 }

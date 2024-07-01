@@ -108,34 +108,32 @@ p.msj-principal {
 
   /*first-search.page.scss  para las alertas*/
 
-  .custom-alert .alert-title,
-.custom-alert .alert-message {
-  text-align: center;
-}
-
-  .custom-alert .alert-head.sc-ion-alert-md {
+  ::ng-deep  .alert-wrapper {
     text-align: center;
-}
-
-.custom-alert .alert-wrapper {
-    align-self: center;
-    text-align: center;
-    background-color: #f8f9fa;
-    border-radius: 10px;
   }
   
-  .custom-alert .alert-header {
+  ::ng-deep  .alert-head {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    align-self: center;
-    color: #007bff;
-    font-weight: bold;
+    width: 100%;
   }
   
-  .custom-alert .alert-message {
-    align-self: center;
+  ::ng-deep .alert-title {
     text-align: center;
-    color: #343a40;
+    width: 100%;
+  }
+  
+  ::ng-deep .alert-message {
     text-align: center;
+    width: 100%;
+  }
+  
+  ::ng-deep .alert-button-group {
+    display: flex;
+    justify-content: center;
+    
   }
   
   .custom-alert .alert-button {
@@ -146,8 +144,9 @@ p.msj-principal {
     --color: white;
   }
 
-.alert-button.sc-ion-alert-md {
+  ::ng-deep .alert-button.sc-ion-alert-md {
     background-color: #31B17D !important;
+    padding: 5px 15px;
 }
 
 .selected ion-item {

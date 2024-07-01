@@ -3,6 +3,7 @@ import { Platform } from '@ionic/angular';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { Router, NavigationEnd, Event } from '@angular/router';
+import { Location } from '@angular/common';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -14,9 +15,10 @@ export class AppComponent {
   showMenu: boolean = false;
   showHeader: boolean = true;
   showHamburgerMenu: boolean = true;
+  showBackButton: boolean = false; // Propiedad para controlar la visibilidad del botón de retroceso
   pageTitle: string = 'EcoCarga';
 
-  constructor(private platform: Platform, private router: Router) {
+  constructor(private platform: Platform, private router: Router, private location: Location) {
     this.initializeApp();
     this.setupRouteListener();
   }
@@ -44,32 +46,41 @@ export class AppComponent {
     if (url.includes('welcome')) {
       this.showHeader = false;
       this.pageTitle = 'BIENVENIDOS';
+      this.showBackButton = false;
     } else if (url.includes('informacionpreliminar')) {
       this.showHeader = true;
       this.showHamburgerMenu = false;
+      this.showBackButton = false;
       this.pageTitle = 'INFORMACIÓN IMPORTANTE';
-    }  else if (url.includes('viewone')) {
-        this.showHeader = true;
-        this.pageTitle = 'TERMINOS Y CONDICIONES';
+    } else if (url.includes('viewone')) {
+      this.showHeader = true;
+      this.pageTitle = 'TERMINOS Y CONDICIONES';
+      this.showBackButton = false;
     } else if (url.includes('first-search')) {
       this.showHeader = true;
       this.showHamburgerMenu = true;
       this.pageTitle = 'CONECTORES';
+      this.showBackButton = false;
     } else if (url.includes('second-search')) {
       this.showHeader = true;
-      this.pageTitle = 'ESTACIONES'; // Ajusta el título según sea necesario
+      this.pageTitle = 'ESTACIONES';
+      this.showBackButton = true;
     } else if (url.includes('contact-us')) {
       this.showHeader = true;
       this.pageTitle = 'CONTACTO';
+      this.showBackButton = true;
     } else if (url.includes('station-details')) {
       this.showHeader = true;
       this.pageTitle = 'DETALLES DE LA ESTACION';
+      this.showBackButton = true;
     } else if (url.includes('electrolineras')) {
       this.showHeader = true;
       this.pageTitle = 'ELECTROLINERAS ACTIVAS';
+      this.showBackButton = true;
     } else {
       this.showHeader = true;
-      this.pageTitle = 'EcoCarga'; // Ajusta el título según sea necesario
+      this.pageTitle = 'EcoCarga';
+      this.showBackButton = false;
     }
   }
 
@@ -90,5 +101,9 @@ export class AppComponent {
   navigateTocontact() {
     this.showMenu = false;
     this.router.navigate(['/contact-us']);
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

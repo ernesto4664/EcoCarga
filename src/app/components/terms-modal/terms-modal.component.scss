@@ -34,3 +34,30 @@ p {
   line-height: 18.75px;
   width: fit-content;
 }
+
+::ng-deep  .alert-wrapper {
+  text-align: center;
+}
+
+::ng-deep  .alert-head {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+::ng-deep .alert-title {
+  text-align: center;
+  width: 100%;
+}
+
+::ng-deep .alert-message {
+  text-align: center;
+  width: 100%;
+}
+
+::ng-deep .alert-button-group {
+  display: flex;
+  justify-content: center;
+}

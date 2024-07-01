@@ -81,3 +81,14 @@
     right: 0;
   }
   
+  .menu-title-container {
+    width: 100%;
+    background-color: #31B17D; // Ajusta el color de fondo según sea necesario
+    text-align: center;
+    padding: 10px 0; // Ajusta el relleno según sea necesario
+  }
+  
+  .menu-title-container ion-label {
+    font-size: 1.5em; // Ajusta el tamaño de la fuente según sea necesario
+    color: white; // Ajusta el color del texto según sea necesario
+  }

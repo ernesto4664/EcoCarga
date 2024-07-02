@@ -175,8 +175,6 @@ p.msj-principal{
 /* Estilos personalizados para los botones */
 ion-button {
   --height: 40px;
-  --background: #279769; 
-  --color: #fff; 
   --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 100px; 
   font-weight: 500;
@@ -218,17 +216,27 @@ ion-button {
   color: #FFFFFF;
 }
 
-.custom-button {
-  --border-radius: 100px !important; /* Ajusta el valor según tus necesidades */
-}
-
-.custom-button {
+.custom-button{
   margin-top: 5px;
   text-align: -webkit-center;
  
 
   ion-button {
+    --background: #279769;
     --border-radius: 100px !important; 
+  }
+}
+
+.custom-button-filter{
+  margin-top: 5px;
+  text-align: -webkit-center;
+  
+ 
+
+  ion-button {
+    --background: #F5F5F5 !important;
+    --border-radius: 100px !important; 
+    --color: #279769;
   }
 }
 

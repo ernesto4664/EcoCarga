@@ -20,9 +20,9 @@ ion-content {
 
 .welcome-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;  
   justify-content: center;
-  align-items: center;
+  align-items: center;  
   height: 100%;
   text-align: center;
   position: relative;
@@ -31,16 +31,14 @@ ion-content {
 .welcome-container img {
   max-width: 100%;
   height: auto;
+  padding: 5px;
 }
 
 .logo-min {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 10px;  // Ajusta según sea necesario
+  margin-right: 1rem;  
 }
 
-.center-img {
-  margin-top: auto;
+.logohome {
+  margin-left: 1rem;  
+  vertical-align: middle; 
 }

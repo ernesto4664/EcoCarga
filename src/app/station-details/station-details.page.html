@@ -13,7 +13,7 @@
     <div class="row" style="padding: 10px;">
       <div class="icon-text" style="margin-left: 3px;">
         <img style="width: 46px !important; height: 46px !important;" src="assets/icon/electrolineras.png" alt="electrolineras.png Icon" class="icon">
-        <h2>E/S. {{ station.name }}</h2>
+        <p style="font-size: 16px;"><strong>E/S. {{ station.name }}</strong></p>
       </div>
       <div class="icon-text" style="margin-left: 6px;">
         <img style="width:25px !important; height: 40px !important;" src="assets/icon/location.png" alt="Pin Icon" class="icon">
@@ -30,7 +30,7 @@
         <ion-list>
           <ion-item *ngFor="let status of getConnectorStatus()">
             <ion-label>
-              <p style="color: #fff; font-size: 16px; padding: 10px; max-width: fit-content; border-radius: 10px;" [style.background-color]="status.color">Conectores: {{ status.label }} {{ status.count }}</p>
+              <p style="color: #fff; font-size: 16px; padding: 10px; max-width: fit-content; border-radius: 100px;" [style.background-color]="status.color">Conectores: {{ status.label }} {{ status.count }}</p>
             </ion-label>
           </ion-item>
         </ion-list>

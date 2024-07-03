@@ -149,4 +149,11 @@ export class ApiService {
       this.updateSubscription = null;
     }
   }
+
+  clearCache() {
+    localStorage.clear();
+    this.cache = [];
+    this.lastFetchTime = 0;
+    console.log('Cache cleared');
+  }
 }

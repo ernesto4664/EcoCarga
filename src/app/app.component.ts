@@ -5,6 +5,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { Router, NavigationEnd, Event } from '@angular/router';
 import { Location } from '@angular/common';
 import { filter } from 'rxjs/operators';
+import { ApiService } from './api.service';
 
 @Component({
   selector: 'app-root',
@@ -18,7 +19,7 @@ export class AppComponent {
   showBackButton: boolean = false; // Propiedad para controlar la visibilidad del botón de retroceso
   pageTitle: string = 'EcoCarga';
 
-  constructor(private platform: Platform, private router: Router, private location: Location) {
+  constructor(private platform: Platform, private router: Router, private location: Location, private apiService: ApiService) {
     this.initializeApp();
     this.setupRouteListener();
   }
@@ -119,5 +120,9 @@ export class AppComponent {
 
   goBack() {
     this.location.back();
+  }
+
+  clearCache() {
+    this.apiService.clearCache();
   }
 }

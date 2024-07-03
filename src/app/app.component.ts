@@ -73,6 +73,10 @@ export class AppComponent {
       this.showHeader = true;
       this.pageTitle = 'DETALLES DE LA ESTACION';
       this.showBackButton = true;
+    } else if (url.includes('terminos-condiciones')) {
+      this.showHeader = true;
+      this.pageTitle = 'TERMINOS Y CONDICIONES';
+      this.showBackButton = true;
     } else if (url.includes('electrolineras')) {
       this.showHeader = true;
       this.pageTitle = 'ELECTROLINERAS ACTIVAS';
@@ -101,6 +105,16 @@ export class AppComponent {
   navigateTocontact() {
     this.showMenu = false;
     this.router.navigate(['/contact-us']);
+  }
+
+  navigateToinformation() {
+    this.showMenu = false;
+    this.router.navigate(['/informacionpreliminar']);
+  }
+
+  navigateToterminos() {
+    this.showMenu = false;
+    this.router.navigate(['/terminos-condiciones']);
   }
 
   goBack() {

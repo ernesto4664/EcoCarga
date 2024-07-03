@@ -151,6 +151,8 @@ export class StationDetailsPage implements OnInit {
       } else {
         console.error('Elemento del mapa no encontrado');
       }
+    } else {
+      console.error('No se encontraron coordenadas para la estación');
     }
   }
 

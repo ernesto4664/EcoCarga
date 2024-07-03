@@ -149,17 +149,24 @@ p.msj-principal {
     padding: 5px 15px;
 }
 
-.selected ion-item {
-  background: #31B17D !important;
+::ng-deep ion-item.selected {
+  margin-top: 2px;
+  --background: #31B17D !important;
   color: white !important;
+}
 
-  .connector-info p {
-    color: white !important;
-  }
+::ng-deep ion-item.selected .connector-info p {
+  width: fit-content;
+  padding: 5px 25px;
+  color: white !important;
+}
 
-  ion-thumbnail img {
-    filter: brightness(0) invert(1); // Cambia el color del icono si es necesario
-  }
+::ng-deep ion-item.selected ion-thumbnail img {
+  //filter: brightness(0) invert(1); /* Cambia el color del icono si es necesario */
+}
+
+::ng-deep ion-item.selected .item-native {
+  background: #31B17D !important;
 }
 
 .loader {

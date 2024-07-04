@@ -72,7 +72,7 @@ export class AppComponent {
       this.showBackButton = true;
     } else if (url.includes('station-details')) {
       this.showHeader = true;
-      this.pageTitle = 'DETALLES DE LA ESTACION';
+      this.pageTitle = 'DETALLES DE LA ESTACIÓN';
       this.showBackButton = true;
     } else if (url.includes('terminos-condiciones')) {
       this.showHeader = true;

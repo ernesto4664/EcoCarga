@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
   bundledWebRuntime: false,
   plugins: {
     GoogleMaps: {
-      apiKey: 'AIzaSyCNM9lXDeD3hLfe7Es4KNqkL8J2jsZ_W8I',
+      apiKey: 'AIzaSyBcpB4-Tq5jXCLIsrvlWmKsnv1Et6ZQ7mU',
     },
   },
 };

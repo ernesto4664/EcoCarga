@@ -1,10 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Platform } from '@ionic/angular';
-import { StatusBar, Style } from '@capacitor/status-bar';
-import { SplashScreen } from '@capacitor/splash-screen';
-import { Router, NavigationEnd, Event } from '@angular/router';
 import { Location } from '@angular/common';
-import { filter } from 'rxjs/operators';
+import { TermsAndConditionsService } from '../services/terms-and-conditions.service';
 
 @Component({
   selector: 'app-terminos-condiciones',
@@ -12,13 +8,22 @@ import { filter } from 'rxjs/operators';
   styleUrls: ['./terminos-condiciones.page.scss'],
 })
 export class TerminosCondicionesPage implements OnInit {
+  latestTerms: any;
 
-  constructor(private location: Location) {}
+  constructor(private location: Location, private termsService: TermsAndConditionsService) {}
+
+  ngOnInit() {
+    this.termsService.getTermsAndConditions().subscribe(
+      data => {
+        this.latestTerms = data[0]; // Obtener el término más reciente
+      },
+      error => {
+        console.error('Error fetching terms and conditions:', error);
+      }
+    );
+  }
 
   goBack() {
     this.location.back();
-  }
-
-  ngOnInit() {
   }
 }

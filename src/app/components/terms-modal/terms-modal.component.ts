@@ -1,15 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { GlobalDataService } from '../../global-data.service';
+import { TermsAndConditionsService } from '../../services/terms-and-conditions.service';
 
 @Component({
   selector: 'app-terms-modal',
   templateUrl: './terms-modal.component.html',
   styleUrls: ['./terms-modal.component.scss'],
 })
-export class TermsModalComponent {
+export class TermsModalComponent implements OnInit {
   termsAccepted = false;
   showAlert = false;
+  latestTerms: any;
 
   alertButtons = [
     {
@@ -22,8 +24,20 @@ export class TermsModalComponent {
 
   constructor(
     private modalController: ModalController,
-    private globalDataService: GlobalDataService
+    private globalDataService: GlobalDataService,
+    private termsService: TermsAndConditionsService
   ) {}
+
+  ngOnInit() {
+    this.termsService.getTermsAndConditions().subscribe(
+      data => {
+        this.latestTerms = data[0]; // Obtener el término más reciente
+      },
+      error => {
+        console.error('Error fetching terms and conditions:', error);
+      }
+    );
+  }
 
   dismiss() {
     this.modalController.dismiss();
@@ -31,19 +45,15 @@ export class TermsModalComponent {
 
   accept() {
     if (this.termsAccepted) {
-      // Guardar el estado de aceptación en localStorage
       localStorage.setItem('termsAccepted', 'true');
-      
-      // Llamamos a la función para adelantar la consulta a la API
       this.globalDataService.fetchAllConnectors();
-
       this.modalController.dismiss({ accepted: true });
     } else {
-      this.showAlert = true; // Mostrar la alerta si los términos no han sido aceptados
+      this.showAlert = true;
     }
   }
 
   onAlertDismiss() {
-    this.showAlert = false; // Resetear la visibilidad de la alerta al cerrarla
+    this.showAlert = false;
   }
 }

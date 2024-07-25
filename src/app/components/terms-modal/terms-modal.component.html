@@ -8,75 +8,18 @@
 </ion-header>
 
 <ion-content>
-  <div class="modal-content">
-    <h1>Términos y condiciones generales del uso</h1>
-
-    <p>Bienvenidos a EcoCarga, la aplicación para la red de cargadores públicos de vehículos
-      eléctricos de Chile, operado por el Ministerio de Energía.</p>
-      
-    <p><strong>Introducción:</strong></p>
-
-    <p>EcoCarga es una aplicación móvil compatible con plataformas Android e iOS, que tiene
-      por objeto entregar información a la ciudadanía acerca de la ubicación geográfica de las
-      electrolineras públicas desplegadas a lo largo de Chile, junto con sus características
-      técnicas, tiempo de carga estimado y compatibilidad del conector segun marca y modelo
-      del vehículo de que se trate.</p>
-      
-    <p><strong>Condiciones de uso:</strong></p>
-
-    <p>EcoCarga está sujeta a las siguientes condiciones, las que deberian ser cumplidas por
-      sus usuarios (en adelante, e indistintamente, 'usted' o el 'usuario'). Si usted no está
-      de acuerdo con los términos y condiciones de uso, deberá abstenerse de utilizar la aplicación
-      EcoCarga. Al acceder a EcoCarga, el usuario tendrá derecho a revisar la información relativa a 
-      la ubicación geográfica de las electrolineras públicas, sus características técnicas, tiempo 
-      de carga estimado y compatibilidad del conector según marca y modelo del vehículo de que se trate.
-      Sin perjuicio de lo anterior, el Ministerio de Energía no se hace responsable por la veracidad o 
-      exactitud de la información contenida en los enlaces a otros sitios web o aplicaciones y que haya sido 
-      entregada por terceros. EcoCarga es un medio que facilita la entrega de información a la ciudadanía,
-      sin intervenir, ni formal, ni sustantivamente, en la ejecución de dichos actos ni en ninguna de sus fases.
-      Los usuarios de EcoCarga declaran conocer y aceptar la circunstancia relativa a que este servicio 
-      podrá modificar, en cualquier momento, todo o aparte de las presentes condiciones de uso, conforme 
-      con la legislación vigente o políticas del organismo.</p>
-
-    <p><strong>Requisitos de uso:</strong></p>
-
-    <p>EcoCarga está disponible para ser utilizada sólo en Chile. El acceso y utilización de EcoCarga 
-      requiere que el usuario disponga de acceso a internet ya sea por un plan, bolsa de datos, mediante 
-      conexión Wifi u otro medio disponible y requiere de dispositivos compatibles y determinados software,
-      que podrían requerir actualizaciones periódicas. Los servicios de EcoCarga podrían verse afectados
-      por el rendimiento de estos factores.</p>
-
-    <p><strong>Responsabilidad:</strong></p>
-
-    <p>El Ministerio de Energía no garantiza ni declara que el uso de los servicios de EcoCarga será sin
-      interrupciones o libre de errores, el usuario acepta que cada cierto tiempo el Ministerio de Energía
-      podrá retirar los servicios de la aplicación por periodos indefinidos de tiempo o cancelar tales 
-      servicios en cualquier momento, sin necesidad de aviso previo. Usted acepta expresamente que el uso o 
-      la imposibilidad de uso de los servicios de EcoCarga es bajo su exclusivo riesgo, por cuanto los servicios
-      de EcoCarga son proporcionados sin soporte ni mantenimiento, disponible para su uso, sin garantias de 
-      ningún tipo, ya sean explícitas o implícitas. En ningun caso el Ministerio de Energía o sus funcionarios
-      serán responsables por cualquier daño derivado del uso de la aplicación EcoCarga. El Ministerio de Energía
-      realizará esfuerzos razonables para proteger la información entregada por usted en relación con la aplicación
-      EcoCarga, sin embrago usted acepta que la entrega de dicha información es bajo su propio riesgo y el Ministerio
-      de Energía no será en ningún caso responsable ante usted por cualquier pérdida o responsabilidad relacionada
-      con dicha información. El Ministerio no declara ni garantiza que EcoCarga será libre de pérdidas, ataques,
-      virus, interferencias, intromisiones en la seguridad por hacking o de otro tipo.</p>
-    
-    <p><strong>Obligaciones del usuario:</strong></p>
-
-    <p>El usuario se obliga a utilizar EcoCarga de conformidad con la legislación vigente y estos 
-      Terminos y Condiciones de Uso, debiendo darle un uso consistente con las exigencias que imponen
-      el orden público, la moral, las buenas costumbres generalmente aceptadas y principalmente, el 
-      respeto de terceros. Para tales fines, el usuario se compromete a no utilizar EcoCarga de manera
-      perjudicial de los derechos e intereses de terceros, o de cualquier forma que pueda dañar, inutilizar
-      sobrecargar, deteriorar o impedir la normal utilización de EcoCarga.</p>
-
+  <div class="modal-content" *ngIf="latestTerms; else loading">
+    <h1>Términos y Condiciones</h1>
+    <div [innerHTML]="latestTerms.content"></div>
     <ion-item>
       <ion-label>Acepto los términos y condiciones de uso</ion-label>
       <ion-checkbox slot="start" [(ngModel)]="termsAccepted"></ion-checkbox>
     </ion-item>
     <ion-button (click)="accept()" class="custom-button" style="--background: #31B17D; --color: white;">Aceptar</ion-button>
   </div>
+  <ng-template #loading>
+    <p>Cargando términos y condiciones...</p>
+  </ng-template>
 
   <ion-alert
     [isOpen]="showAlert"

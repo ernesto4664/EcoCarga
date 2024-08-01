@@ -64,7 +64,7 @@ export class AppComponent {
       this.showBackButton = false;
     } else if (url.includes('second-search')) {
       this.showHeader = true;
-      this.pageTitle = 'ESTACIONES';
+      this.pageTitle = 'CARGADORES';
       this.showBackButton = true;
     } else if (url.includes('contact-us')) {
       this.showHeader = true;

@@ -1,34 +1,42 @@
 
 <ion-content [fullscreen]="false">
-  <div class="container img" style="text-align-last: center;">
-    <!-- Tu contenido aquí -->
-  </div>
+  <!--<div class="container img" style="text-align-last: center;">
+     Tu contenido aquí 
+  </div>-->
   <div class="content-wrapper">
     <div class="swiper-container-wrapper">
-      <div class="button-group-top"style="align-self: self-end;">
-        <ion-button class="mi-btn" (click)="skip()">Saltar</ion-button>
-      </div>
+    <!--<div class="button-group-top" style="align-self: self-end;">
+        <ion-button class="mi-btn" *ngIf="showSkipButton" (click)="skip()">Saltar</ion-button>
+      </div>-->
       <swiper-container [loop]="false" [slidesPerView]="1">
         <swiper-slide>
+          <img src="assets/img/firstpresentation.png" alt="firstpresentation">
           <h2>¡Hola!</h2>
           <p>Te damos la bienvenida a la mayor comunidad de movilidad eléctrica.</p>
         </swiper-slide>
         <swiper-slide>
-          <h2>Todos los cargadores a tu alcance con tan solo un clic</h2>
-          <p>Conoce la ubicación donde y cuando quieras.</p>
+          <img src="assets/img/secondpresentation.png" alt="secondpresentation">
+          <h2>Realizamos tu búsqueda con filtros personalizados para tu vehículo</h2>
+          <p>Selecciona los filtros avanzados según las características de tu vehículo.</p>
         </swiper-slide>
         <swiper-slide>
+          <img src="assets/img/uplast.png" alt="uplast">
           <h2>Todos los cargadores a tu alcance con tan solo un clic</h2>
-          <p>Conoce la ubicación donde y cuando quieras.</p>
+          <p>Conoce la ubicación de los cargadores más cercanos donde y cuando quieras.</p>
+        </swiper-slide>
+        <swiper-slide>
+          <img src="assets/img/location.png" alt="location">
+          <h2>Conéctate desde cualquier punto del país y en todo momento</h2>
+          <p>Aquí podrás ver resultados de los conectores que se encuentran en todo el país.</p>
         </swiper-slide>
       </swiper-container>
       <div class="swiper-pagination"></div>
-      <div class="button-group">
-        <ion-button class="mi-btn" *ngIf="showPrevButton" (click)="prev()">Atrás</ion-button>
-        <ion-button class="mi-btn" *ngIf="!showSkipButton" (click)="next()">{{ nextButtonText }}</ion-button>
-        <ion-button class="mi-btn" *ngIf="showSkipButton" (click)="skip()">Continuar</ion-button>
-      </div>
     </div>
+  </div>
+  <div class="button-group">
+    <ion-button class="mi-btn" *ngIf="showPrevButton" (click)="prev()">Atrás</ion-button>
+    <ion-button class="mi-btn" *ngIf="!showSkipButton" (click)="next()">{{ nextButtonText }}</ion-button>
+    <ion-button class="mi-btn" *ngIf="showSkipButton" (click)="skip()">Continuar</ion-button>
   </div>
 </ion-content>
 <app-layout></app-layout>

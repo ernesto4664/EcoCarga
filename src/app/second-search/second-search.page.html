@@ -67,13 +67,13 @@
     </ion-accordion-group>
 
     <div class="custom-button">
-      <ion-button class="custom-button" (click)="getFilteredStations()">Buscar Estaciones</ion-button>
+      <ion-button class="custom-button" (click)="getFilteredStations()">Buscar Cargadores</ion-button>
     </div>
     
     <div class="container">
       <div class="row">
         <div *ngIf="stations.length > 0">
-          <h2 style="padding: 10px;">Estaciones Filtradas</h2>
+          <h2 style="padding: 10px;">Conectores disponibles</h2>
           <ion-list>
             <ion-item class="result-station" *ngFor="let station of stations" (click)="selectStation(station)">
               <ion-label>

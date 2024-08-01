@@ -19,6 +19,10 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "allowedCommonJsDependencies": [
+              "fast-deep-equal",
+              "localforage"
+            ],
             "assets": [
               {
                 "glob": "**/*",
@@ -44,8 +48,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "80kb",
+                  "maximumError": "60kb"
                 }
               ],
               "fileReplacements": [

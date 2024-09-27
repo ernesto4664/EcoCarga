@@ -3,10 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcpB4-Tq5jXCLIsrvlWmKsnv1Et6ZQ7mU&libraries=places"></script>
-
   <title>Ionic App</title>
-
   <base href="/" />
 
   <meta name="color-scheme" content="light dark" />
@@ -23,6 +20,9 @@
 
 <body>
   <app-root></app-root>
+
+  <!-- Mueve el script de Google Maps aquí para evitar carga múltiple y mejorar el rendimiento -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcpB4-Tq5jXCLIsrvlWmKsnv1Et6ZQ7mU&libraries=places"></script>
 </body>
 
 </html>

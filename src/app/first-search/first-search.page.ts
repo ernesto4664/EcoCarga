@@ -35,6 +35,8 @@ export class FirstSearchPage implements OnInit, OnDestroy {
   }
 
   onCheckboxChange() {
+    console.log('Checkbox AC:', this.typeAC);  // Verificar valor de typeAC
+    console.log('Checkbox DC:', this.typeDC);  // Verificar valor de typeDC
     this.filterConnectors();
   }
 
@@ -42,12 +44,12 @@ export class FirstSearchPage implements OnInit, OnDestroy {
     this.loading = true; // Mostrar preloader
     this.apiService.fetchAllLocations().subscribe(
       (response: any) => {
-        console.log('Respuesta API:', response);
+        console.log('Respuesta completa de la API:', response);  // <--- Imprime la respuesta completa
         if (Array.isArray(response)) {
           this.allConnectors = response.reduce((acc: any[], station: any) => 
             acc.concat(station.evses.reduce((innerAcc: any[], evse: { connectors: any; }) => 
               innerAcc.concat(evse.connectors), [])), []);
-          console.log('Todos los conectores:', this.allConnectors);
+          console.log('Todos los conectores:', this.allConnectors);  // <--- Imprime todos los conectores antes del filtrado
           this.filterConnectors();
         } else {
           console.error('Formato de respuesta API inesperado:', response);
@@ -63,39 +65,66 @@ export class FirstSearchPage implements OnInit, OnDestroy {
 
   filterConnectors() {
     console.log('Filtrado de conectores');
+  
+    // Validación inicial: si no hay tipo seleccionado, limpiar conectores.
     if (!this.typeAC && !this.typeDC) {
       this.connectors = [];
       this.uniqueConnectors = [];
       console.log('Ningún tipo de conector seleccionado :', this.connectors);
       return;
     }
-
-    let filteredConnectors: any[] = [];
-    if (this.typeAC) {
-      filteredConnectors = filteredConnectors.concat(this.allConnectors.filter(connector => connector.power_type.startsWith('AC')));
+  
+    // Asegúrate de que `allConnectors` no sea nulo o indefinido
+    if (!this.allConnectors || !Array.isArray(this.allConnectors)) {
+      console.warn('allConnectors es nulo o no es un array.');
+      this.connectors = [];
+      this.uniqueConnectors = [];
+      return;
     }
-    if (this.typeDC) {
-      filteredConnectors = filteredConnectors.concat(this.allConnectors.filter(connector => connector.power_type.startsWith('DC')));
-    }
-
-    this.connectors = filteredConnectors;
-    console.log('Todos los conectores filtrados:', this.connectors);
-
-    this.uniqueConnectors = this.getUniqueConnectors(filteredConnectors);
-    console.log('Conectores únicos para pantalla.:', this.uniqueConnectors);
-  }
-
-  getUniqueConnectors(connectors: any[]): any[] {
-    const uniqueConnectors = new Map<string, any>();
-
-    connectors.forEach(connector => {
-      const key = connector.standard;
-      if (!uniqueConnectors.has(key)) {
-        uniqueConnectors.set(key, connector);
+  
+    // Filtrar conectores basado en los tipos seleccionados
+    this.connectors = this.allConnectors.filter(connector => {
+      // Excluir conectores con propiedades nulas o indefinidas, o con estado "FUERA DE LINEA"
+      if (!connector.standard || !connector.format || !connector.power_type || connector.status === 'FUERA DE LINEA') {
+        console.warn('Conector excluido por tener propiedades nulas/indefinidas o estar fuera de línea:', connector);
+        return false;
       }
+  
+      // Filtrar solo conectores de tipo AC si solo el checkbox de AC está seleccionado
+      if (this.typeAC && !this.typeDC && connector.power_type?.startsWith('AC')) {
+        console.log('Conector AC encontrado:', connector);  // Log para cada conector AC
+        return true;
+      }
+  
+      // Filtrar solo conectores de tipo DC si solo el checkbox de DC está seleccionado
+      if (this.typeDC && !this.typeAC && connector.power_type?.startsWith('DC')) {
+        console.log('Conector DC encontrado:', connector);  // Log para cada conector DC
+        return true;
+      }
+  
+      // Si ambos están seleccionados, muestra ambos tipos
+      if (this.typeAC && this.typeDC) {
+        return connector.power_type?.startsWith('AC') || connector.power_type?.startsWith('DC');
+      }
+  
+      return false;
     });
-
-    return Array.from(uniqueConnectors.values());
+  
+    console.log('Todos los conectores filtrados:', this.connectors);
+  
+    this.uniqueConnectors = this.getUniqueConnectors(this.connectors);
+    console.log('Conectores únicos para pantalla:', this.uniqueConnectors);
+  }
+  
+  
+  // Método para obtener conectores únicos
+  getUniqueConnectors(connectors: any[]): any[] {
+    const unique = new Set();
+    return connectors.filter(connector => {
+      const isDuplicate = unique.has(connector.standard);
+      unique.add(connector.standard);
+      return !isDuplicate;
+    });
   }
 
   async selectConnector(index: number) {
@@ -194,41 +223,42 @@ export class FirstSearchPage implements OnInit, OnDestroy {
   }
 
   getIconPath(connector: any): string {
+    if (!connector.standard || !connector.format || !connector.power_type) {
+      console.warn('Conector con datos incompletos encontrado:', connector);
+      return this.iconPath + 'default.jpeg';  // Icono por defecto
+    }
+  
     const iconMap: { [key: string]: string } = {
-      'IEC_62196_T2 (SOCKET - AC_1_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2 (SOCKET - AC_2_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2 (SOCKET - AC_3_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2 (CABLE - AC_1_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2 (CABLE - AC_2_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2 (CABLE - AC_3_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2_COMBO (CABLE - AC_1_PHASE)': 'combinadotipo2.png',
-      'IEC_62196_T2_COMBO (CABLE - AC_2_PHASE_SPLIT)': 'combinadotipo2.png',
-      'IEC_62196_T2_COMBO (CABLE - AC_3_PHASE)': 'combinadotipo2.png',
-      'IEC_62196_T2_COMBO (SOCKET - AC_1_PHASE)': 'combinadotipo2.png',
-      'IEC_62196_T2_COMBO (SOCKET - AC_2_PHASE_SPLIT)': 'combinadotipo2.png',
-      'IEC_62196_T2_COMBO (SOCKET - AC_3_PHASE)': 'combinadotipo2.png',
-      'GBT_AC (CABLE - AC_1_PHASE)': 'GBT_AC.png',
-      'IEC_62196_T1 (CABLE - AC_1_PHASE)': 'Tipo1AC.png',
-      'CHADEMO (CABLE - DC)': 'CHADEMO.png',
-      'IEC_62196_T1_COMBO (CABLE - DC)': 'Tipo1DC.png',
-      'GBT_DC (CABLE - DC)': 'GBT_DC.png',
+      'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
+      'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
+      'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
+      'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
+      'GB/T AC (CABLE - AC)': 'GBT_AC.png',
+      'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
+      'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
+      'GB/T DC (CABLE - DC)': 'GBT_DC.png',
     };
-
+  
     const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
-    return this.iconPath + (iconMap[key] || 'default.png');
+    return this.iconPath + (iconMap[key] || 'default.jpeg');
   }
 
   getConnectorDisplayName(connector: any): string {
+    if (!connector.standard) {
+      console.warn('Conector con standard faltante encontrado y excluido:', connector);
+      return '';  // No mostrar nada
+    }
+  
     const displayNameMap: { [key: string]: string } = {
-      'IEC_62196_T2': 'Conector tipo 2',
-      'IEC_62196_T1': 'Conector tipo 1',
-      'IEC_62196_T1_COMBO': 'Combinado tipo 1',
-      'IEC_62196_T2_COMBO': 'Combinado tipo 2',
-      'CHADEMO': 'CHAdeMO',
-      'GBT_AC': 'Conector GBT AC',
-      'GBT_DC': 'Conector GBT DC',
+      'Tipo 2': 'Conector tipo 2',
+      'Tipo 1': 'Conector tipo 1',
+      'CCS 2': 'CCS 2 (Combinado tipo 2)',
+      'CCS 1': 'CCS 1 (Combinado tipo 1)',
+      'CHAdeMO': 'CHAdeMO',
+      'GB/T AC': 'Conector GBT AC',
+      'GB/T DC': 'Conector GBT DC',
     };
-
+  
     return displayNameMap[connector.standard] || connector.standard;
   }
 }

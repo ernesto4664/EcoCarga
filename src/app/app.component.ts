@@ -16,7 +16,7 @@ export class AppComponent {
   showMenu: boolean = false;
   showHeader: boolean = true;
   showHamburgerMenu: boolean = true;
-  showBackButton: boolean = false; // Propiedad para controlar la visibilidad del botón de retroceso
+  showBackButton: boolean = false;
   pageTitle: string = 'EcoCarga';
 
   constructor(private platform: Platform, private router: Router, private location: Location, private apiService: ApiService) {
@@ -44,46 +44,28 @@ export class AppComponent {
   }
 
   updateHeaderVisibilityAndTitle(url: string) {
-    if (url.includes('welcome')) {
-      this.showHeader = false;
-      this.pageTitle = 'BIENVENIDOS';
-      this.showBackButton = false;
-    } else if (url.includes('informacionpreliminar')) {
-      this.showHeader = true;
-      this.showHamburgerMenu = false;
-      this.showBackButton = false;
-      this.pageTitle = 'INFORMACIÓN IMPORTANTE';
-    } else if (url.includes('viewone')) {
-      this.showHeader = true;
-      this.pageTitle = 'TERMINOS Y CONDICIONES';
-      this.showBackButton = false;
-    } else if (url.includes('first-search')) {
-      this.showHeader = true;
-      this.showHamburgerMenu = true;
-      this.pageTitle = 'CONECTORES';
-      this.showBackButton = false;
-    } else if (url.includes('second-search')) {
-      this.showHeader = true;
-      this.pageTitle = 'CARGADORES';
-      this.showBackButton = true;
-    } else if (url.includes('contact-us')) {
-      this.showHeader = true;
-      this.pageTitle = 'CONTACTO';
-      this.showBackButton = true;
-    } else if (url.includes('station-details')) {
-      this.showHeader = true;
-      this.pageTitle = 'DETALLES DE LA ESTACIÓN';
-      this.showBackButton = true;
-    } else if (url.includes('terminos-condiciones')) {
-      this.showHeader = true;
-      this.pageTitle = 'TERMINOS Y CONDICIONES';
-      this.showBackButton = true;
-    } else if (url.includes('electrolineras')) {
-      this.showHeader = true;
-      this.pageTitle = 'ELECTROLINERAS ACTIVAS';
-      this.showBackButton = true;
+    const viewConfig: { [key: string]: { showHeader: boolean; showHamburgerMenu: boolean; pageTitle: string; showBackButton: boolean } } = {
+      'welcome': { showHeader: false, showHamburgerMenu: false, pageTitle: 'BIENVENIDOS', showBackButton: false },
+      'informacionpreliminar': { showHeader: true, showHamburgerMenu: false, pageTitle: 'INFORMACIÓN IMPORTANTE', showBackButton: false },
+      'viewone': { showHeader: true, showHamburgerMenu: false, pageTitle: 'TERMINOS Y CONDICIONES', showBackButton: false },
+      'first-search': { showHeader: true, showHamburgerMenu: true, pageTitle: 'CONECTORES', showBackButton: false },
+      'second-search': { showHeader: true, showHamburgerMenu: false, pageTitle: 'CARGADORES', showBackButton: true },
+      'contact-us': { showHeader: true, showHamburgerMenu: false, pageTitle: 'CONTACTO', showBackButton: true },
+      'station-details': { showHeader: true, showHamburgerMenu: false, pageTitle: 'DETALLES DE LA ESTACIÓN', showBackButton: true },
+      'terminos-condiciones': { showHeader: true, showHamburgerMenu: false, pageTitle: 'TERMINOS Y CONDICIONES', showBackButton: true },
+      'electrolineras': { showHeader: true, showHamburgerMenu: false, pageTitle: 'ELECTROLINERAS ACTIVAS', showBackButton: true },
+    };
+  
+    const config = Object.entries(viewConfig).find(([key]) => url.includes(key))?.[1];
+    if (config) {
+      this.showHeader = config.showHeader;
+      this.showHamburgerMenu = config.showHamburgerMenu;
+      this.pageTitle = config.pageTitle;
+      this.showBackButton = config.showBackButton;
     } else {
+      // Configuración predeterminada
       this.showHeader = true;
+      this.showHamburgerMenu = true; // Asegúrate de que se establezca un valor predeterminado aquí también.
       this.pageTitle = 'EcoCarga';
       this.showBackButton = false;
     }

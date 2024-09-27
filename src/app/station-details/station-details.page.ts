@@ -57,12 +57,13 @@ export class StationDetailsPage implements OnInit {
 
   getStatusLabel(status: string): string {
     switch (status) {
-      case 'AVAILABLE':
+      case 'DISPONIBLE':
         return 'Disponibles';
-      case 'CHARGING':
+      case 'CARGANDO':
         return 'Cargando';
-      case 'INOPERATIVE':
-      case 'REMOVED':
+      case 'INOPERATIVO':
+      case 'BLOQUEADO':
+      case 'REMOVIDO':
         return 'No disponibles';
       default:
         return 'Desconocido';
@@ -71,12 +72,13 @@ export class StationDetailsPage implements OnInit {
 
   getStatusColor(status: string): string {
     switch (status) {
-      case 'AVAILABLE':
+      case 'DISPONIBLE':
         return 'green';
-      case 'CHARGING':
+      case 'CARGANDO':
         return 'orange';
-      case 'INOPERATIVE':
-      case 'REMOVED':
+      case 'INOPERATIVO':
+      case 'BLOQUEADO':
+      case 'REMOVIDO':
         return 'red';
       default:
         return 'gray';
@@ -158,28 +160,29 @@ export class StationDetailsPage implements OnInit {
 
   getIconPath(connector: any): string {
     const iconMap: { [key: string]: string } = {
-      'GBT_AC (CABLE - AC_1_PHASE)': 'GBT_AC.png',
-      'IEC_62196_T1 (CABLE - AC_1_PHASE)': 'Tipo1AC.png',
-      'IEC_62196_T2 (SOCKET - AC_1_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2 (SOCKET - AC_2_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2 (SOCKET - AC_3_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2 (CABLE - AC_1_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2 (CABLE - AC_2_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2 (CABLE - AC_3_PHASE)': 'Tipo2AC.png',
-      'IEC_62196_T2_COMBO (CABLE - AC_1_PHASE)': 'combinadotipo2.png',
-      'IEC_62196_T2_COMBO (CABLE - AC_2_PHASE_SPLIT)': 'combinadotipo2.png',
-      'IEC_62196_T2_COMBO (CABLE - AC_3_PHASE)': 'combinadotipo2.png',
-      'IEC_62196_T2_COMBO (SOCKET - AC_1_PHASE)': 'combinadotipo2.png',
-      'IEC_62196_T2_COMBO (SOCKET - AC_2_PHASE_SPLIT)': 'combinadotipo2.png',
-      'IEC_62196_T2_COMBO (SOCKET - AC_3_PHASE)': 'combinadotipo2.png',
-      'CHADEMO (CABLE - DC)': 'CHADEMO.png',
-      'IEC_62196_T1_COMBO (CABLE - DC)': 'Tipo1DC.png',
-      'GBT_DC (CABLE - DC)': 'GBT_DC.png',
+      'GB/T AC (CABLE - AC)': 'GBT_AC.png',
+      'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
+      'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
+      'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
+      //'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
+      //'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
+      'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
+      //'Tipo 2 (CABLE - AC_2_PHASE)': 'Tipo2AC.png',
+      //'Tipo 2 (CABLE - AC_3_PHASE)': 'Tipo2AC.png',
+      'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
+      //'CCS 2 (CABLE - DC_2_PHASE_SPLIT)': 'combinadotipo2.png',
+      //'CCS 2 (CABLE - DC_3_PHASE)': 'combinadotipo2.png',
+      'CCS 2 (SOCKET - DC)': 'combinadotipo2.png',
+      //'CCS 2 (SOCKET - DC_2_PHASE_SPLIT)': 'combinadotipo2.png',
+      //'CCS 2 (SOCKET - DC_3_PHASE)': 'combinadotipo2.png',
+      'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
+      'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
+      'GB/T DC (CABLE - DC)': 'GBT_DC.png',
       // Agrega más mapeos según sea necesario
     };
 
     const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
-    return this.iconPath + (iconMap[key] || 'default.png'); // 'default.png' si no se encuentra el conector
+    return this.iconPath + (iconMap[key] || 'default.jpeg'); // 'default.png' si no se encuentra el conector
   }
 
   getCurrentType(powerType: string): string {

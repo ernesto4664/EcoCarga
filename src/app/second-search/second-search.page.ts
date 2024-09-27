@@ -148,7 +148,7 @@ export class SecondSearchPage implements OnInit {
 
   filterUnavailableEVSEs(stations: any[]) {
     stations.forEach(station => {
-      station.evses = station.evses.filter((evse: any) => evse.status === 'AVAILABLE');
+      station.evses = station.evses.filter((evse: any) => evse.status === 'DISPONIBLE');
     });
   }
 
@@ -215,11 +215,14 @@ export class SecondSearchPage implements OnInit {
 
   getStatusLabel(status: string): string {
     switch (status) {
-      case 'AVAILABLE':
+      case 'DISPONBILE':
         return 'Disponible';
-      case 'CHARGING':
+      case 'CARGANDO':
         return 'Cargando';
-      case 'INOPERATIVE':
+        case 'OCUPADO':
+          return 'Ocupado';
+      case 'INOPERATIVO':
+      case 'BLOQUEADO':
       case 'REMOVED':
         return 'No disponible';
       default:
@@ -229,12 +232,14 @@ export class SecondSearchPage implements OnInit {
 
   getStatusColor(status: string): string {
     switch (status) {
-      case 'AVAILABLE':
+      case 'DISPONBILE':
         return 'green';
-      case 'CHARGING':
+      case 'CARGANDO':
         return 'orange';
-      case 'INOPERATIVE':
+      case 'INOPERATIVO':
+      case 'BLOQUEADO':
       case 'REMOVED':
+      case 'OCUPADO':
         return 'red';
       default:
         return 'gray';
@@ -247,8 +252,8 @@ export class SecondSearchPage implements OnInit {
       this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
     );
   
-    const availableConnectors = filteredConnectors.filter((connector: any) => connector.status === 'AVAILABLE');
-    const chargingConnectors = filteredConnectors.filter((connector: any) => connector.status === 'CHARGING');
+    const availableConnectors = filteredConnectors.filter((connector: any) => connector.status === 'DISPONIBLE');
+    const chargingConnectors = filteredConnectors.filter((connector: any) => connector.status === 'CARGANDO');
   
     const acCount = availableConnectors.filter((connector: any) => connector.power_type.startsWith('AC')).length;
     const dcCount = availableConnectors.filter((connector: any) => connector.power_type.startsWith('DC')).length;

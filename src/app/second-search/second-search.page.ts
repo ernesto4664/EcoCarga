@@ -10,16 +10,16 @@ import { ApiService } from '../api.service';
   styleUrls: ['./second-search.page.scss'],
 })
 export class SecondSearchPage implements OnInit {
-  batteryCapacity: string = '';
-  suggestedCapacities: string[] = [];
-  selectedBattery: any = null;
+  batteryCapacity: string = '';  // Para manejar la capacidad de la batería ingresada
+  suggestedCapacities: string[] = [];  // Lista de capacidades sugeridas
+  selectedBattery: any = null;  // Para almacenar el detalle de la batería seleccionada
   pseOptions: string[] = [];
   selectedPSE: string = '';
   selectedDistance: number = 0;
   userLocation: { latitude: number; longitude: number } | null = null;
   selectedConnectors: any[] = [];
   stations: any[] = [];  // Para almacenar las estaciones filtradas
-  private apiUrl = 'https://backend.electromovilidadenlinea.cl'; 
+  private apiUrl = 'https://backend.electromovilidadenlinea.cl';  // URL del backend de las estaciones
 
   constructor(
     private http: HttpClient,
@@ -37,9 +37,9 @@ export class SecondSearchPage implements OnInit {
 
   ngOnInit() {
     this.getUserLocation();
-    //this.loadPSEOptions();  // cargamos las opciones del PSE en init
   }
 
+  // Obtener ubicación del usuario
   async getUserLocation() {
     try {
       const coordinates = await Geolocation.getCurrentPosition({
@@ -56,15 +56,20 @@ export class SecondSearchPage implements OnInit {
     }
   }
 
+  // Método de búsqueda de capacidades de batería basado en input
   searchBatteryCapacities(event: any) {
     const query = event.target.value;
-    if (query && query.length > 1) {
-      this.http.get<any[]>(`${this.apiUrl}/battery-capacities?query=${query}`).subscribe(
+    if (query && query.length > 0) {
+      // Llamada a la API correcta para obtener las capacidades de baterías
+      this.http.get<any[]>(`http://18.116.216.219/api/BateriasApi`).subscribe(
         (capacities) => {
-          this.suggestedCapacities = capacities.map(capacity => capacity.name);
+          // Filtramos las capacidades que coincidan con el input del usuario
+          this.suggestedCapacities = capacities
+            .filter(capacity => capacity.capacidad.toString().startsWith(query))
+            .map(capacity => capacity.capacidad);
         },
         (error) => {
-          console.error('Error al obtener capacidades:', error);
+          console.error('Error al obtener capacidades desde BateriasApi:', error);
           this.suggestedCapacities = [];
         }
       );
@@ -73,12 +78,14 @@ export class SecondSearchPage implements OnInit {
     }
   }
 
+  // Seleccionar una capacidad de la lista sugerida
   selectCapacity(capacity: string) {
     this.batteryCapacity = capacity;
     this.suggestedCapacities = [];
     this.fetchBatteryDetails(capacity);
   }
 
+  // Obtener detalles de la batería seleccionada
   fetchBatteryDetails(capacity: string) {
     this.http.get<any>(`${this.apiUrl}/battery-details?capacity=${capacity}`).subscribe(
       (battery) => {
@@ -90,21 +97,25 @@ export class SecondSearchPage implements OnInit {
     );
   }
 
+  // Filtrar estaciones por distancia
   filterByDistance() {
     console.log('Filtrar por distancia:', this.selectedDistance);
     this.applyAllFilters();
   }
 
+  // Reiniciar filtros
   resetFilters() {
     this.selectedPSE = '';
     this.selectedDistance = 0;
     this.applyAllFilters();
   }
 
+  // Aplicar todos los filtros (incluye el filtrado de distancia y PSE)
   applyAllFilters() {
     this.getFilteredStations();
   }
 
+  // Obtener estaciones filtradas
   getFilteredStations() {
     if (!this.userLocation) {
       console.error('Ubicación del usuario no disponible');
@@ -136,11 +147,10 @@ export class SecondSearchPage implements OnInit {
 
   updateConnectorsStatus() {
     const currentDate = new Date();
-
     this.stations.forEach(station => {
       station.evses.forEach((evse: { connectors: any[]; }) => {
         evse.connectors.forEach((connector: any) => {
-          // Código para actualizar el estado del conector
+          // Lógica para actualizar el estado del conector
         });
       });
     });
@@ -207,7 +217,8 @@ export class SecondSearchPage implements OnInit {
     const navigationExtras = {
       state: {
         station,
-        selectedConnectors: this.selectedConnectors
+        selectedConnectors: this.selectedConnectors,
+        batteryCapacity: this.batteryCapacity  // Pasamos la capacidad de la batería seleccionada
       }
     };
     this.router.navigate(['/station-details'], navigationExtras);
@@ -219,8 +230,8 @@ export class SecondSearchPage implements OnInit {
         return 'Disponible';
       case 'CARGANDO':
         return 'Cargando';
-        case 'OCUPADO':
-          return 'Ocupado';
+      case 'OCUPADO':
+        return 'Ocupado';
       case 'INOPERATIVO':
       case 'BLOQUEADO':
       case 'REMOVED':
@@ -288,7 +299,7 @@ export class SecondSearchPage implements OnInit {
     return this.selectedConnectors.some(c => c.power_type.startsWith('AC')) && this.selectedConnectors.some(c => c.power_type.startsWith('DC'));
   }
 
-  // NUEVOS METODOS PARA MANEJAR LOS HORARIOS DE APERTURAS Y CIERRES DE LAS ESTACIONES
+  // Métodos para horarios de aperturas y cierres
   getOpeningHours(station: any): string {
     if (station.opening_times.twentyfourseven) {
       return 'Abierto 24/7';
@@ -327,7 +338,6 @@ export class SecondSearchPage implements OnInit {
         stationMap.set(station.location_id, station);
       }
     });
-    console.log('Estaciones después de eliminar duplicados:', Array.from(stationMap.values()));
     return Array.from(stationMap.values());
   }
 }

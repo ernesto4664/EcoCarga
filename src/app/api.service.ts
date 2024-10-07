@@ -4,31 +4,38 @@ import { Observable, of, forkJoin, interval, Subscription } from 'rxjs';
 import { tap, mergeMap, switchMap } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
+  // Variables de configuración
   private apiUrl = 'https://backend.electromovilidadenlinea.cl/locations';
-  private token = 'eyJraWQiOiJvSWM1K3NpU25yWnZ3Y3YxS294UVwvR29HWEM3VVc2VVVPOHV2dXVjT095OD0iLCJhbGciOiJSUzI1NiJ9.eyJjdXN0b206cmVnaW9uIjoiVGFyYXBhY8OhIiwic3ViIjoiNDRjOGI0MzgtNjAxMS03MGQ3LWVkZDgtNWYwY2Y5MzMwZGFhIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImN1c3RvbTphZGRyZXNzIjoiQ2hpbGUiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9wbHdaNTBkeHUiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOmZhbHNlLCJjb2duaXRvOnVzZXJuYW1lIjoiMTExMTEyMjIzIiwiY3VzdG9tOmNvbW11bmUiOiJDYW1pw7FhIiwib3JpZ2luX2p0aSI6IjgzZGRlODgxLTI2YzgtNDRjMS1hNzJmLTVjODdkNWIzMGYwZiIsImF1ZCI6IjQzc2Z0c2RyaXRscDNybXEzZzA1cThxM3JpIiwiZXZlbnRfaWQiOiI4OWJhOWQ5Zi1hYjk0LTQ3NGMtYWM0NS0xYmU3NDU1YjQyZWYiLCJ0b2tlbl91c2UiOiJpZCIsImN1c3RvbTpzZWNfdmFsaWRhdGlvbiI6ImZhbHNlIiwiYXV0aF90aW1lIjoxNzE3MDg2NDc1LCJuYW1lIjoiU3VwZXJ2aXNvcjEiLCJwaG9uZV9udW1iZXIiOiIrNTY5NzI5NDc4MjMiLCJjdXN0b206ZGJfdXNlcmlkIjoiMTExIiwiZXhwIjoxNzE3MDkwMDc1LCJpYXQiOjE3MTcwODY0NzUsImp0aSI6Ijk1ZWU2NmY1LWQxMmYtNDRmZS1hMzViLTI2MjFhMTMyY2YxZiIsImVtYWlsIjoiY3ZpZGFsQHNlYy5jbCJ9.mOUtZ9y4YZKfklhvojbJNv-x7c09HpoKtQTNsl1o9j9fo-CzDtkC6FHB70ZV0COv2kRxRteXRn6pQPRH9_-bTCvgoT5WwXwSJiyibz-HhvSFfxOsCZoVCI24ck9FPMVnxHpYf8kGTQjpvs_yTu1zUJg4x93xJH44AlrSuUoFhL0tO0axvo6Ru1xUIXxfdapNKjGVT9HvWzANG3-ZWMjxKh_cXfALylZpe4-U-g3BJ9ediAejbRo7I0IniCwh0jqxModWLL3waMIds55C0vrvKKO-8P5deOI_5B0kux6wzd3ENKH9vLf7dx0nX5Ex264FjfNmQfUTuFki8_0_XF5XSA'; // Asegúrate de reemplazar esto con tu token real
+  private token = 'eyJraWQiOiJvSWM1K3NpU25yWnZ3...'; // Token (truncado por seguridad)
+  private firstLoad = true;
+  
   private cache: any[] = [];
-  private cacheLifetime = 12 * 3600 * 1000; // 12 horas en milisegundos
-  private lastFetchTime: number = 0;
-  private updateInterval = 45 * 60 * 1000; // 45 minutos en milisegundos
+  private cacheLifetime = 2 * 3600 * 1000; // 2 horas
+  private lastFetchTime = 0;
+  private updateInterval = 5 * 60 * 1000; // 5 minutos
+  private cacheFirstSearchLifetime = 7 * 24 * 3600 * 1000; // 7 días
   private updateSubscription: Subscription | null = null;
 
   constructor(private http: HttpClient) {
     this.startConnectorStatusUpdates();
   }
 
+  // -------------------------------------------------------------------------
+  //  Métodos Privados
+  // -------------------------------------------------------------------------
+  
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
-      'Authorization': `Bearer ${this.token}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${this.token}`,
+      'Content-Type': 'application/json',
     });
   }
 
   private isCacheValid(): boolean {
-    const cacheValid = (Date.now() - this.lastFetchTime) < this.cacheLifetime;
-    console.log('Cache valid:', cacheValid, 'Cache age:', Date.now() - this.lastFetchTime, 'Cache lifetime:', this.cacheLifetime);
+    const cacheValid = Date.now() - this.lastFetchTime < this.cacheLifetime;
     return cacheValid;
   }
 
@@ -37,41 +44,129 @@ export class ApiService {
     return this.http.get<any>(url, { headers: this.getHeaders() });
   }
 
-  fetchAllLocations(): Observable<any> {
-    const cachedData = localStorage.getItem('cache');
-    const cachedTime = localStorage.getItem('lastFetchTime');
+  private startConnectorStatusUpdates() {
+    if (this.updateSubscription) {
+      this.updateSubscription.unsubscribe();
+    }
+
+    this.updateSubscription = interval(this.updateInterval)
+      .pipe(
+        switchMap(() => {
+          const connectorIds = this.cache.reduce(
+            (acc, station) =>
+              acc.concat(
+                station.evses.reduce(
+                  (innerAcc: any[], evse: { connectors: any[] }) =>
+                    innerAcc.concat(evse.connectors.map((connector) => connector.connector_id)),
+                  []
+                )
+              ),
+            []
+          );
+          return forkJoin(connectorIds.map((id: number) => this.getConnectorStatus(id)));
+        }),
+        tap((updatedConnectors: any) => {
+          updatedConnectors.forEach((connector: any) =>
+            this.updateCacheWithConnectorStatus(connector)
+          );
+        })
+      )
+      .subscribe();
+  }
+
+  // -------------------------------------------------------------------------
+  //  Métodos de Caché
+  // -------------------------------------------------------------------------
   
-    if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime, 10)) < this.cacheLifetime) {
-      console.log('Recuperando datos de la caché localStorage');
-      this.cache = JSON.parse(cachedData);
-      this.lastFetchTime = parseInt(cachedTime, 10);
+  // Métodos para la cache de la búsqueda principal (first-search)
+  
+  storeFirstSearchCache(data: any) {
+    try {
+      localStorage.setItem('cacheFirst-Search', JSON.stringify(data));
+      localStorage.setItem('firstSearchCacheTime', Date.now().toString());
+      console.log('Filtros almacenados en cacheFirst-Search:', data);
+    } catch (error) {
+      console.error('Error al almacenar en cacheFirst-Search:', error);
+    }
+  }
+
+  getFirstSearchCache(): any {
+    try {
+      const cachedFilters = localStorage.getItem('cacheFirst-Search');
+      return cachedFilters ? JSON.parse(cachedFilters) : null;
+    } catch (error) {
+      console.error('Error al recuperar cacheFirst-Search:', error);
+      return null;
+    }
+  }
+
+  checkFirstSearchCacheValidity(): boolean {
+    const cachedTime = localStorage.getItem('firstSearchCacheTime');
+    if (cachedTime) {
+      const cacheValid = Date.now() - parseInt(cachedTime, 10) < this.cacheFirstSearchLifetime;
+      return cacheValid;
+    }
+    return false;
+  }
+
+  clearFirstSearchCache() {
+    localStorage.removeItem('cacheFirst-Search');
+    localStorage.removeItem('firstSearchCacheTime');
+    console.log('cacheFirst-Search cleared');
+  }
+
+  // Métodos para la cache de las ubicaciones y conectores
+
+  clearCache() {
+    localStorage.clear();
+    this.cache = [];
+    this.lastFetchTime = 0;
+    console.log('Cache cleared');
+  }
+
+  updateCacheWithConnectorStatus(updatedConnector: any) {
+    this.cache.forEach((station) => {
+      station.evses.forEach((evse: { connectors: { connector_id: any; status: any; last_updated: any }[] }) => {
+        evse.connectors.forEach((connector: { connector_id: any; status: any; last_updated: any }) => {
+          if (connector.connector_id === updatedConnector.connector_id) {
+            connector.status = updatedConnector.status;
+            connector.last_updated = updatedConnector.last_updated;
+          }
+        });
+      });
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  //  Métodos Públicos
+  // -------------------------------------------------------------------------
+
+  fetchAllLocations(): Observable<any> {
+    if (this.isCacheValid()) {
       return of(this.cache);
     }
-  
-    console.log('Realizando solicitud a la API');
+
     return this.fetchLocations(1).pipe(
-      tap(response => {
+      tap((response) => {
         this.cache = response.items || [];
         this.lastFetchTime = Date.now();
         localStorage.setItem('cache', JSON.stringify(this.cache));
         localStorage.setItem('lastFetchTime', this.lastFetchTime.toString());
-        console.log('Datos iniciales almacenados en caché:', this.cache);
       }),
-      mergeMap(response => {
+      mergeMap((response) => {
         const totalPages = response.total_pages;
         const requests: Observable<any>[] = [];
-  
+
         for (let page = 2; page <= totalPages; page++) {
           requests.push(this.fetchLocations(page));
         }
-  
+
         return forkJoin(requests).pipe(
-          tap(responses => {
-            responses.forEach(res => {
+          tap((responses) => {
+            responses.forEach((res) => {
               this.cache = this.cache.concat(res.items || []);
             });
             localStorage.setItem('cache', JSON.stringify(this.cache));
-            console.log('Datos adicionales almacenados en caché:', this.cache);
           }),
           mergeMap(() => of(this.cache))
         );
@@ -83,9 +178,12 @@ export class ApiService {
     return this.fetchAllLocations().pipe(
       mergeMap((locations: any[]) => {
         const connectors = locations.reduce((acc, location) => {
-          const locationConnectors = location.evses.reduce((innerAcc: any[], evse: { connectors: any; }) => {
-            return innerAcc.concat(evse.connectors);
-          }, []);
+          const locationConnectors = location.evses.reduce(
+            (innerAcc: any[], evse: { connectors: any }) => {
+              return innerAcc.concat(evse.connectors);
+            },
+            []
+          );
           return acc.concat(locationConnectors);
         }, []);
         return of(connectors);
@@ -96,9 +194,9 @@ export class ApiService {
   getStationsByConnectors(connectorIds: number[]): Observable<any> {
     return this.fetchAllLocations().pipe(
       mergeMap((locations: any[]) => {
-        const filteredLocations = locations.filter(location =>
-          location.evses.some((evse: { connectors: { connector_id: number; }[]; }) =>
-            evse.connectors.some((connector: { connector_id: number; }) =>
+        const filteredLocations = locations.filter((location) =>
+          location.evses.some((evse: { connectors: { connector_id: number }[] }) =>
+            evse.connectors.some((connector: { connector_id: number }) =>
               connectorIds.includes(connector.connector_id)
             )
           )
@@ -112,37 +210,6 @@ export class ApiService {
     return this.http.get<any>(`${this.apiUrl}/connector-status?connectorId=${connectorId}`);
   }
 
-  updateCacheWithConnectorStatus(updatedConnector: any) {
-    this.cache.forEach(station => {
-      station.evses.forEach((evse: { connectors: { connector_id: any; status: any; last_updated: any; }[]; }) => {
-        evse.connectors.forEach((connector: { connector_id: any; status: any; last_updated: any; }) => {
-          if (connector.connector_id === updatedConnector.connector_id) {
-            connector.status = updatedConnector.status;
-            connector.last_updated = updatedConnector.last_updated;
-          }
-        });
-      });
-    });
-  }
-
-  private startConnectorStatusUpdates() {
-    if (this.updateSubscription) {
-      this.updateSubscription.unsubscribe();
-    }
-
-    this.updateSubscription = interval(this.updateInterval).pipe(
-      switchMap(() => {
-        const connectorIds = this.cache.reduce((acc, station) => 
-          acc.concat(station.evses.reduce((innerAcc: any[], evse: { connectors: any[]; }) => 
-            innerAcc.concat(evse.connectors.map(connector => connector.connector_id)), [])), []);
-        return forkJoin(connectorIds.map((id: number) => this.getConnectorStatus(id)));
-      }),
-      tap((updatedConnectors: any) => {
-        updatedConnectors.forEach((connector: any) => this.updateCacheWithConnectorStatus(connector));
-      })
-    ).subscribe();
-  }
-
   stopConnectorStatusUpdates() {
     if (this.updateSubscription) {
       this.updateSubscription.unsubscribe();
@@ -150,10 +217,13 @@ export class ApiService {
     }
   }
 
-  clearCache() {
-    localStorage.clear();
-    this.cache = [];
-    this.lastFetchTime = 0;
-    console.log('Cache cleared');
+  // Métodos para verificar si es la primera carga
+
+  isFirstLoad() {
+    return this.firstLoad;
+  }
+
+  setFirstLoad(value: boolean) {
+    this.firstLoad = value;
   }
 }

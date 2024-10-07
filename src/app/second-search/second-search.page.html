@@ -1,3 +1,4 @@
+<!-- Comentado como lo solicitaste -->
 <!--<ion-header class="custom-header">
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -8,124 +9,128 @@
 </ion-header>-->
 
 <ion-content [fullscreen]="true">
+  <!-- Contenedor para la selección de capacidad de batería -->
   <div class="container" style="background: #31B17D !important;">
     <p class="msj-principal">Selecciona la capacidad de la batería de tu vehículo en kWh; opción obligatoria!</p>
   </div>
+
+  <!-- Selección de Capacidad de Batería -->
   <div class="container">
     <ion-item class="capacidad">
       <ion-label position="floating">Capacidad de la Batería (kWh)</ion-label>
       <ion-input [(ngModel)]="batteryCapacity" (ionInput)="searchBatteryCapacities($event)" type="text" debounce="300"></ion-input>
     </ion-item>
+    
+    <!-- Mostrar sugerencias de capacidades -->
     <ion-list *ngIf="suggestedCapacities.length > 0">
       <ion-item *ngFor="let capacity of suggestedCapacities" (click)="selectCapacity(capacity)">
-        {{ capacity }}
+        {{ capacity }} kWh
       </ion-item>
     </ion-list>
   </div>
-  
-    <div *ngIf="selectedBattery">
-      <ion-item>
-        <ion-thumbnail slot="start">
-          <img [src]="selectedBattery.image" alt="Battery Image">
-        </ion-thumbnail>
-        <ion-label>
-          <h2>{{ selectedBattery.name }}</h2>
-          <p>{{ selectedBattery.specifications }}</p>
-        </ion-label>
+
+  <!-- Muestra el detalle de la batería seleccionada -->
+  <div *ngIf="selectedBattery">
+    <ion-item>
+      <ion-thumbnail slot="start">
+        <img [src]="selectedBattery.image" alt="Battery Image">
+      </ion-thumbnail>
+      <ion-label>
+        <h2>{{ selectedBattery.name }}</h2>
+        <p>{{ selectedBattery.specifications }}</p>
+      </ion-label>
+    </ion-item>
+  </div>
+
+  <!-- Acordeón de filtros opcionales -->
+  <ion-accordion-group>
+    <ion-accordion value="filters">
+      <ion-item class="filter" slot="header">
+        <ion-label>Filtros Avanzados (Opcionales)</ion-label>
       </ion-item>
-    </div>
-
-    <ion-accordion-group>
-      <ion-accordion value="filters">
-        <ion-item class="filter" slot="header">
-          <ion-label>Filtros Avanzados (Opcionales)</ion-label>
+      <div class="ion-padding" slot="content">
+        <ion-item class="filter-item">
+          <ion-label>Filtrar por Distancia</ion-label>
+          <ion-select [(ngModel)]="selectedDistance" (ionChange)="filterByDistance()">
+            <ion-select-option value="5">5 km</ion-select-option>
+            <ion-select-option value="10">10 km</ion-select-option>
+            <ion-select-option value="15">15 km</ion-select-option>
+            <ion-select-option value="20">20 km</ion-select-option>
+            <ion-select-option value="30">30 km</ion-select-option>
+            <ion-select-option value="50">50 km</ion-select-option>
+          </ion-select>
         </ion-item>
-        <div class="ion-padding" slot="content">
-         <!--<ion-item class="filter-item">
-            <ion-label>Proveedor de Servicios de Carga (PSE)</ion-label>
-            <ion-select [(ngModel)]="selectedPSE" (ionChange)="filterByPSE()">
-              <ion-select-option *ngFor="let pse of pseOptions" [value]="pse">{{ pse }}</ion-select-option>
-            </ion-select>
-          </ion-item>--> 
-          <ion-item class="filter-item">
-            <ion-label>Filtrar por Distancia</ion-label>
-            <ion-select [(ngModel)]="selectedDistance" (ionChange)="filterByDistance()">
-              <ion-select-option value="5">5 km</ion-select-option>
-              <ion-select-option value="10">10 km</ion-select-option>
-              <ion-select-option value="15">15 km</ion-select-option>
-              <ion-select-option value="20">20 km</ion-select-option>
-              <ion-select-option value="30">30 km</ion-select-option>
-              <ion-select-option value="50">50 km</ion-select-option>
-            </ion-select>
-          </ion-item>
-    
-          <div class="custom-button-filter mt-2">
-            <ion-button class="mt-2" (click)="resetFilters()">Limpiar Búsqueda</ion-button>
-          </div>
-        </div>
-      </ion-accordion>
-    </ion-accordion-group>
 
-    <div class="custom-button">
-      <ion-button class="custom-button" (click)="getFilteredStations()">Buscar Cargadores</ion-button>
-    </div>
-    
-    <div class="container">
-      <div class="row">
-        <div *ngIf="stations.length > 0">
-          <h2 style="padding: 10px;">Conectores disponibles</h2>
-          <ion-list>
-            <ion-item class="result-station" *ngFor="let station of stations" (click)="selectStation(station)">
-              <ion-label>
-                <div class="icon-text">
-                  <img src="assets/icon/electrolineras.png" alt="electrolineras.png Icon" class="icon">
-                  <h2><strong>E/S. {{ station.name }}</strong> / {{ station.distance }} km</h2>
-                </div>
-                
-                <div class="icon-text">
-                  <img style="width: 17px !important;" src="assets/icon/location.png" alt="ubicacion Icon" class="icon">
-                  <p><span>Dirección:</span> {{ station.address }}, <span>Región:</span> {{ station.region }}, {{ station.commune }}</p>
-                </div>
-                
-                <div  *ngIf="getConnectorStatus(station).totalConnectors > 0">
-                  <div class="status-container" *ngFor="let status of getConnectorStatus(station).statusDetails">
-                    <p [style.background-color]="status.color" class="status-pill">
-                      {{ status.count }} Conectores: {{ status.label }}
-                    </p>
-                  </div>
-                  <div class="mt-2 mb-2" *ngIf="true">
-                    <div class="icon-text">
-                      <img src="assets/icon/iconoAC.png" alt="electrolineraAC.png Icon" class="icon">
-                      <p>Conectores AC: {{ getConnectorStatus(station).acCount }}</p>
-                      <p *ngIf="getConnectorStatus(station).acChargingCount > 0">Cargando: {{ getConnectorStatus(station).acChargingCount }}</p>
-                    </div>
-                    <div class="icon-text">
-                      <img src="assets/icon/iconoDC.png" alt="electrolineraDC.png Icon" class="icon">
-                      <p>Conectores DC: {{ getConnectorStatus(station).dcCount }}</p>
-                      <p *ngIf="getConnectorStatus(station).dcChargingCount > 0">Cargando: {{ getConnectorStatus(station).dcChargingCount }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="icon-text">
-                  <img src="assets/icon/hours.png" alt="horarios" class="icon">
-                  <p>Horarios: {{ getOpeningHours(station) }}</p>
-                </div>
-                <div *ngIf="station.opening_times.exceptional_openings.length > 0">
-                  <div class="icon-text">
-                    <p>Excepcionales Aperturas: {{ getExceptionalOpenings(station) }}</p>
-                  </div>
-                </div>
-                <div *ngIf="station.opening_times.exceptional_closings.length > 0">
-                  <div class="icon-text">
-                    <p>Excepcionales Cierres: {{ getExceptionalClosings(station) }}</p>
-                  </div>
-                </div>
-              </ion-label>
-            </ion-item>
-          </ion-list>
+        <div class="custom-button-filter mt-2">
+          <ion-button class="mt-2" (click)="resetFilters()">Limpiar Búsqueda</ion-button>
         </div>
       </div>
+    </ion-accordion>
+  </ion-accordion-group>
+
+  <!-- Botón para buscar cargadores -->
+  <div class="custom-button">
+    <ion-button class="custom-button" (click)="getFilteredStations()">Buscar Cargadores</ion-button>
+  </div>
+
+  <!-- Resultados de estaciones -->
+  <div class="container">
+    <div class="row">
+      <div *ngIf="stations.length > 0">
+        <h2 style="padding: 10px;">Conectores disponibles</h2>
+        <ion-list>
+          <ion-item class="result-station" *ngFor="let station of stations" (click)="selectStation(station)">
+            <ion-label>
+              <div class="icon-text">
+                <img src="assets/icon/electrolineras.png" alt="electrolineras.png Icon" class="icon">
+                <h2><strong>E/S. {{ station.name }}</strong> / {{ station.distance }} km</h2>
+              </div>
+              
+              <div class="icon-text">
+                <img style="width: 17px !important;" src="assets/icon/location.png" alt="ubicacion Icon" class="icon">
+                <p><span>Dirección:</span> {{ station.address }}, <span>Región:</span> {{ station.region }}, {{ station.commune }}</p>
+              </div>
+              
+              <div  *ngIf="getConnectorStatus(station).totalConnectors > 0">
+                <div class="status-container" *ngFor="let status of getConnectorStatus(station).statusDetails">
+                  <p [style.background-color]="status.color" class="status-pill">
+                    {{ status.count }} Conectores: {{ status.label }}
+                  </p>
+                </div>
+                <div class="mt-2 mb-2" *ngIf="true">
+                  <div class="icon-text">
+                    <img src="assets/icon/iconoAC.png" alt="electrolineraAC.png Icon" class="icon">
+                    <p>Conectores AC: {{ getConnectorStatus(station).acCount }}</p>
+                    <p *ngIf="getConnectorStatus(station).acChargingCount > 0">Cargando: {{ getConnectorStatus(station).acChargingCount }}</p>
+                  </div>
+                  <div class="icon-text">
+                    <img src="assets/icon/iconoDC.png" alt="electrolineraDC.png Icon" class="icon">
+                    <p>Conectores DC: {{ getConnectorStatus(station).dcCount }}</p>
+                    <p *ngIf="getConnectorStatus(station).dcChargingCount > 0">Cargando: {{ getConnectorStatus(station).dcChargingCount }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="icon-text">
+                <img src="assets/icon/hours.png" alt="horarios" class="icon">
+                <p>Horarios: {{ getOpeningHours(station) }}</p>
+              </div>
+              <div *ngIf="station.opening_times.exceptional_openings.length > 0">
+                <div class="icon-text">
+                  <p>Excepcionales Aperturas: {{ getExceptionalOpenings(station) }}</p>
+                </div>
+              </div>
+              <div *ngIf="station.opening_times.exceptional_closings.length > 0">
+                <div class="icon-text">
+                  <p>Excepcionales Cierres: {{ getExceptionalClosings(station) }}</p>
+                </div>
+              </div>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </div>
     </div>
+  </div>
 </ion-content>
+
 <app-layout></app-layout>

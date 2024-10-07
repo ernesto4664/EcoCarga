@@ -17,6 +17,7 @@ export class StationDetailsPage implements OnInit {
   directionsService: any;
   directionsRenderer: any;
   iconPath: string = 'assets/icon/';
+  batteryCapacity: number = 0; // Almacenar la capacidad de la batería seleccionada
 
   constructor(
     private route: ActivatedRoute, 
@@ -27,6 +28,7 @@ export class StationDetailsPage implements OnInit {
       if (navigation?.extras.state) {
         this.station = navigation.extras.state['station'];
         this.selectedConnectors = navigation.extras.state['selectedConnectors'] || [];
+        this.batteryCapacity = navigation.extras.state['batteryCapacity'] || 0;  // Capacidad de la batería seleccionada
         console.log('Estacion:', this.station);
         console.log('Conectores seleccionados:', this.selectedConnectors);
       }
@@ -36,9 +38,93 @@ export class StationDetailsPage implements OnInit {
     this.directionsRenderer = new google.maps.DirectionsRenderer();
   }
 
+  ngAfterViewInit() {
+    this.observeMapVisibility(); // Observamos si el mapa está visible
+  }
+
   ngOnInit() {
     this.loadMap();
     this.setMapUrl();
+  }
+
+  observeMapVisibility() {
+    const element = document.getElementById('map'); // Busca el div del mapa
+
+    if (element) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            console.log('El mapa es visible en la vista');
+            this.loadMap(); // Llamamos la carga del mapa cuando es visible
+            observer.unobserve(element); // Dejamos de observar una vez cargado
+          } else {
+            console.log('El mapa NO es visible');
+          }
+        });
+      });
+
+      observer.observe(element); // Comienza a observar el mapa
+    } else {
+      console.error('Elemento del mapa no encontrado.');
+    }
+  }
+
+  async loadMap() {
+    if (!window.google || !window.google.maps) {
+      console.error('Google Maps no está cargado correctamente');
+      return;
+    }
+
+    if (this.station?.coordinates) {
+      const mapElement = document.getElementById('map');
+      if (mapElement) {
+        try {
+          const userPosition = await Geolocation.getCurrentPosition();
+          const userLatitude = userPosition.coords.latitude;
+          const userLongitude = userPosition.coords.longitude;
+
+          const mapOptions = {
+            center: new google.maps.LatLng(userLatitude, userLongitude),
+            zoom: 15,
+          };
+
+          this.map = new google.maps.Map(mapElement, mapOptions);
+          this.directionsRenderer.setMap(this.map);
+
+          const request = {
+            origin: new google.maps.LatLng(userLatitude, userLongitude),
+            destination: new google.maps.LatLng(
+              parseFloat(this.station.coordinates.latitude),
+              parseFloat(this.station.coordinates.longitude)
+            ),
+            travelMode: google.maps.TravelMode.DRIVING,
+          };
+
+          this.directionsService.route(request, (result: any, status: any) => {
+            if (status === google.maps.DirectionsStatus.OK) {
+              this.directionsRenderer.setDirections(result);
+            } else {
+              console.error('Error al obtener direcciones', status);
+            }
+          });
+
+          const marker = new google.maps.Marker({
+            position: {
+              lat: parseFloat(this.station.coordinates.latitude),
+              lng: parseFloat(this.station.coordinates.longitude),
+            },
+            map: this.map,
+            title: this.station.name,
+          });
+        } catch (error) {
+          console.error('Error al obtener la ubicación del usuario:', error);
+        }
+      } else {
+        console.error('Elemento del mapa no encontrado');
+      }
+    } else {
+      console.error('No se encontraron coordenadas para la estación');
+    }
   }
 
   async setMapUrl() {
@@ -53,6 +139,15 @@ export class StationDetailsPage implements OnInit {
     } else {
       console.error('No se pudieron obtener las coordenadas de la estación.');
     }
+  }
+
+  // Método para calcular el tiempo de carga
+  calculateChargingTime(maxPower: number): string {
+    if (this.batteryCapacity && maxPower > 0) {
+      const chargingTime = this.batteryCapacity / maxPower;
+      return `${chargingTime.toFixed(2)} horas`; // Tiempo de carga en horas
+    }
+    return 'No disponible';
   }
 
   getStatusLabel(status: string): string {
@@ -115,74 +210,22 @@ export class StationDetailsPage implements OnInit {
     })).filter((evse: any) => evse.connectors.length > 0);
   }
 
-  async loadMap() {
-    if (this.station?.coordinates) {
-      const mapElement = document.getElementById('map');
-      if (mapElement) {
-        const userPosition = await Geolocation.getCurrentPosition();
-        const userLatitude = userPosition.coords.latitude;
-        const userLongitude = userPosition.coords.longitude;
-
-        const mapOptions = {
-          center: new google.maps.LatLng(userLatitude, userLongitude),
-          zoom: 15
-        };
-
-        this.map = new google.maps.Map(mapElement, mapOptions);
-        this.directionsRenderer.setMap(this.map);
-
-        const request = {
-          origin: new google.maps.LatLng(userLatitude, userLongitude),
-          destination: new google.maps.LatLng(parseFloat(this.station.coordinates.latitude), parseFloat(this.station.coordinates.longitude)),
-          travelMode: google.maps.TravelMode.DRIVING
-        };
-
-        this.directionsService.route(request, (result: any, status: any) => {
-          if (status === google.maps.DirectionsStatus.OK) {
-            this.directionsRenderer.setDirections(result);
-          } else {
-            console.error('Error al obtener direcciones', status);
-          }
-        });
-
-        const marker = new google.maps.Marker({
-          position: { lat: parseFloat(this.station.coordinates.latitude), lng: parseFloat(this.station.coordinates.longitude) },
-          map: this.map,
-          title: this.station.name
-        });
-      } else {
-        console.error('Elemento del mapa no encontrado');
-      }
-    } else {
-      console.error('No se encontraron coordenadas para la estación');
-    }
-  }
-
   getIconPath(connector: any): string {
     const iconMap: { [key: string]: string } = {
       'GB/T AC (CABLE - AC)': 'GBT_AC.png',
       'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
       'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
       'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
-      //'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
-      //'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
       'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
-      //'Tipo 2 (CABLE - AC_2_PHASE)': 'Tipo2AC.png',
-      //'Tipo 2 (CABLE - AC_3_PHASE)': 'Tipo2AC.png',
       'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
-      //'CCS 2 (CABLE - DC_2_PHASE_SPLIT)': 'combinadotipo2.png',
-      //'CCS 2 (CABLE - DC_3_PHASE)': 'combinadotipo2.png',
       'CCS 2 (SOCKET - DC)': 'combinadotipo2.png',
-      //'CCS 2 (SOCKET - DC_2_PHASE_SPLIT)': 'combinadotipo2.png',
-      //'CCS 2 (SOCKET - DC_3_PHASE)': 'combinadotipo2.png',
       'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
       'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
       'GB/T DC (CABLE - DC)': 'GBT_DC.png',
-      // Agrega más mapeos según sea necesario
     };
 
     const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
-    return this.iconPath + (iconMap[key] || 'default.jpeg'); // 'default.png' si no se encuentra el conector
+    return this.iconPath + (iconMap[key] || 'default.jpeg');
   }
 
   getCurrentType(powerType: string): string {
@@ -192,6 +235,41 @@ export class StationDetailsPage implements OnInit {
       return 'DC';
     } else {
       return powerType; // Devuelve el valor original si no es AC o DC
+    }
+  }
+
+  getPaymentIcon(capability: string): string {
+    const paymentIcons: { [key: string]: string } = {
+      'EFECTIVO': 'assets/icon/cash.png',
+      'DEBITO': 'assets/icon/debit-card.png',
+      'CREDITO': 'assets/icon/debit-card.png',
+      'APP': 'assets/icon/app.png',
+      'PORTAL': 'assets/icon/portal.png',
+      'SUSCRIPCION': 'assets/icon/subscription.png',
+    };
+    return paymentIcons[capability] || 'assets/icon/default.png';
+  }
+
+  getActivationIcon(capability: string): string {
+    const activationIcons: { [key: string]: string } = {
+      'APP': 'assets/icon/app.png',
+      'RFID': 'assets/icon/rfid.png',
+      'QR': 'assets/icon/qr-code.png',
+      'PORTAL': 'assets/icon/portal.png',
+    };
+    return activationIcons[capability] || 'assets/icon/default.png';
+  }
+
+  getTariffDescription(tariff: any): string {
+    switch (tariff.tariff_dimension) {
+      case 'TIEMPO':
+        return `Este conector cobrará ${tariff.price} pesos por minuto.`;
+      case 'ENERGÍA':
+        return `Este conector cobrará ${tariff.price} pesos por kWh.`;
+      case 'CARGO FIJO':
+        return `Este conector tiene una tarifa fija de ${tariff.price} pesos.`;
+      default:
+        return 'Tarifa desconocida';
     }
   }
 }

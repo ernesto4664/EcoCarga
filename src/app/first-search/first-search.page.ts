@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { ApiService } from '../api.service';
 import { AlertController } from '@ionic/angular';
 
@@ -27,6 +27,25 @@ export class FirstSearchPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.listenForRouteChanges();
+  
+    // Verificar si es la primera carga
+    const isFirstLoad = this.apiService.isFirstLoad();
+    const isCacheValid = this.apiService.checkFirstSearchCacheValidity();
+  
+    console.log('Cache validity:', isCacheValid);
+    console.log('Is first load:', isFirstLoad);
+  
+    if (isFirstLoad) {
+      // Si es la primera vez, limpiar los filtros y NO mostrar la alerta
+      this.clearFilters();
+      this.apiService.setFirstLoad(false); // Marcar como ya no es la primera vez
+    } else if (isCacheValid) {
+      // Si no es la primera vez y la caché es válida, mostrar la alerta
+      this.showCacheAlert();
+    }
+  
+    // Siempre busca los conectores
     this.fetchAllConnectors();
   }
 
@@ -34,9 +53,83 @@ export class FirstSearchPage implements OnInit, OnDestroy {
     this.apiService.stopConnectorStatusUpdates();
   }
 
+  listenForRouteChanges() {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        if (this.router.url === '/first-search') {
+          this.showCacheAlert();  // Mostrar alerta si vuelve a first-search
+        }
+      }
+    });
+}
+
+checkCacheAndShowAlert() {
+  const isFirstLoad = this.apiService.isFirstLoad();
+  const isCacheValid = this.apiService.checkFirstSearchCacheValidity();
+
+  console.log('Cache validity:', isCacheValid);
+  console.log('Is first load:', isFirstLoad);
+
+  // Si es la primera carga, limpiar los filtros y no mostrar alerta
+  if (isFirstLoad) {
+    this.clearFilters();
+    this.apiService.setFirstLoad(false); // Marcar como ya no es la primera vez
+    return; // Salir de la función si es la primera carga
+  }
+
+  // Mostrar la alerta solo si la cache es válida
+  if (isCacheValid) {
+    this.showCacheAlert();
+  } else {
+    this.clearFilters(); // Limpiar filtros si la cache no es válida
+  }
+}
+
+  loadCachedFilters() {
+    const cachedFilters = this.apiService.getFirstSearchCache();
+    if (cachedFilters) {
+      this.typeAC = cachedFilters.typeAC;
+      this.typeDC = cachedFilters.typeDC;
+      this.selectedIndexes = cachedFilters.selectedIndexes;
+      this.selectedConnectors = cachedFilters.selectedConnectors;
+      this.filterConnectors(); // Aplicar filtros cargados
+    }
+  }
+
+  async showCacheAlert() {
+    const alert = await this.alertController.create({
+      header: 'Filtros guardados',
+      message: '¿Deseas mantener los mismos filtros de la búsqueda anterior?',
+      buttons: [
+        {
+          text: 'No, reiniciar filtros',
+          role: 'cancel',
+          handler: () => {
+            this.clearFilters();
+          }
+        },
+        {
+          text: 'Sí, mantener filtros',
+          handler: () => {
+            this.loadCachedFilters();
+            this.navigateToSecondSearch();
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  clearFilters() {
+    this.typeAC = false;
+    this.typeDC = false;
+    this.selectedIndexes = [];
+    this.selectedConnectors = [];
+    this.connectors = [];
+    this.uniqueConnectors = [];
+  }
+
   onCheckboxChange() {
-    console.log('Checkbox AC:', this.typeAC);  // Verificar valor de typeAC
-    console.log('Checkbox DC:', this.typeDC);  // Verificar valor de typeDC
     this.filterConnectors();
   }
 
@@ -44,12 +137,10 @@ export class FirstSearchPage implements OnInit, OnDestroy {
     this.loading = true; // Mostrar preloader
     this.apiService.fetchAllLocations().subscribe(
       (response: any) => {
-        console.log('Respuesta completa de la API:', response);  // <--- Imprime la respuesta completa
         if (Array.isArray(response)) {
           this.allConnectors = response.reduce((acc: any[], station: any) => 
             acc.concat(station.evses.reduce((innerAcc: any[], evse: { connectors: any; }) => 
               innerAcc.concat(evse.connectors), [])), []);
-          console.log('Todos los conectores:', this.allConnectors);  // <--- Imprime todos los conectores antes del filtrado
           this.filterConnectors();
         } else {
           console.error('Formato de respuesta API inesperado:', response);
@@ -64,60 +155,23 @@ export class FirstSearchPage implements OnInit, OnDestroy {
   }
 
   filterConnectors() {
-    console.log('Filtrado de conectores');
-  
-    // Validación inicial: si no hay tipo seleccionado, limpiar conectores.
     if (!this.typeAC && !this.typeDC) {
       this.connectors = [];
       this.uniqueConnectors = [];
-      console.log('Ningún tipo de conector seleccionado :', this.connectors);
       return;
     }
-  
-    // Asegúrate de que `allConnectors` no sea nulo o indefinido
-    if (!this.allConnectors || !Array.isArray(this.allConnectors)) {
-      console.warn('allConnectors es nulo o no es un array.');
-      this.connectors = [];
-      this.uniqueConnectors = [];
-      return;
-    }
-  
-    // Filtrar conectores basado en los tipos seleccionados
+
     this.connectors = this.allConnectors.filter(connector => {
-      // Excluir conectores con propiedades nulas o indefinidas, o con estado "FUERA DE LINEA"
-      if (!connector.standard || !connector.format || !connector.power_type || connector.status === 'FUERA DE LINEA') {
-        console.warn('Conector excluido por tener propiedades nulas/indefinidas o estar fuera de línea:', connector);
-        return false;
-      }
-  
-      // Filtrar solo conectores de tipo AC si solo el checkbox de AC está seleccionado
-      if (this.typeAC && !this.typeDC && connector.power_type?.startsWith('AC')) {
-        console.log('Conector AC encontrado:', connector);  // Log para cada conector AC
-        return true;
-      }
-  
-      // Filtrar solo conectores de tipo DC si solo el checkbox de DC está seleccionado
-      if (this.typeDC && !this.typeAC && connector.power_type?.startsWith('DC')) {
-        console.log('Conector DC encontrado:', connector);  // Log para cada conector DC
-        return true;
-      }
-  
-      // Si ambos están seleccionados, muestra ambos tipos
-      if (this.typeAC && this.typeDC) {
-        return connector.power_type?.startsWith('AC') || connector.power_type?.startsWith('DC');
-      }
-  
+      if (connector.status === 'FUERA DE LINEA') return false;
+      if (this.typeAC && !this.typeDC && connector.power_type?.startsWith('AC')) return true;
+      if (this.typeDC && !this.typeAC && connector.power_type?.startsWith('DC')) return true;
+      if (this.typeAC && this.typeDC) return connector.power_type?.startsWith('AC') || connector.power_type?.startsWith('DC');
       return false;
     });
-  
-    console.log('Todos los conectores filtrados:', this.connectors);
-  
+
     this.uniqueConnectors = this.getUniqueConnectors(this.connectors);
-    console.log('Conectores únicos para pantalla:', this.uniqueConnectors);
   }
-  
-  
-  // Método para obtener conectores únicos
+
   getUniqueConnectors(connectors: any[]): any[] {
     const unique = new Set();
     return connectors.filter(connector => {
@@ -152,7 +206,7 @@ export class FirstSearchPage implements OnInit, OnDestroy {
     if (this.selectedIndexes.length === 1) {
       await this.showAlertMessage(
         'Atención',
-        'Recuerda que puedes seleccionar dos estándares de conectores.',
+        'Recuerda que puedes seleccionar conectores AC y DC.',
         'REGRESAR',
         'CONTINUAR'
       );
@@ -167,14 +221,10 @@ export class FirstSearchPage implements OnInit, OnDestroy {
   }
 
   async showAlertMessage(header: string, message: string, cancelButtonText: string, confirmButtonText: string = '') {
-    const buttons = [
+    const buttons: any[] = [
       {
         text: cancelButtonText,
         role: 'cancel',
-        cssClass: 'alert-button secondary',
-        handler: () => {
-          console.log('Confirmación cancelada');
-        },
       },
     ];
 
@@ -184,8 +234,6 @@ export class FirstSearchPage implements OnInit, OnDestroy {
         handler: () => {
           this.navigateToSecondSearch();
         },
-        role: '',
-        cssClass: 'alert-button',
       });
     }
 
@@ -193,7 +241,6 @@ export class FirstSearchPage implements OnInit, OnDestroy {
       header,
       message,
       buttons,
-      cssClass: 'custom-alert',
     });
 
     await alert.present();
@@ -222,10 +269,11 @@ export class FirstSearchPage implements OnInit, OnDestroy {
     });
   }
 
+  // Método para obtener el ícono del conector
   getIconPath(connector: any): string {
     if (!connector.standard || !connector.format || !connector.power_type) {
       console.warn('Conector con datos incompletos encontrado:', connector);
-      return this.iconPath + 'default.jpeg';  // Icono por defecto
+      return this.iconPath + 'default.jpeg';  // Icono por defecto si faltan datos
     }
   
     const iconMap: { [key: string]: string } = {
@@ -240,13 +288,14 @@ export class FirstSearchPage implements OnInit, OnDestroy {
     };
   
     const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
-    return this.iconPath + (iconMap[key] || 'default.jpeg');
+    return this.iconPath + (iconMap[key] || 'default.jpeg');  // Icono por defecto si no hay coincidencia en el mapa
   }
 
+  // Método para mostrar el nombre del conector
   getConnectorDisplayName(connector: any): string {
     if (!connector.standard) {
       console.warn('Conector con standard faltante encontrado y excluido:', connector);
-      return '';  // No mostrar nada
+      return '';  // No mostrar nada si falta el estándar
     }
   
     const displayNameMap: { [key: string]: string } = {
@@ -260,5 +309,16 @@ export class FirstSearchPage implements OnInit, OnDestroy {
     };
   
     return displayNameMap[connector.standard] || connector.standard;
+  }
+
+  // Método para almacenar filtros en el cache
+  storeFirstSearchCache() {
+    const filters = {
+      typeAC: this.typeAC,
+      typeDC: this.typeDC,
+      selectedIndexes: this.selectedIndexes,
+      selectedConnectors: this.selectedConnectors,
+    };
+    this.apiService.storeFirstSearchCache(filters);
   }
 }

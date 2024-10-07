@@ -75,3 +75,19 @@ ion-list {
     margin-right: 10px;
   }
 }
+
+.icon-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Espaciado entre íconos */
+  margin-top: 5px; /* Separación del título */
+}
+
+.icon-item img {
+  width: 24px; /* Tamaño más pequeño para los íconos */
+  height: 24px;
+}
+
+.icon-text {
+  margin-bottom: 20px; /* Espaciado entre secciones */
+}

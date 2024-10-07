@@ -1,135 +1,151 @@
 import { Component, AfterViewInit, OnInit } from '@angular/core';
-import { GoogleMap } from '@capacitor/google-maps';
 import { Geolocation } from '@capacitor/geolocation';
+import { ApiService } from '../api.service';
+import { AlertController } from '@ionic/angular';
+import { Loader } from '@googlemaps/js-api-loader';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-electrolineras',
   templateUrl: './electrolineras.page.html',
   styleUrls: ['./electrolineras.page.scss'],
 })
-export class ElectrolinerasPage implements OnInit, AfterViewInit  {
-  map: GoogleMap | undefined;
+export class ElectrolinerasPage implements OnInit, AfterViewInit {
+  map: google.maps.Map | undefined;
+  availableStations: any[] = [];
 
-  constructor() {}
+  constructor(
+    private apiService: ApiService,
+    private alertController: AlertController
+  ) {}
 
   ngOnInit() {
-    console.log('ElectrolinerasPágina cargada');
+    console.log('Electrolineras Página cargada');
   }
 
   async ngAfterViewInit() {
-    await this.initializeMap();
-    await this.getCurrentLocation();
-    this.getNearbyPlaces();
+    try {
+      await this.initializeMap();
+      await this.getCurrentLocation();
+      await this.getNearbyStations();
+    } catch (error) {
+      console.error('Error al inicializar la página de electrolineras:', error);
+    }
   }
 
   async initializeMap() {
-    this.map = await GoogleMap.create({
-      id: 'my-map',
-      element: document.getElementById('map') as HTMLElement,
-      apiKey: 'AIzaSyCNM9lXDeD3hLfe7Es4KNqkL8J2jsZ_W8I',
-      config: {
-        center: {
-          lat: -34.9290,
-          lng: 138.6010,
-        },
-        zoom: 15,
-      },
+    const loader = new Loader({
+      apiKey: environment.googleMapsApiKey,
+      version: 'weekly',
+      libraries: ['places'],
     });
+
+    await loader.load(); // Cargar el API de forma asíncrona
+
+    this.map = new google.maps.Map(document.getElementById('map') as HTMLElement, {
+      center: { lat: -34.929, lng: 138.601 },
+      zoom: 15,
+    });
+
+    // Llama a addMarker con un objeto 'station' como cuarto argumento
+    const dummyStation = { name: 'Estación de carga', address: 'Dirección de carga' }; // Objeto ficticio
+    this.addMarker(-34.929, 138.601, 'Estación de carga', dummyStation);
   }
 
   async getCurrentLocation() {
-    const coordinates = await Geolocation.getCurrentPosition();
-    console.log('Posición actual:', coordinates);
+    try {
+      const coordinates = await Geolocation.getCurrentPosition();
+      console.log('Posición actual:', coordinates);
 
-    if (this.map) {
-      // Centra el mapa en la ubicación actual del usuario
-      this.map.setCamera({
-        coordinate: {
+      if (this.map) {
+        this.map.setCenter({
           lat: coordinates.coords.latitude,
           lng: coordinates.coords.longitude,
-        },
-        zoom: 15,
+        });
+        this.map.setZoom(15);
+      }
+    } catch (error) {
+      console.error('Error al obtener la ubicación actual:', error);
+      // Mostrar un mensaje de alerta
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: 'No se pudo obtener la ubicación actual.',
+        buttons: ['OK'],
       });
+      await alert.present();
     }
   }
 
-  getNearbyPlaces() {
-    // Datos simulados de lugares cercanos
-    const places = [
-      { latitude: -34.920, longitude: 138.600, name: 'Place 1' },
-      { latitude: -34.930, longitude: 138.610, name: 'Place 2' },
-      { latitude: -34.940, longitude: 138.620, name: 'Place 3' },
-    ];
+  getNearbyStations() {
+    this.apiService.fetchAllLocations().subscribe((stations: any[]) => {
+      this.availableStations = stations.filter(station =>
+        station.evses.some((evse: { status: string }) => evse.status === 'DISPONIBLE')
+      );
 
-    // Agrega marcadores en el mapa para los lugares simulados
-    places.forEach(place => {
-      this.addMarker(place.latitude, place.longitude, place.name);
+      console.log('Estaciones disponibles:', this.availableStations);
+
+      this.availableStations.forEach(station => {
+        const { latitude, longitude } = station.coordinates;
+
+        // Validación de coordenadas
+        if (latitude && longitude) {
+          const lat = parseFloat(latitude);
+          const lng = parseFloat(longitude);
+
+          if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            // Coordenadas válidas, añadir marcador
+            this.addMarker(lat, lng, station.name, station);
+          } else {
+            console.error("Coordenadas fuera de rango:", station);
+          }
+        } else {
+          console.error('Coordenadas no válidas o faltantes para la estación:', station);
+        }
+      });
     });
   }
 
-  addMarker(lat: number, lng: number, title: string) {
-    if (this.map) {
-      this.map.addMarker({
-        coordinate: { lat, lng },
-        title,
+  async addMarker(lat: number, lng: number, title: string, station: any) {
+    if (this.map && !isNaN(lat) && !isNaN(lng)) {
+      const marker = new google.maps.Marker({
+        position: { lat, lng },
+        map: this.map,
+        title: title,
+        icon: {
+          url: 'assets/icon/electrolineras.png', // Ruta hacia tu imagen personalizada
+          scaledSize: new google.maps.Size(50, 50), // Escala la imagen (opcional)
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(25, 50) // Ajusta la posición del ícono en el mapa
+        }
       });
+  
+      marker.addListener('click', () => {
+        this.showStationDetails(station);
+      });
+    } else {
+      console.error('Latitud o longitud no válidas:', lat, lng);
     }
   }
 
-  async showDirections(destinationLat: number, destinationLng: number) {
-    const coordinates = await Geolocation.getCurrentPosition();
-    const originLat = coordinates.coords.latitude;
-    const originLng = coordinates.coords.longitude;
-
-    const directionsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${originLat},${originLng}&destination=${destinationLat},${destinationLng}&key=YOUR_GOOGLE_MAPS_API_KEY`;
-
-    // Realiza la solicitud HTTP a la API de Google Directions
-    const response = await fetch(directionsUrl);
-    const directions = await response.json();
-
-    if (directions.routes.length > 0) {
-      const route = directions.routes[0];
-      const polyline = this.decodePolyline(route.overview_polyline.points);
-      if (this.map) {
-        await this.map.addPolylines([
-          {
-            path: polyline,
-            strokeColor: '#007AFF',
-            geodesic: true
-          }
-        ]);
+  async showStationDetails(station: any) {
+    const availableConnectors = station.evses.reduce((acc: any[], evse: any) => {
+      if (evse.status === 'DISPONIBLE') {
+        return acc.concat(evse.connectors);
       }
-    }
-  }
+      return acc;
+    }, []);
 
-  decodePolyline(encoded: string): { lat: number, lng: number }[] {
-    const points: { lat: number, lng: number }[] = [];
-    let index = 0, len = encoded.length;
-    let lat = 0, lng = 0;
+    const connectorDetails = availableConnectors
+      .map((connector: { standard: string; power_type: string }) => `Conector: ${connector.standard}, Tipo: ${connector.power_type}`)
+      .join('\n');
 
-    while (index < len) {
-      let b, shift = 0, result = 0;
-      do {
-        b = encoded.charCodeAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      const dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
-      lat += dlat;
+    const alert = await this.alertController.create({
+      header: station.name,
+      subHeader: station.address,
+      message: `Conectores disponibles:\n${connectorDetails || 'No hay conectores disponibles.'}`,
+      buttons: ['OK'],
+    });
 
-      shift = 0;
-      result = 0;
-      do {
-        b = encoded.charCodeAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      const dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
-      lng += dlng;
-
-      points.push({ lat: lat / 1e5, lng: lng / 1e5 });
-    }
-
-    return points;
+    await alert.present();
   }
 }

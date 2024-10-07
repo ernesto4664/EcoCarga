@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
@@ -6,13 +6,14 @@ import { Router, NavigationEnd, Event } from '@angular/router';
 import { Location } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { ApiService } from './api.service';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   showMenu: boolean = false;
   showHeader: boolean = true;
   showHamburgerMenu: boolean = true;
@@ -22,6 +23,20 @@ export class AppComponent {
   constructor(private platform: Platform, private router: Router, private location: Location, private apiService: ApiService) {
     this.initializeApp();
     this.setupRouteListener();
+  }
+
+  ngOnInit() {
+    this.loadGoogleMaps();
+  }
+
+  loadGoogleMaps() {
+    if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
   }
 
   initializeApp() {
@@ -49,9 +64,9 @@ export class AppComponent {
       'informacionpreliminar': { showHeader: true, showHamburgerMenu: false, pageTitle: 'INFORMACIÓN IMPORTANTE', showBackButton: false },
       'viewone': { showHeader: true, showHamburgerMenu: false, pageTitle: 'TERMINOS Y CONDICIONES', showBackButton: false },
       'first-search': { showHeader: true, showHamburgerMenu: true, pageTitle: 'CONECTORES', showBackButton: false },
-      'second-search': { showHeader: true, showHamburgerMenu: false, pageTitle: 'CARGADORES', showBackButton: true },
+      'second-search': { showHeader: true, showHamburgerMenu: true, pageTitle: 'CARGADORES', showBackButton: true },
       'contact-us': { showHeader: true, showHamburgerMenu: false, pageTitle: 'CONTACTO', showBackButton: true },
-      'station-details': { showHeader: true, showHamburgerMenu: false, pageTitle: 'DETALLES DE LA ESTACIÓN', showBackButton: true },
+      'station-details': { showHeader: true, showHamburgerMenu: true, pageTitle: 'DETALLES DE LA ESTACIÓN', showBackButton: true },
       'terminos-condiciones': { showHeader: true, showHamburgerMenu: false, pageTitle: 'TERMINOS Y CONDICIONES', showBackButton: true },
       'electrolineras': { showHeader: true, showHamburgerMenu: false, pageTitle: 'ELECTROLINERAS ACTIVAS', showBackButton: true },
     };

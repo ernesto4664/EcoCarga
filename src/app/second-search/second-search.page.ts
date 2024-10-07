@@ -121,13 +121,27 @@ export class SecondSearchPage implements OnInit {
       console.error('Ubicación del usuario no disponible');
       return;
     }
-
+  
     const connectorIds = this.selectedConnectors.map(c => c.connector_id);
-
+  
     this.apiService.getStationsByConnectors(connectorIds).subscribe(
       (stations: any) => {
         this.filterUnavailableEVSEs(stations); // Filtrar los EVSEs no disponibles
         this.stations = this.removeDuplicateStations(this.sortStationsByDistance(stations));
+        
+        // Aplicar filtro de conectores basados en los estándares seleccionados
+        this.stations.forEach(station => {
+          station.evses.forEach((evse: { connectors: any[]; }) => {
+            evse.connectors = evse.connectors.filter((connector: any) =>
+              this.selectedConnectors.some(selected =>
+                selected.standard === connector.standard && selected.power_type === connector.power_type
+              )
+            );
+          });
+          // Remover EVSEs que se queden sin conectores válidos
+          station.evses = station.evses.filter((evse: any) => evse.connectors.length > 0);
+        });
+  
         // Aplica el filtro de distancia
         if (this.selectedDistance > 0) {
           this.stations = this.stations.filter(station => parseFloat(station.distance) <= this.selectedDistance);
@@ -136,6 +150,7 @@ export class SecondSearchPage implements OnInit {
         if (this.selectedPSE) {
           this.stations = this.stations.filter(station => station.pse && station.pse.includes(this.selectedPSE));
         }
+  
         this.updateConnectorsStatus(); // Actualizar el estado de los conectores
         this.printConnectorTotals();
       },
@@ -228,13 +243,13 @@ export class SecondSearchPage implements OnInit {
     switch (status) {
       case 'DISPONBILE':
         return 'Disponible';
-      case 'CARGANDO':
-        return 'Cargando';
       case 'OCUPADO':
-        return 'Ocupado';
+        return 'Cargando';
       case 'INOPERATIVO':
       case 'BLOQUEADO':
       case 'REMOVED':
+      case 'FUERA DE LINEA':
+      case 'NO DISPONIBLE':
         return 'No disponible';
       default:
         return 'Desconocido';
@@ -245,11 +260,13 @@ export class SecondSearchPage implements OnInit {
     switch (status) {
       case 'DISPONBILE':
         return 'green';
-      case 'CARGANDO':
+      case 'OCUPADO':
         return 'orange';
       case 'INOPERATIVO':
       case 'BLOQUEADO':
       case 'REMOVED':
+      case 'FUERA DE LINEA':
+      case 'NO DISPONIBLE':
       case 'OCUPADO':
         return 'red';
       default:
@@ -264,7 +281,7 @@ export class SecondSearchPage implements OnInit {
     );
   
     const availableConnectors = filteredConnectors.filter((connector: any) => connector.status === 'DISPONIBLE');
-    const chargingConnectors = filteredConnectors.filter((connector: any) => connector.status === 'CARGANDO');
+    const chargingConnectors = filteredConnectors.filter((connector: any) => connector.status === 'OCUPADO');
   
     const acCount = availableConnectors.filter((connector: any) => connector.power_type.startsWith('AC')).length;
     const dcCount = availableConnectors.filter((connector: any) => connector.power_type.startsWith('DC')).length;
@@ -304,13 +321,40 @@ export class SecondSearchPage implements OnInit {
     if (station.opening_times.twentyfourseven) {
       return 'Abierto 24/7';
     }
-
+  
     const regularHours = station.opening_times.regular_hours;
     if (regularHours.length > 0) {
-      const firstDay = regularHours[0];
-      const lastDay = regularHours[regularHours.length - 1];
-      return `De ${this.getDayName(firstDay.weekday)} ${firstDay.period_begin} a ${this.getDayName(lastDay.weekday)} ${lastDay.period_end}`;
+      const weekdays = regularHours.filter((hour: { weekday: number; }) => hour.weekday >= 1 && hour.weekday <= 5);
+      const weekend = regularHours.filter((hour: { weekday: number; }) => hour.weekday === 6 || hour.weekday === 7);
+  
+      let result = '';
+  
+      // Mostrar horarios de lunes a viernes
+      if (weekdays.length > 0) {
+        const firstWeekday = weekdays[0];
+        const lastWeekday = weekdays[weekdays.length - 1];
+        result += `De ${this.getDayName(firstWeekday.weekday)} ${firstWeekday.period_begin} a ${this.getDayName(lastWeekday.weekday)} ${lastWeekday.period_end}`;
+      }
+  
+      // Si hay horarios de fin de semana, verificamos si son iguales o no a los de entre semana
+      if (weekend.length > 0) {
+        const firstWeekend = weekend[0];
+        const lastWeekend = weekend[weekend.length - 1];
+  
+        // Verificar si los horarios del fin de semana son iguales a los de lunes a viernes
+        const sameWeekendHours = weekdays.length > 0 &&
+          firstWeekend.period_begin === firstWeekend.period_begin &&
+          lastWeekend.period_end === lastWeekend.period_end;
+  
+        // Si los horarios son diferentes, mostramos los del fin de semana en una línea separada
+        if (!sameWeekendHours) {
+          result += `\nSábado ${firstWeekend.period_begin} a Domingo ${lastWeekend.period_end}`;
+        }
+      }
+  
+      return result;
     }
+  
     return 'No disponible';
   }
 
@@ -326,9 +370,9 @@ export class SecondSearchPage implements OnInit {
     }).join(', ');
   }
 
-  getDayName(dayNumber: number): string {
+  getDayName(weekday: number): string {
     const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    return days[dayNumber - 1];
+    return days[weekday - 1]; // El índice del array se ajusta restando 1
   }
 
   removeDuplicateStations(stations: any[]): any[] {

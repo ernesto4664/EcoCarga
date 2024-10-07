@@ -154,11 +154,13 @@ export class StationDetailsPage implements OnInit {
     switch (status) {
       case 'DISPONIBLE':
         return 'Disponibles';
-      case 'CARGANDO':
+      case 'OCUPADO':
         return 'Cargando';
-      case 'INOPERATIVO':
-      case 'BLOQUEADO':
-      case 'REMOVIDO':
+        case 'INOPERATIVO':
+        case 'BLOQUEADO':
+        case 'REMOVED':
+        case 'FUERA DE LINEA':
+        case 'NO DISPONIBLE':
         return 'No disponibles';
       default:
         return 'Desconocido';
@@ -169,11 +171,13 @@ export class StationDetailsPage implements OnInit {
     switch (status) {
       case 'DISPONIBLE':
         return 'green';
-      case 'CARGANDO':
+      case 'OCUPADO':
         return 'orange';
       case 'INOPERATIVO':
       case 'BLOQUEADO':
       case 'REMOVIDO':
+      case 'FUERA DE LINEA':
+      case 'NO DISPONIBLE':
         return 'red';
       default:
         return 'gray';
@@ -207,7 +211,7 @@ export class StationDetailsPage implements OnInit {
       connectors: evse.connectors.filter((connector: any) =>
         this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
       )
-    })).filter((evse: any) => evse.connectors.length > 0);
+    })).filter((evse: any) => evse.connectors.length > 0); // Excluir EVSEs sin conectores válidos
   }
 
   getIconPath(connector: any): string {
@@ -271,5 +275,43 @@ export class StationDetailsPage implements OnInit {
       default:
         return 'Tarifa desconocida';
     }
+  }
+
+  getOpeningHours(station: any): string {
+    if (station.opening_times.twentyfourseven) {
+      return 'Abierto 24/7';
+    }
+  
+    const regularHours = station.opening_times.regular_hours;
+    if (regularHours.length > 0) {
+      const weekdays = regularHours.filter((hour: { weekday: number }) => hour.weekday >= 1 && hour.weekday <= 5);
+      const weekend = regularHours.filter((hour: { weekday: number }) => hour.weekday === 6 || hour.weekday === 7);
+  
+      let result = '';
+  
+      // Mostrar los horarios de lunes a viernes
+      if (weekdays.length > 0) {
+        const firstWeekday = weekdays[0];
+        const lastWeekday = weekdays[weekdays.length - 1];
+        result += `De ${this.getDayName(firstWeekday.weekday)} ${firstWeekday.period_begin} a ${this.getDayName(lastWeekday.weekday)} ${lastWeekday.period_end}`;
+      }
+  
+      // Separar los horarios de fin de semana en otra línea
+      if (weekend.length > 0) {
+        const firstWeekend = weekend[0];
+        const lastWeekend = weekend[weekend.length - 1];
+        result += `\nSábado ${firstWeekend.period_begin} a Domingo ${lastWeekend.period_end}`;
+      }
+  
+      return result;
+    }
+  
+    return 'No disponible';
+  }
+  
+  // Método para convertir el número del día en nombre del día de la semana
+  getDayName(weekday: number): string {
+    const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    return days[weekday - 1]; // Restamos 1 porque el array empieza desde 0
   }
 }

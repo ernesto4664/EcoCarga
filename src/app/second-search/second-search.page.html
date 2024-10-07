@@ -101,12 +101,12 @@
                   <div class="icon-text">
                     <img src="assets/icon/iconoAC.png" alt="electrolineraAC.png Icon" class="icon">
                     <p>Conectores AC: {{ getConnectorStatus(station).acCount }}</p>
-                    <p *ngIf="getConnectorStatus(station).acChargingCount > 0">Cargando: {{ getConnectorStatus(station).acChargingCount }}</p>
+                    <p *ngIf="getConnectorStatus(station).acChargingCount > 0"> &nbsp;/&nbsp;Cargando: {{ getConnectorStatus(station).acChargingCount }}</p>
                   </div>
                   <div class="icon-text">
                     <img src="assets/icon/iconoDC.png" alt="electrolineraDC.png Icon" class="icon">
                     <p>Conectores DC: {{ getConnectorStatus(station).dcCount }}</p>
-                    <p *ngIf="getConnectorStatus(station).dcChargingCount > 0">Cargando: {{ getConnectorStatus(station).dcChargingCount }}</p>
+                    <p *ngIf="getConnectorStatus(station).dcChargingCount > 0"> &nbsp;/&nbsp;Cargando: {{ getConnectorStatus(station).dcChargingCount }}</p>
                   </div>
                 </div>
               </div>

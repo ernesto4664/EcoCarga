@@ -160,15 +160,30 @@ checkCacheAndShowAlert() {
       this.uniqueConnectors = [];
       return;
     }
-
+  
+    // Definimos los estándares permitidos para AC y DC
+    const validStandardsAC = ['Tipo 2', 'Tipo 1', 'GB/T AC'];
+    const validStandardsDC = ['CCS 2', 'CCS 1', 'CHAdeMO', 'GB/T DC'];
+  
+    // Filtramos los conectores basados en los tipos de energía (AC o DC)
     this.connectors = this.allConnectors.filter(connector => {
       if (connector.status === 'FUERA DE LINEA') return false;
-      if (this.typeAC && !this.typeDC && connector.power_type?.startsWith('AC')) return true;
-      if (this.typeDC && !this.typeAC && connector.power_type?.startsWith('DC')) return true;
-      if (this.typeAC && this.typeDC) return connector.power_type?.startsWith('AC') || connector.power_type?.startsWith('DC');
-      return false;
+  
+      const isAC = connector.power_type?.startsWith('AC');
+      const isDC = connector.power_type?.startsWith('DC');
+  
+      // Filtramos según los estándares y el tipo de energía
+      if (this.typeAC && isAC && validStandardsAC.includes(connector.standard)) {
+        return true;
+      }
+      if (this.typeDC && isDC && validStandardsDC.includes(connector.standard)) {
+        return true;
+      }
+  
+      return false; // Excluir conectores que no coinciden con los estándares permitidos
     });
-
+  
+    // Remover duplicados por estándar
     this.uniqueConnectors = this.getUniqueConnectors(this.connectors);
   }
 
@@ -283,6 +298,7 @@ checkCacheAndShowAlert() {
       'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
       'GB/T AC (CABLE - AC)': 'GBT_AC.png',
       'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
+      'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
       'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
       'GB/T DC (CABLE - DC)': 'GBT_DC.png',
     };
@@ -301,10 +317,10 @@ checkCacheAndShowAlert() {
     const displayNameMap: { [key: string]: string } = {
       'Tipo 2': 'Conector tipo 2',
       'Tipo 1': 'Conector tipo 1',
+      'GB/T AC': 'Conector GBT AC',
       'CCS 2': 'CCS 2 (Combinado tipo 2)',
       'CCS 1': 'CCS 1 (Combinado tipo 1)',
       'CHAdeMO': 'CHAdeMO',
-      'GB/T AC': 'Conector GBT AC',
       'GB/T DC': 'Conector GBT DC',
     };
   

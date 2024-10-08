@@ -72,14 +72,9 @@ p.msj-principal {
 }
 
 // Estilos para elementos seleccionados
-::ng-deep .selected {
-  background-color: map-get($colors, secondary) !important;
-  color: map-get($colors, white) !important;
-}
-
-::ng-deep ion-item.selected .item-native {
-  background-color: map-get($colors, secondary) !important;
-  color: map-get($colors, white) !important;
+::ng-deep ion-item.selected {
+  --background: #31B17D !important;
+  --color: #FFF !important;
 }
 
 // Estilos para elementos ocultos
@@ -103,59 +98,6 @@ ion-thumbnail {
     height: 100%;
     object-fit: contain;
   }
-}
-
-// Estilos para las alertas
-::ng-deep .alert-wrapper {
-  text-align: center;
-}
-
-::ng-deep .alert-head {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 100%;
-}
-
-::ng-deep .alert-title,
-::ng-deep .alert-message {
-  text-align: center;
-  width: 100%;
-}
-
-::ng-deep .alert-button-group {
-  display: flex;
-  justify-content: center;
-}
-
-.custom-alert .alert-button {
-  --background-color: map-get($colors, secondary) !important;
-  --background-activated: #0056b3;
-  --background-focused: #0056b3;
-  --background-hover: #0056b3;
-  --color: map-get($colors, white);
-}
-
-::ng-deep .alert-button.sc-ion-alert-md {
-  background-color: map-get($colors, secondary) !important;
-  padding: 5px 15px;
-}
-
-::ng-deep ion-item.selected {
-  margin-top: 2px;
-  --background: map-get($colors, secondary) !important;
-  color: map-get($colors, white) !important;
-}
-
-::ng-deep ion-item.selected .connector-info p {
-  width: fit-content;
-  padding: 5px 25px;
-  color: map-get($colors, white) !important;
-}
-
-::ng-deep ion-item.selected .item-native {
-  background: map-get($colors, secondary) !important;
 }
 
 // Estilos para el loader

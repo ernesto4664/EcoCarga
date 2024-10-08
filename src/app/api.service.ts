@@ -10,8 +10,7 @@ export class ApiService {
   // Variables de configuración
   private apiUrl = 'https://backend.electromovilidadenlinea.cl/locations';
   private token = 'eyJraWQiOiJvSWM1K3NpU25yWnZ3...'; // Token (truncado por seguridad)
-  private firstLoad = true;
-  
+
   private cache: any[] = [];
   private cacheLifetime = 2 * 3600 * 1000; // 2 horas
   private lastFetchTime = 0;
@@ -100,6 +99,7 @@ export class ApiService {
     }
   }
 
+
   checkFirstSearchCacheValidity(): boolean {
     const cachedTime = localStorage.getItem('firstSearchCacheTime');
     if (cachedTime) {
@@ -108,6 +108,7 @@ export class ApiService {
     }
     return false;
   }
+
 
   clearFirstSearchCache() {
     localStorage.removeItem('cacheFirst-Search');
@@ -219,11 +220,11 @@ export class ApiService {
 
   // Métodos para verificar si es la primera carga
 
-  isFirstLoad() {
-    return this.firstLoad;
-  }
-
   setFirstLoad(value: boolean) {
-    this.firstLoad = value;
+    localStorage.setItem('isFirstLoad', JSON.stringify(value));
+  }
+  
+  isFirstLoad() {
+    return JSON.parse(localStorage.getItem('isFirstLoad') || 'true');
   }
 }

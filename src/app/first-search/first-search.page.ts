@@ -27,41 +27,44 @@ export class FirstSearchPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.listenForRouteChanges();
-  
+    this.listenForRouteChanges();  // Escuchar cambios en la navegación
+
     // Verificar si es la primera carga
     const isFirstLoad = this.apiService.isFirstLoad();
     const isCacheValid = this.apiService.checkFirstSearchCacheValidity();
-  
+
     console.log('Cache validity:', isCacheValid);
     console.log('Is first load:', isFirstLoad);
-  
-    if (isFirstLoad) {
-      // Si es la primera vez, limpiar los filtros y NO mostrar la alerta
-      this.clearFilters();
-      this.apiService.setFirstLoad(false); // Marcar como ya no es la primera vez
-    } else if (isCacheValid) {
-      // Si no es la primera vez y la caché es válida, mostrar la alerta
-      this.showCacheAlert();
-    }
-  
-    // Siempre busca los conectores
-    this.fetchAllConnectors();
-  }
 
-  ngOnDestroy() {
-    this.apiService.stopConnectorStatusUpdates();
+    if (isFirstLoad) {
+      this.clearFilters();
+      this.apiService.setFirstLoad(false);  // Ya no es la primera carga
+    } else if (isCacheValid) {
+      this.showCacheAlert();  // Mostrar alerta si la cache es válida
+    }
+
+    this.fetchAllConnectors();  // Buscar los conectores siempre
   }
 
   listenForRouteChanges() {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         if (this.router.url === '/first-search') {
-          this.showCacheAlert();  // Mostrar alerta si vuelve a first-search
+          console.log('Regresaste a first-search');
+          const isCacheValid = this.apiService.checkFirstSearchCacheValidity();
+          console.log('Cache validity al regresar:', isCacheValid);
+          if (isCacheValid) {
+            console.log('Mostrando alerta de filtros guardados');
+            this.showCacheAlert();
+          }
         }
       }
     });
-}
+  }
+  
+  ngOnDestroy() {
+    this.apiService.stopConnectorStatusUpdates();
+  }
 
 checkCacheAndShowAlert() {
   const isFirstLoad = this.apiService.isFirstLoad();
@@ -115,7 +118,8 @@ checkCacheAndShowAlert() {
             this.navigateToSecondSearch();
           }
         }
-      ]
+      ],
+      cssClass: 'custom-alert-buttons'  // Clase CSS personalizada
     });
     await alert.present();
   }
@@ -134,22 +138,23 @@ checkCacheAndShowAlert() {
   }
 
   fetchAllConnectors() {
-    this.loading = true; // Mostrar preloader
+    this.loading = true; // Mostrar indicador de carga
+  
     this.apiService.fetchAllLocations().subscribe(
       (response: any) => {
         if (Array.isArray(response)) {
           this.allConnectors = response.reduce((acc: any[], station: any) => 
             acc.concat(station.evses.reduce((innerAcc: any[], evse: { connectors: any; }) => 
               innerAcc.concat(evse.connectors), [])), []);
-          this.filterConnectors();
+          this.filterConnectors(); // Aplicar filtros a los conectores
         } else {
-          console.error('Formato de respuesta API inesperado:', response);
+          console.error('Formato de respuesta inesperado:', response);
         }
-        this.loading = false; // Ocultar preloader
+        this.loading = false; // Ocultar indicador de carga
       },
       (error) => {
         console.error('Error al recuperar conectores:', error);
-        this.loading = false; // Ocultar preloader en caso de error
+        this.loading = false; // Ocultar indicador de carga en caso de error
       }
     );
   }
@@ -262,13 +267,16 @@ checkCacheAndShowAlert() {
   }
 
   navigateToSecondSearch() {
+    // Almacenar los filtros actuales en la caché
+    this.storeFirstSearchCache();
+  
     let allSelectedConnectors: any[] = [];
     this.selectedConnectors.forEach(selected => {
       allSelectedConnectors = allSelectedConnectors.concat(
         this.connectors.filter(connector => connector.standard === selected.standard)
       );
     });
-
+  
     const navigationExtras = {
       state: {
         selectedConnectors: allSelectedConnectors
@@ -335,6 +343,7 @@ checkCacheAndShowAlert() {
       selectedIndexes: this.selectedIndexes,
       selectedConnectors: this.selectedConnectors,
     };
+    console.log('Almacenando filtros en cache:', filters);  // Verificar los filtros antes de almacenar
     this.apiService.storeFirstSearchCache(filters);
   }
 }

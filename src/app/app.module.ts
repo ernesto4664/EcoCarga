@@ -17,10 +17,12 @@ import { ApiService } from './api.service';
 
 import { IonicStorageModule } from '@ionic/storage-angular';
 
+import { StationDetailsModalComponent } from './station-details-modal/station-details-modal.component';
+
 register(); // Registra los componentes personalizados de Swiper
 
 @NgModule({
-  declarations: [AppComponent, SafeUrlPipe], // Declara aquí
+  declarations: [AppComponent, SafeUrlPipe, StationDetailsModalComponent],
   imports: [
     BrowserModule, 
     IonicModule.forRoot(),

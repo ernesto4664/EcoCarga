@@ -31,14 +31,16 @@
   <div class="container" style="margin-bottom: 50px; padding-bottom: 50px;" *ngIf="!loading && uniqueConnectors.length > 0">
     <h2 style="text-align: center;">Conectores Disponibles</h2>
     <ion-list>
-      <ion-item *ngFor="let connector of uniqueConnectors; let i = index" (click)="selectConnector(i)" [ngClass]="{'selected': selectedIndexes.includes(i)}">
+      <ion-item *ngFor="let connector of uniqueConnectors; let i = index" 
+              (click)="selectConnector(i)" 
+              [ngClass]="{'selected': selectedIndexes.includes(i)}">
         <ion-thumbnail slot="start">
-          <img [src]="getIconPath(connector)" alt="Icono Conector">
+        <img [src]="getIconPath(connector)" alt="Icono Conector">
         </ion-thumbnail>
         <div class="connector-info">
-          <p style="margin-bottom:10px;">{{ getConnectorDisplayName(connector) }}</p>
+        <p style="margin-bottom:10px;">{{ getConnectorDisplayName(connector) }}</p>
         </div>
-      </ion-item>
+        </ion-item>
     </ion-list>
   </div>
 </ion-content>

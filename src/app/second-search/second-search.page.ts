@@ -127,8 +127,11 @@ export class SecondSearchPage implements OnInit {
     this.apiService.getStationsByConnectors(connectorIds).subscribe(
       (stations: any) => {
         this.filterUnavailableEVSEs(stations); // Filtrar los EVSEs no disponibles
-        this.stations = this.removeDuplicateStations(this.sortStationsByDistance(stations));
         
+        // Filtra las estaciones que se quedan sin EVSEs después del filtro de disponibilidad
+        this.stations = this.removeDuplicateStations(this.sortStationsByDistance(stations))
+          .filter(station => station.evses.length > 0);  // <-- AQUI SE APLICA EL FILTRO
+  
         // Aplicar filtro de conectores basados en los estándares seleccionados
         this.stations.forEach(station => {
           station.evses.forEach((evse: { connectors: any[]; }) => {
@@ -146,6 +149,7 @@ export class SecondSearchPage implements OnInit {
         if (this.selectedDistance > 0) {
           this.stations = this.stations.filter(station => parseFloat(station.distance) <= this.selectedDistance);
         }
+        
         // Aplica el filtro de PSE
         if (this.selectedPSE) {
           this.stations = this.stations.filter(station => station.pse && station.pse.includes(this.selectedPSE));
@@ -324,35 +328,30 @@ export class SecondSearchPage implements OnInit {
   
     const regularHours = station.opening_times.regular_hours;
     if (regularHours.length > 0) {
-      const weekdays = regularHours.filter((hour: { weekday: number; }) => hour.weekday >= 1 && hour.weekday <= 5);
-      const weekend = regularHours.filter((hour: { weekday: number; }) => hour.weekday === 6 || hour.weekday === 7);
+      const firstHour = regularHours[0];
+      const sameHours = regularHours.every((hour: { period_begin: any; period_end: any; }) => hour.period_begin === firstHour.period_begin && hour.period_end === firstHour.period_end);
   
-      let result = '';
+      if (sameHours) {
+        return `De Lunes a Domingo ${firstHour.period_begin} a ${firstHour.period_end}`;
+      } else {
+        let result = '';
+        const weekdays = regularHours.filter((hour: { weekday: number; }) => hour.weekday >= 1 && hour.weekday <= 5);
+        const weekend = regularHours.filter((hour: { weekday: number; }) => hour.weekday === 6 || hour.weekday === 7);
   
-      // Mostrar horarios de lunes a viernes
-      if (weekdays.length > 0) {
-        const firstWeekday = weekdays[0];
-        const lastWeekday = weekdays[weekdays.length - 1];
-        result += `De ${this.getDayName(firstWeekday.weekday)} ${firstWeekday.period_begin} a ${this.getDayName(lastWeekday.weekday)} ${lastWeekday.period_end}`;
-      }
+        if (weekdays.length > 0) {
+          const firstWeekday = weekdays[0];
+          const lastWeekday = weekdays[weekdays.length - 1];
+          result += `De ${this.getDayName(firstWeekday.weekday)} ${firstWeekday.period_begin} a ${this.getDayName(lastWeekday.weekday)} ${lastWeekday.period_end}`;
+        }
   
-      // Si hay horarios de fin de semana, verificamos si son iguales o no a los de entre semana
-      if (weekend.length > 0) {
-        const firstWeekend = weekend[0];
-        const lastWeekend = weekend[weekend.length - 1];
-  
-        // Verificar si los horarios del fin de semana son iguales a los de lunes a viernes
-        const sameWeekendHours = weekdays.length > 0 &&
-          firstWeekend.period_begin === firstWeekend.period_begin &&
-          lastWeekend.period_end === lastWeekend.period_end;
-  
-        // Si los horarios son diferentes, mostramos los del fin de semana en una línea separada
-        if (!sameWeekendHours) {
+        if (weekend.length > 0) {
+          const firstWeekend = weekend[0];
+          const lastWeekend = weekend[weekend.length - 1];
           result += `\nSábado ${firstWeekend.period_begin} a Domingo ${lastWeekend.period_end}`;
         }
-      }
   
-      return result;
+        return result;
+      }
     }
   
     return 'No disponible';

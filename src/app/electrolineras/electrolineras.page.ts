@@ -1,9 +1,10 @@
 import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { Geolocation } from '@capacitor/geolocation';
 import { ApiService } from '../api.service';
-import { AlertController } from '@ionic/angular';
-import { Loader } from '@googlemaps/js-api-loader';
-import { environment } from '../../environments/environment';
+import { ModalController } from '@ionic/angular';
+import { StationDetailsModalComponent } from '../station-details-modal/station-details-modal.component';
+import { environment } from 'src/environments/environment';
+import { Loader } from '@googlemaps/js-api-loader'; // Importar Loader
 
 @Component({
   selector: 'app-electrolineras',
@@ -13,10 +14,11 @@ import { environment } from '../../environments/environment';
 export class ElectrolinerasPage implements OnInit, AfterViewInit {
   map: google.maps.Map | undefined;
   availableStations: any[] = [];
+  iconPath = 'assets/icon/'; // Ruta base de los íconos
 
   constructor(
     private apiService: ApiService,
-    private alertController: AlertController
+    private modalCtrl: ModalController
   ) {}
 
   ngOnInit() {
@@ -34,22 +36,18 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
   }
 
   async initializeMap() {
-    const loader = new Loader({
+    const loader = new Loader({ // Aquí declaramos 'loader' correctamente
       apiKey: environment.googleMapsApiKey,
       version: 'weekly',
       libraries: ['places'],
     });
 
-    await loader.load(); // Cargar el API de forma asíncrona
+    await loader.load();
 
     this.map = new google.maps.Map(document.getElementById('map') as HTMLElement, {
       center: { lat: -34.929, lng: 138.601 },
       zoom: 15,
     });
-
-    // Llama a addMarker con un objeto 'station' como cuarto argumento
-    const dummyStation = { name: 'Estación de carga', address: 'Dirección de carga' }; // Objeto ficticio
-    this.addMarker(-34.929, 138.601, 'Estación de carga', dummyStation);
   }
 
   async getCurrentLocation() {
@@ -66,13 +64,6 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
       }
     } catch (error) {
       console.error('Error al obtener la ubicación actual:', error);
-      // Mostrar un mensaje de alerta
-      const alert = await this.alertController.create({
-        header: 'Error',
-        message: 'No se pudo obtener la ubicación actual.',
-        buttons: ['OK'],
-      });
-      await alert.present();
     }
   }
 
@@ -87,13 +78,11 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
       this.availableStations.forEach(station => {
         const { latitude, longitude } = station.coordinates;
 
-        // Validación de coordenadas
         if (latitude && longitude) {
           const lat = parseFloat(latitude);
           const lng = parseFloat(longitude);
 
           if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-            // Coordenadas válidas, añadir marcador
             this.addMarker(lat, lng, station.name, station);
           } else {
             console.error("Coordenadas fuera de rango:", station);
@@ -112,13 +101,13 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
         map: this.map,
         title: title,
         icon: {
-          url: 'assets/icon/electrolineras.png', // Ruta hacia tu imagen personalizada
-          scaledSize: new google.maps.Size(50, 50), // Escala la imagen (opcional)
+          url: 'assets/icon/electrolineras.png',
+          scaledSize: new google.maps.Size(50, 50),
           origin: new google.maps.Point(0, 0),
-          anchor: new google.maps.Point(25, 50) // Ajusta la posición del ícono en el mapa
+          anchor: new google.maps.Point(25, 50)
         }
       });
-  
+
       marker.addListener('click', () => {
         this.showStationDetails(station);
       });
@@ -128,24 +117,122 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
   }
 
   async showStationDetails(station: any) {
-    const availableConnectors = station.evses.reduce((acc: any[], evse: any) => {
-      if (evse.status === 'DISPONIBLE') {
-        return acc.concat(evse.connectors);
-      }
-      return acc;
-    }, []);
-
-    const connectorDetails = availableConnectors
-      .map((connector: { standard: string; power_type: string }) => `Conector: ${connector.standard}, Tipo: ${connector.power_type}`)
-      .join('\n');
-
-    const alert = await this.alertController.create({
-      header: station.name,
-      subHeader: station.address,
-      message: `Conectores disponibles:\n${connectorDetails || 'No hay conectores disponibles.'}`,
-      buttons: ['OK'],
+    const availableConnectorGroups: { [key: string]: { count: number; power_type: string; icon: string } } = {};
+    const occupiedConnectorGroups: { [key: string]: { count: number; power_type: string; icon: string } } = {};
+  
+    station.evses.forEach((evse: any) => {
+      evse.connectors.forEach((connector: any) => {
+        const key = `${connector.standard}, Tipo: ${connector.power_type}`;
+        const icon = this.getIconPath(connector);
+  
+        if (evse.status === 'DISPONIBLE') {
+          if (availableConnectorGroups[key]) {
+            availableConnectorGroups[key].count += 1;
+          } else {
+            availableConnectorGroups[key] = { count: 1, power_type: connector.power_type, icon };
+          }
+        } else {
+          if (occupiedConnectorGroups[key]) {
+            occupiedConnectorGroups[key].count += 1;
+          } else {
+            occupiedConnectorGroups[key] = { count: 1, power_type: connector.power_type, icon };
+          }
+        }
+      });
     });
+  
+    const availableConnectors = Object.entries(availableConnectorGroups)
+      .map(([connector, data]) => ({
+        icon: data.icon,
+        text: `${connector} Total: ${data.count}`
+      }));
+  
+    const occupiedConnectors = Object.entries(occupiedConnectorGroups)
+      .map(([connector, data]) => ({
+        icon: data.icon,
+        text: `${connector} Total: ${data.count}`
+      }));
+  
+    const modal = await this.modalCtrl.create({
+      component: StationDetailsModalComponent,
+      componentProps: {
+        station,
+        availableConnectors: availableConnectors || [],
+        occupiedConnectors: occupiedConnectors || []
+      }
+    });
+  
+    await modal.present();
+  
+    const { data } = await modal.onDidDismiss();
+    if (data?.action === 'goToStation') {
+      this.calculateAndDisplayRoute(station);
+    }
+  }
+  
+  getIconPath(connector: any): string {
+    if (!connector.standard || !connector.format || !connector.power_type) {
+      console.warn('Conector con datos incompletos encontrado:', connector);
+      return this.iconPath + 'default.jpeg';  // Icono por defecto si faltan datos
+    }
+  
+    // Imprimir valores de conector para depuración
+    console.log('Conector:', connector);
+    
+    const iconMap: { [key: string]: string } = {
+      'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
+      'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
+      'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
+      'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
+      'GB/T AC (CABLE - AC)': 'GBT_AC.png',
+      'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
+      'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
+      'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
+      'GB/T DC (CABLE - DC)': 'GBT_DC.png',
+    };
+  
+    const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
+  
+    // Imprimir clave generada y verificar si coincide con el mapa de iconos
+    console.log('Clave generada:', key);
+  
+    return this.iconPath + (iconMap[key] || 'default.jpeg');  // Icono por defecto si no hay coincidencia en el mapa
+  }
 
-    await alert.present();
+  calculateAndDisplayRoute(station: any) {
+    if (!this.map) return;
+
+    const directionsService = new google.maps.DirectionsService();
+    const directionsRenderer = new google.maps.DirectionsRenderer();
+    directionsRenderer.setMap(this.map);
+
+    Geolocation.getCurrentPosition().then((position) => {
+      const userLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+
+      const stationLocation = {
+        lat: parseFloat(station.coordinates.latitude),
+        lng: parseFloat(station.coordinates.longitude),
+      };
+
+      directionsService.route(
+        {
+          origin: userLocation,
+          destination: stationLocation,
+          travelMode: google.maps.TravelMode.DRIVING,
+        },
+        (response, status) => {
+          if (status === 'OK') {
+            directionsRenderer.setDirections(response);
+          } else {
+            console.error('Solicitud de direcciones fallida debido a ' + status);
+          }
+        }
+      );
+    }).catch(error => {
+      console.error('Error al obtener la ubicación actual para la ruta:', error);
+    });
   }
 }

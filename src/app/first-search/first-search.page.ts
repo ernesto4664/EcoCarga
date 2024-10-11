@@ -88,41 +88,77 @@ checkCacheAndShowAlert() {
   }
 }
 
-  loadCachedFilters() {
-    const cachedFilters = this.apiService.getFirstSearchCache();
-    if (cachedFilters) {
-      this.typeAC = cachedFilters.typeAC;
-      this.typeDC = cachedFilters.typeDC;
-      this.selectedIndexes = cachedFilters.selectedIndexes;
-      this.selectedConnectors = cachedFilters.selectedConnectors;
-      this.filterConnectors(); // Aplicar filtros cargados
-    }
+loadCachedFilters() {
+  const cachedFilters = this.apiService.getFirstSearchCache();
+  if (cachedFilters) {
+    console.log('Filtros cargados desde la caché:', cachedFilters); // Verificar los filtros cargados
+    this.typeAC = cachedFilters.typeAC;
+    this.typeDC = cachedFilters.typeDC;
+    this.selectedIndexes = cachedFilters.selectedIndexes;
+    this.selectedConnectors = cachedFilters.selectedConnectors;
+    this.filterConnectors(); // Aplicar filtros cargados
+    
+    // Realizar una nueva consulta a la API incluso después de cargar los filtros desde la caché
+    console.log('Forzando una nueva consulta a la API con los filtros cargados');
+    this.fetchAllConnectors(); // Llama a la función que consulta la API para obtener los conectores
   }
+}
 
-  async showCacheAlert() {
-    const alert = await this.alertController.create({
-      header: 'Filtros guardados',
-      message: '¿Deseas mantener los mismos filtros de la búsqueda anterior?',
-      buttons: [
-        {
-          text: 'No, reiniciar filtros',
-          role: 'cancel',
-          handler: () => {
-            this.clearFilters();
-          }
-        },
-        {
-          text: 'Sí, mantener filtros',
-          handler: () => {
-            this.loadCachedFilters();
-            this.navigateToSecondSearch();
-          }
+async showCacheAlert() {
+  const alert = await this.alertController.create({
+    header: 'Filtros guardados',
+    message: '¿Deseas mantener los mismos filtros de la búsqueda anterior?',
+    buttons: [
+      {
+        text: 'No, reiniciar filtros',
+        role: 'cancel',
+        handler: () => {
+          console.log('Opción seleccionada: No, reiniciar filtros');
+          this.clearFilters(); // Reiniciar filtros
+          this.fetchAllConnectors(); // Hacer un nuevo ping a la API para actualizar los datos sin filtros
         }
-      ],
-      cssClass: 'custom-alert-buttons'  // Clase CSS personalizada
-    });
-    await alert.present();
-  }
+      },
+      {
+        text: 'Sí, mantener filtros',
+        handler: () => {
+          console.log('Opción seleccionada: Sí, mantener filtros');
+          this.loadCachedFilters(); // Cargar filtros guardados
+          this.fetchAllConnectorsWithFilter(); // Hacer un nuevo ping a la API y luego aplicar los filtros cargados
+          this.navigateToSecondSearch(); // Navegar a la segunda búsqueda
+        }
+      }
+    ],
+    cssClass: 'custom-alert-buttons' // Clase CSS personalizada
+  });
+  await alert.present();
+}
+
+// Nueva función para hacer el ping y aplicar filtros
+fetchAllConnectorsWithFilter() {
+  this.loading = true;
+  console.log('Consultando la API para obtener conectores con filtros aplicados (actualización con filtros anteriores)...');
+
+  this.apiService.fetchAllLocations().subscribe(
+    (response: any) => {
+      console.log('Respuesta de la API:', response);
+      if (Array.isArray(response)) {
+        this.allConnectors = response.reduce((acc: any[], station: any) =>
+          acc.concat(station.evses.reduce((innerAcc: any[], evse: { connectors: any; }) =>
+            innerAcc.concat(evse.connectors), [])), []);
+        console.log('Aplicando filtros a los conectores recibidos...');
+        this.filterConnectors(); // Aplicar los filtros previamente cargados después de obtener los datos
+      } else {
+        console.error('Formato de respuesta inesperado:', response);
+      }
+      this.loading = false;
+    },
+    (error) => {
+      console.error('Error al recuperar conectores:', error);
+      this.loading = false;
+    }
+  );
+}
+
 
   clearFilters() {
     this.typeAC = false;
@@ -138,26 +174,46 @@ checkCacheAndShowAlert() {
   }
 
   fetchAllConnectors() {
-    this.loading = true; // Mostrar indicador de carga
-  
+    this.loading = true;
+    console.log('Consultando la API para obtener todos los conectores sin filtros (actualización general)...');
+    
     this.apiService.fetchAllLocations().subscribe(
       (response: any) => {
-        if (Array.isArray(response)) {
-          this.allConnectors = response.reduce((acc: any[], station: any) => 
-            acc.concat(station.evses.reduce((innerAcc: any[], evse: { connectors: any; }) => 
-              innerAcc.concat(evse.connectors), [])), []);
-          this.filterConnectors(); // Aplicar filtros a los conectores
+        console.log('Respuesta de la API:', response);
+    
+        if (Array.isArray(response) && response.length > 0) {
+          this.allConnectors = response.reduce((acc: any[], station: any) => {
+            if (station && Array.isArray(station.evses)) {
+              return acc.concat(station.evses.reduce((innerAcc: any[], evse: { connectors: any; }) => {
+                if (evse && Array.isArray(evse.connectors)) {
+                  return innerAcc.concat(evse.connectors);
+                }
+                return innerAcc;
+              }, []));
+            }
+            return acc;
+          }, []);
+    
+          console.log('Conectores obtenidos:', this.allConnectors.length);
+          console.log('Filtrando conectores para aplicar configuración actual...');
+          this.filterConnectors(); // Aplicar filtros según la configuración actual
+    
         } else {
-          console.error('Formato de respuesta inesperado:', response);
+          console.warn('No se encontraron datos de conectores o la respuesta tiene un formato inesperado.');
+          this.allConnectors = [];
+          this.connectors = [];
+          this.uniqueConnectors = [];
         }
-        this.loading = false; // Ocultar indicador de carga
+    
+        this.loading = false;
       },
       (error) => {
         console.error('Error al recuperar conectores:', error);
-        this.loading = false; // Ocultar indicador de carga en caso de error
+        this.loading = false;
       }
     );
   }
+  
 
 // Método para filtrar los conectores en función de los tipos seleccionados
 filterConnectors() {
@@ -323,6 +379,7 @@ getIconPath(connector: any): string {
     'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
     'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
     'GB/T AC (CABLE - AC)': 'GBT_AC.png',
+    'GB/T AC (SOCKET - AC)': 'GBT_AC.png',
     'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
     'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
     'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
@@ -344,11 +401,11 @@ getIconPath(connector: any): string {
     const displayNameMap: { [key: string]: string } = {
       'Tipo 2': 'Conector tipo 2',
       'Tipo 1': 'Conector tipo 1',
-      'GB/T AC': 'Conector GBT AC',
+      'GB/T AC': 'Conector GB/T AC',
       'CCS 2': 'CCS 2 (Combinado tipo 2)',
       'CCS 1': 'CCS 1 (Combinado tipo 1)',
       'CHAdeMO': 'CHAdeMO',
-      'GB/T DC': 'Conector GBT DC',
+      'GB/T DC': 'Conector GB/T DC',
     };
   
     return displayNameMap[connector.standard] || connector.standard;
@@ -362,7 +419,7 @@ getIconPath(connector: any): string {
       selectedIndexes: this.selectedIndexes,
       selectedConnectors: this.selectedConnectors,
     };
-    console.log('Almacenando filtros en cache:', filters);  // Verificar los filtros antes de almacenar
+    console.log('Almacenando filtros en cache:', filters);  // Log para verificar los filtros antes de almacenar
     this.apiService.storeFirstSearchCache(filters);
   }
 }

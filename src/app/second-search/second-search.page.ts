@@ -312,7 +312,7 @@ export class SecondSearchPage implements OnInit {
       {
         label: 'Disponible',
         count: availableConnectors.length,
-        color: '#049F2F'
+        color: '#279769'
       },
       {
         label: 'Cargando',
@@ -365,6 +365,20 @@ export class SecondSearchPage implements OnInit {
     let result = '';
     let weekdayRanges: { start: number; end: number; period_begin: string; period_end: string }[] = [];
   
+    // Asegurarse de que todos los días de la semana se cubran, incluso los que no están en el arreglo regularHours
+    const diasCubiertos = new Set(regularHours.map((h: { weekday: any; }) => h.weekday));
+  
+    // Agregar días faltantes como "Cerrado"
+    for (let i = 1; i <= 7; i++) {
+      if (!diasCubiertos.has(i)) {
+        regularHours.push({
+          weekday: i,
+          period_begin: 'Cerrado',
+          period_end: 'Cerrado'
+        });
+      }
+    }
+  
     // Agrupar días consecutivos con el mismo horario
     for (let i = 0; i < regularHours.length; i++) {
       const currentDay = regularHours[i];
@@ -393,10 +407,10 @@ export class SecondSearchPage implements OnInit {
     weekdayRanges.forEach((range, index) => {
       const dayStart = this.getDayName(range.start);
       const dayEnd = this.getDayName(range.end);
-      const hours = `${range.period_begin} a ${range.period_end}`;
+      const hours = range.period_begin === 'Cerrado' ? 'Cerrado' : `${range.period_begin} a ${range.period_end}`;
   
       if (dayStart === dayEnd) {
-        result += `${dayStart} ${hours}`;
+        result += `${dayStart}: ${hours}`;
       } else {
         result += `De ${dayStart} ${range.period_begin} a ${dayEnd} ${range.period_end}`;
       }

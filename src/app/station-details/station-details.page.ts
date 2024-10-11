@@ -152,7 +152,7 @@ export class StationDetailsPage implements OnInit {
   getStatusColor(status: string): string {
     switch (status) {
       case 'DISPONIBLE':
-        return 'green';
+        return '#279769';
       case 'OCUPADO':
         return '#f53d3d';
       case 'INOPERATIVO':
@@ -246,7 +246,7 @@ export class StationDetailsPage implements OnInit {
   getActivationIcon(capability: string): string {
     const activationIcons: { [key: string]: string } = {
       'APP': 'assets/icon/app.png',
-      'RFID': 'assets/icon/rfid.png',
+      'RFID': 'assets/icon/rfdi.png',
       'QR': 'assets/icon/qr-code.png',
       'PORTAL': 'assets/icon/portal.png',
     };

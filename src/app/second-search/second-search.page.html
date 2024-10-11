@@ -113,7 +113,10 @@
 
               <div class="icon-text">
                 <img src="assets/icon/hours.png" alt="horarios" class="icon">
-                <p>Horarios: {{ getOpeningHours(station) }}</p>
+                <div class="hours-container">
+                  <p>Horarios:</p>
+                  <div [innerHTML]="getOpeningHours(station)"></div>
+                </div>
               </div>
               <div *ngIf="station.opening_times.exceptional_openings.length > 0">
                 <div class="icon-text">

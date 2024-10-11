@@ -159,38 +159,56 @@ checkCacheAndShowAlert() {
     );
   }
 
-  filterConnectors() {
-    if (!this.typeAC && !this.typeDC) {
-      this.connectors = [];
-      this.uniqueConnectors = [];
-      return;
-    }
-  
-    // Definimos los estándares permitidos para AC y DC
-    const validStandardsAC = ['Tipo 2', 'Tipo 1', 'GB/T AC'];
-    const validStandardsDC = ['CCS 2', 'CCS 1', 'CHAdeMO', 'GB/T DC'];
-  
-    // Filtramos los conectores basados en los tipos de energía (AC o DC)
-    this.connectors = this.allConnectors.filter(connector => {
-      if (connector.status === 'FUERA DE LINEA') return false;
-  
-      const isAC = connector.power_type?.startsWith('AC');
-      const isDC = connector.power_type?.startsWith('DC');
-  
-      // Filtramos según los estándares y el tipo de energía
-      if (this.typeAC && isAC && validStandardsAC.includes(connector.standard)) {
-        return true;
-      }
-      if (this.typeDC && isDC && validStandardsDC.includes(connector.standard)) {
-        return true;
-      }
-  
-      return false; // Excluir conectores que no coinciden con los estándares permitidos
-    });
-  
-    // Remover duplicados por estándar
-    this.uniqueConnectors = this.getUniqueConnectors(this.connectors);
+// Método para filtrar los conectores en función de los tipos seleccionados
+filterConnectors() {
+  if (!this.typeAC && !this.typeDC) {
+    this.connectors = [];
+    this.uniqueConnectors = [];
+    return;
   }
+
+  // Definimos los estándares permitidos para AC y DC
+  const validStandardsAC = ['Tipo 2', 'Tipo 1', 'GB/T AC'];
+  const validStandardsDC = ['CCS 2', 'CCS 1', 'CHAdeMO', 'GB/T DC'];
+
+  // Filtramos los conectores basados en los tipos de energía (AC o DC)
+  this.connectors = this.allConnectors.filter(connector => {
+    if (connector.status === 'FUERA DE LINEA') return false;
+
+    // Asignamos el power_type si es null, basado en el standard
+    const powerType = connector.power_type || this.getPowerTypeByStandard(connector.standard);
+
+    const isAC = powerType === 'AC';
+    const isDC = powerType === 'DC';
+
+    // Filtramos según los estándares y el tipo de energía
+    if (this.typeAC && isAC && validStandardsAC.includes(connector.standard)) {
+      return true;
+    }
+    if (this.typeDC && isDC && validStandardsDC.includes(connector.standard)) {
+      return true;
+    }
+
+    return false; // Excluir conectores que no coinciden con los estándares permitidos
+  });
+
+  // Remover duplicados por estándar
+  this.uniqueConnectors = this.getUniqueConnectors(this.connectors);
+}
+
+// Método auxiliar para asignar el power_type basado en el estándar si es null
+getPowerTypeByStandard(standard: string): string {
+  const acStandards = ['Tipo 2', 'Tipo 1', 'GB/T AC'];
+  const dcStandards = ['CCS 2', 'CCS 1', 'CHAdeMO', 'GB/T DC'];
+
+  if (acStandards.includes(standard)) {
+    return 'AC';
+  }
+  if (dcStandards.includes(standard)) {
+    return 'DC';
+  }
+  return 'Desconocido'; // Si el estándar no coincide con ninguno conocido, devolver 'Desconocido'
+}
 
   getUniqueConnectors(connectors: any[]): any[] {
     const unique = new Set();
@@ -292,28 +310,29 @@ checkCacheAndShowAlert() {
     });
   }
 
-  // Método para obtener el ícono del conector
-  getIconPath(connector: any): string {
-    if (!connector.standard || !connector.format || !connector.power_type) {
-      console.warn('Conector con datos incompletos encontrado:', connector);
-      return this.iconPath + 'default.jpeg';  // Icono por defecto si faltan datos
-    }
-  
-    const iconMap: { [key: string]: string } = {
-      'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
-      'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
-      'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
-      'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
-      'GB/T AC (CABLE - AC)': 'GBT_AC.png',
-      'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
-      'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
-      'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
-      'GB/T DC (CABLE - DC)': 'GBT_DC.png',
-    };
-  
-    const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
-    return this.iconPath + (iconMap[key] || 'default.jpeg');  // Icono por defecto si no hay coincidencia en el mapa
+// Método para obtener el ícono del conector
+getIconPath(connector: any): string {
+  // Asignar power_type si es null basado en el standard
+  if (!connector.power_type) {
+    connector.power_type = this.getPowerTypeByStandard(connector.standard);
   }
+
+  const iconMap: { [key: string]: string } = {
+    'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
+    'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
+    'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
+    'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
+    'GB/T AC (CABLE - AC)': 'GBT_AC.png',
+    'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
+    'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
+    'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
+    'GB/T DC (CABLE - DC)': 'GBT_DC.png',
+  };
+
+  // Construir la clave para buscar en el mapa de íconos
+  const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
+  return this.iconPath + (iconMap[key] || 'default.jpeg');  // Icono por defecto si no hay coincidencia en el mapa
+}
 
   // Método para mostrar el nombre del conector
   getConnectorDisplayName(connector: any): string {

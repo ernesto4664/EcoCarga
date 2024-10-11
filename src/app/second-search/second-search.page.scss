@@ -270,3 +270,14 @@ ion-button {
     margin-right: 5px;
   }
 }
+
+.hours-container {
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+  color: #7C7C7C;
+  font-size: 0.875rem;
+  margin-left: 5px; /* Ajusta el valor según sea necesario */
+}
+
+.hours-container p:first-child {
+  margin-bottom: 5px; /* Espacio entre "Horarios:" y el contenido */
+}

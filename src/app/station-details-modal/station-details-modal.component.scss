@@ -1,0 +1,13 @@
+.station-info {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+  }
+  
+  .station-info img {
+    margin-right: 8px; /* Espacio entre el ícono y el nombre */
+  }
+  
+  .station-name {
+    display: inline-block;
+  }

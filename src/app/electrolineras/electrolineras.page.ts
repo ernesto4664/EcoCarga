@@ -116,88 +116,106 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
     }
   }
 
-  async showStationDetails(station: any) {
-    const availableConnectorGroups: { [key: string]: { count: number; power_type: string; icon: string } } = {};
-    const occupiedConnectorGroups: { [key: string]: { count: number; power_type: string; icon: string } } = {};
-  
-    station.evses.forEach((evse: any) => {
-      evse.connectors.forEach((connector: any) => {
-        const key = `${connector.standard}, Tipo: ${connector.power_type}`;
-        const icon = this.getIconPath(connector);
-  
-        if (evse.status === 'DISPONIBLE') {
-          if (availableConnectorGroups[key]) {
-            availableConnectorGroups[key].count += 1;
-          } else {
-            availableConnectorGroups[key] = { count: 1, power_type: connector.power_type, icon };
-          }
+    // Método auxiliar para asignar el power_type basado en el estándar si es null
+private getPowerTypeByStandard(standard: string): string {
+  const acStandards = ['Tipo 2', 'Tipo 1', 'GB/T AC'];
+  const dcStandards = ['CCS 2', 'CCS 1', 'CHAdeMO', 'GB/T DC'];
+
+  if (acStandards.includes(standard)) {
+    return 'AC';
+  }
+  if (dcStandards.includes(standard)) {
+    return 'DC';
+  }
+  return 'Desconocido'; // Si el estándar no coincide con ninguno conocido, devolver 'Desconocido'
+}
+
+async showStationDetails(station: any) {
+  const availableConnectorGroups: { [key: string]: { count: number; power_type: string; icon: string } } = {};
+  const occupiedConnectorGroups: { [key: string]: { count: number; power_type: string; icon: string } } = {};
+
+  station.evses.forEach((evse: any) => {
+    evse.connectors.forEach((connector: any) => {
+      // Asignar el power_type si es null basado en el estándar
+      connector.power_type = connector.power_type || this.getPowerTypeByStandard(connector.standard);
+      connector.format = connector.format || 'CABLE'; // Si no tiene formato, asumimos "CABLE"
+
+      // Generar la clave para el ícono
+      const standard = connector.standard || 'Desconocido';
+      const powerType = connector.power_type;
+      const key = `${standard} - ${powerType}`;
+      const icon = this.getIconPath(connector);
+
+      // Agrupar conectores disponibles y ocupados
+      if (connector.status === 'DISPONIBLE') {
+        if (availableConnectorGroups[key]) {
+          availableConnectorGroups[key].count += 1;
         } else {
-          if (occupiedConnectorGroups[key]) {
-            occupiedConnectorGroups[key].count += 1;
-          } else {
-            occupiedConnectorGroups[key] = { count: 1, power_type: connector.power_type, icon };
-          }
+          availableConnectorGroups[key] = { count: 1, power_type: powerType, icon };
         }
-      });
-    });
-  
-    const availableConnectors = Object.entries(availableConnectorGroups)
-      .map(([connector, data]) => ({
-        icon: data.icon,
-        text: `${connector} Total: ${data.count}`
-      }));
-  
-    const occupiedConnectors = Object.entries(occupiedConnectorGroups)
-      .map(([connector, data]) => ({
-        icon: data.icon,
-        text: `${connector} Total: ${data.count}`
-      }));
-  
-    const modal = await this.modalCtrl.create({
-      component: StationDetailsModalComponent,
-      componentProps: {
-        station,
-        availableConnectors: availableConnectors || [],
-        occupiedConnectors: occupiedConnectors || []
+      } else {
+        if (occupiedConnectorGroups[key]) {
+          occupiedConnectorGroups[key].count += 1;
+        } else {
+          occupiedConnectorGroups[key] = { count: 1, power_type: powerType, icon };
+        }
       }
     });
-  
-    await modal.present();
-  
-    const { data } = await modal.onDidDismiss();
-    if (data?.action === 'goToStation') {
-      this.calculateAndDisplayRoute(station);
+  });
+
+  // Convertir los grupos en arreglos
+  const availableConnectors = Object.entries(availableConnectorGroups)
+  .map(([connector, data]) => ({
+    icon: data.icon,
+    text: `${connector.split(' - ')[0]}, Tipo: ${data.power_type} Disponibles: ${data.count}`,
+    textStyle: data.count > 0 ? 'green-text' : 'green-text' // Aquí puedes asignar una clase basada en la condición
+  }));
+
+
+  const occupiedConnectors = Object.entries(occupiedConnectorGroups)
+    .map(([connector, data]) => ({
+      icon: data.icon,
+      text: `${connector.split(' - ')[0]}, Tipo: ${data.power_type} Cargando: ${data.count}`
+    }));
+
+  // Mostrar el modal
+  const modal = await this.modalCtrl.create({
+    component: StationDetailsModalComponent,
+    componentProps: {
+      station,
+      availableConnectors,
+      occupiedConnectors
     }
+  });
+
+  await modal.present();
+
+  const { data } = await modal.onDidDismiss();
+  if (data?.action === 'goToStation') {
+    this.calculateAndDisplayRoute(station);
   }
-  
-  getIconPath(connector: any): string {
-    if (!connector.standard || !connector.format || !connector.power_type) {
-      console.warn('Conector con datos incompletos encontrado:', connector);
-      return this.iconPath + 'default.jpeg';  // Icono por defecto si faltan datos
-    }
-  
-    // Imprimir valores de conector para depuración
-    console.log('Conector:', connector);
-    
-    const iconMap: { [key: string]: string } = {
-      'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
-      'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
-      'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
-      'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
-      'GB/T AC (CABLE - AC)': 'GBT_AC.png',
-      'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
-      'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
-      'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
-      'GB/T DC (CABLE - DC)': 'GBT_DC.png',
-    };
-  
-    const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
-  
-    // Imprimir clave generada y verificar si coincide con el mapa de iconos
-    console.log('Clave generada:', key);
-  
-    return this.iconPath + (iconMap[key] || 'default.jpeg');  // Icono por defecto si no hay coincidencia en el mapa
-  }
+}
+
+// Método para obtener el ícono del conector
+getIconPath(connector: any): string {
+  // Si el power_type es null, asignarlo basado en el estándar
+  connector.power_type = connector.power_type || this.getPowerTypeByStandard(connector.standard);
+  connector.format = connector.format || 'CABLE'; // Si el formato no está definido, asumir "CABLE"
+
+  const iconMap: { [key: string]: string } = {
+    'Tipo 2 - AC': 'Tipo2AC.png',
+    'CCS 2 - DC': 'combinadotipo2.png',
+    'CCS 1 - DC': 'Tipo1DC.png',
+    'GB/T AC - AC': 'GBT_AC.png',
+    'Tipo 1 - AC': 'Tipo1AC.png',
+    'CHAdeMO - DC': 'CHADEMO.png',
+    'GB/T DC - DC': 'GBT_DC.png',
+  };
+
+  const key = `${connector.standard} - ${connector.power_type}`;
+
+  return this.iconPath + (iconMap[key] || 'default.jpeg');
+}
 
   calculateAndDisplayRoute(station: any) {
     if (!this.map) return;

@@ -135,13 +135,16 @@ export class SecondSearchPage implements OnInit {
         // Aplicar filtro de conectores basados en los estándares seleccionados
         this.stations.forEach(station => {
           station.evses.forEach((evse: { connectors: any[]; }) => {
+            // Filtrar los conectores para incluir aquellos que tienen el mismo estándar, y permitir power_type nulo
             evse.connectors = evse.connectors.filter((connector: any) =>
               this.selectedConnectors.some(selected =>
-                selected.standard === connector.standard && selected.power_type === connector.power_type
+                selected.standard === connector.standard &&
+                (selected.power_type === connector.power_type || connector.power_type === null)
               )
             );
           });
-          // Remover EVSEs que se queden sin conectores válidos
+        
+          // Remover EVSEs que se queden sin conectores válidos después del filtrado
           station.evses = station.evses.filter((evse: any) => evse.connectors.length > 0);
         });
   
@@ -278,21 +281,33 @@ export class SecondSearchPage implements OnInit {
     }
   }
 
+
   getConnectorStatus(station: any) {
     const connectorsInStation = station.evses.map((evse: any) => evse.connectors).flat();
+
+    // Establecemos el power_type basado en el standard si es nulo
+    connectorsInStation.forEach((connector: any) => {
+      if (!connector.power_type) {
+        connector.power_type = this.getPowerTypeByStandard(connector.standard);
+      }
+    });
+
     const filteredConnectors = connectorsInStation.filter((connector: any) =>
-      this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
+      this.selectedConnectors.some(selected =>
+        selected.standard === connector.standard &&
+        (selected.power_type === connector.power_type || connector.power_type === null)
+      )
     );
-  
+
     const availableConnectors = filteredConnectors.filter((connector: any) => connector.status === 'DISPONIBLE');
     const chargingConnectors = filteredConnectors.filter((connector: any) => connector.status === 'OCUPADO');
-  
-    const acCount = availableConnectors.filter((connector: any) => connector.power_type.startsWith('AC')).length;
-    const dcCount = availableConnectors.filter((connector: any) => connector.power_type.startsWith('DC')).length;
-  
-    const acChargingCount = chargingConnectors.filter((connector: any) => connector.power_type.startsWith('AC')).length;
-    const dcChargingCount = chargingConnectors.filter((connector: any) => connector.power_type.startsWith('DC')).length;
-  
+
+    const acCount = availableConnectors.filter((connector: any) => connector.power_type?.startsWith('AC')).length;
+    const dcCount = availableConnectors.filter((connector: any) => connector.power_type?.startsWith('DC')).length;
+
+    const acChargingCount = chargingConnectors.filter((connector: any) => connector.power_type?.startsWith('AC')).length;
+    const dcChargingCount = chargingConnectors.filter((connector: any) => connector.power_type?.startsWith('DC')).length;
+
     const statusDetails = [
       {
         label: 'Disponible',
@@ -302,10 +317,10 @@ export class SecondSearchPage implements OnInit {
       {
         label: 'Cargando',
         count: chargingConnectors.length,
-        color: '#F9A504'
+        color: '#f53d3d'
       }
     ];
-  
+
     return {
       totalConnectors: availableConnectors.length + chargingConnectors.length,
       statusDetails,
@@ -316,45 +331,87 @@ export class SecondSearchPage implements OnInit {
     };
   }
 
+    // Método auxiliar para asignar el power_type basado en el estándar
+    getPowerTypeByStandard(standard: string): string {
+      const acStandards = ['Tipo 2', 'Tipo 1', 'GB/T AC'];
+      const dcStandards = ['CCS 2', 'CCS 1', 'CHAdeMO', 'GB/T DC'];
+  
+      if (acStandards.includes(standard)) {
+        return 'AC';
+      }
+      if (dcStandards.includes(standard)) {
+        return 'DC';
+      }
+      return 'Desconocido'; // Si el estándar no coincide con ninguno conocido, devolver 'Desconocido'
+    }
+
+
   showPowerTypeCounts(): boolean {
     return this.selectedConnectors.some(c => c.power_type.startsWith('AC')) && this.selectedConnectors.some(c => c.power_type.startsWith('DC'));
   }
 
   // Métodos para horarios de aperturas y cierres
   getOpeningHours(station: any): string {
+    const regularHours = station.opening_times.regular_hours;
+  
     if (station.opening_times.twentyfourseven) {
       return 'Abierto 24/7';
     }
   
-    const regularHours = station.opening_times.regular_hours;
-    if (regularHours.length > 0) {
-      const firstHour = regularHours[0];
-      const sameHours = regularHours.every((hour: { period_begin: any; period_end: any; }) => hour.period_begin === firstHour.period_begin && hour.period_end === firstHour.period_end);
+    if (regularHours.length === 0) {
+      return 'No disponible';
+    }
   
-      if (sameHours) {
-        return `De Lunes a Domingo ${firstHour.period_begin} a ${firstHour.period_end}`;
+    let result = '';
+    let weekdayRanges: { start: number; end: number; period_begin: string; period_end: string }[] = [];
+  
+    // Agrupar días consecutivos con el mismo horario
+    for (let i = 0; i < regularHours.length; i++) {
+      const currentDay = regularHours[i];
+      const lastRange = weekdayRanges[weekdayRanges.length - 1];
+  
+      if (
+        lastRange &&
+        lastRange.period_begin === currentDay.period_begin &&
+        lastRange.period_end === currentDay.period_end &&
+        lastRange.end === currentDay.weekday - 1
+      ) {
+        // Extender el rango de días si tienen el mismo horario
+        lastRange.end = currentDay.weekday;
       } else {
-        let result = '';
-        const weekdays = regularHours.filter((hour: { weekday: number; }) => hour.weekday >= 1 && hour.weekday <= 5);
-        const weekend = regularHours.filter((hour: { weekday: number; }) => hour.weekday === 6 || hour.weekday === 7);
-  
-        if (weekdays.length > 0) {
-          const firstWeekday = weekdays[0];
-          const lastWeekday = weekdays[weekdays.length - 1];
-          result += `De ${this.getDayName(firstWeekday.weekday)} ${firstWeekday.period_begin} a ${this.getDayName(lastWeekday.weekday)} ${lastWeekday.period_end}`;
-        }
-  
-        if (weekend.length > 0) {
-          const firstWeekend = weekend[0];
-          const lastWeekend = weekend[weekend.length - 1];
-          result += `\nSábado ${firstWeekend.period_begin} a Domingo ${lastWeekend.period_end}`;
-        }
-  
-        return result;
+        // Agregar un nuevo rango de días
+        weekdayRanges.push({
+          start: currentDay.weekday,
+          end: currentDay.weekday,
+          period_begin: currentDay.period_begin,
+          period_end: currentDay.period_end,
+        });
       }
     }
   
-    return 'No disponible';
+    // Formatear el resultado
+    weekdayRanges.forEach((range, index) => {
+      const dayStart = this.getDayName(range.start);
+      const dayEnd = this.getDayName(range.end);
+      const hours = `${range.period_begin} a ${range.period_end}`;
+  
+      if (dayStart === dayEnd) {
+        result += `${dayStart} ${hours}`;
+      } else {
+        result += `De ${dayStart} ${range.period_begin} a ${dayEnd} ${range.period_end}`;
+      }
+  
+      if (index < weekdayRanges.length - 1) {
+        result += '<br>'; // Agregar salto de línea HTML
+      }
+    });
+  
+    return result;
+  }
+  
+  getDayName(weekday: number): string {
+    const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    return days[weekday - 1]; // Ajustar el índice para que el día 1 sea Lunes
   }
 
   getExceptionalOpenings(station: any): string {
@@ -367,11 +424,6 @@ export class SecondSearchPage implements OnInit {
     return station.opening_times.exceptional_closings.map((closing: any) => {
       return `${closing.period_begin} a ${closing.period_end}`;
     }).join(', ');
-  }
-
-  getDayName(weekday: number): string {
-    const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    return days[weekday - 1]; // El índice del array se ajusta restando 1
   }
 
   removeDuplicateStations(stations: any[]): any[] {

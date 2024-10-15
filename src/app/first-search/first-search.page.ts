@@ -170,8 +170,32 @@ fetchAllConnectorsWithFilter() {
   }
 
   onCheckboxChange() {
-    this.filterConnectors();
+    this.filterConnectors();  // Mantiene los conectores en función del tipo seleccionado.
+    this.preserveSelections();  // Preserva los conectores seleccionados.
   }
+
+  //función para mantener las selecciones al cambiar entre AC y DC.
+preserveSelections() {
+  const preservedIndexes: number[] = [];
+  const preservedConnectors: any[] = [];
+
+  this.selectedConnectors.forEach((selected) => {
+    const matchingIndex = this.uniqueConnectors.findIndex(
+      (connector) =>
+        connector.standard === selected.standard &&
+        connector.power_type === selected.power_type
+    );
+
+    if (matchingIndex !== -1) {
+      preservedIndexes.push(matchingIndex);
+      preservedConnectors.push(this.uniqueConnectors[matchingIndex]);
+    }
+  });
+
+  // Actualizamos las selecciones preservadas.
+  this.selectedIndexes = preservedIndexes;
+  this.selectedConnectors = preservedConnectors;
+}
 
   fetchAllConnectors() {
     this.loading = true;
@@ -228,16 +252,13 @@ filterConnectors() {
   const validStandardsDC = ['CCS 2', 'CCS 1', 'CHAdeMO', 'GB/T DC'];
 
   // Filtramos los conectores basados en los tipos de energía (AC o DC)
-  this.connectors = this.allConnectors.filter(connector => {
+  this.connectors = this.allConnectors.filter((connector) => {
     if (connector.status === 'FUERA DE LINEA') return false;
 
-    // Asignamos el power_type si es null, basado en el standard
     const powerType = connector.power_type || this.getPowerTypeByStandard(connector.standard);
-
     const isAC = powerType === 'AC';
     const isDC = powerType === 'DC';
 
-    // Filtramos según los estándares y el tipo de energía
     if (this.typeAC && isAC && validStandardsAC.includes(connector.standard)) {
       return true;
     }
@@ -245,7 +266,14 @@ filterConnectors() {
       return true;
     }
 
-    return false; // Excluir conectores que no coinciden con los estándares permitidos
+    return false;
+  });
+
+  // Ordenar primero AC y luego DC
+  this.connectors.sort((a, b) => {
+    const aIsAC = a.power_type === 'AC' ? -1 : 1;
+    const bIsAC = b.power_type === 'AC' ? -1 : 1;
+    return aIsAC - bIsAC;
   });
 
   // Remover duplicados por estándar

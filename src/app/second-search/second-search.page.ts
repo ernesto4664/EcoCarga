@@ -284,30 +284,46 @@ export class SecondSearchPage implements OnInit {
 
   getConnectorStatus(station: any) {
     const connectorsInStation = station.evses.map((evse: any) => evse.connectors).flat();
-
-    // Establecemos el power_type basado en el standard si es nulo
+  
+    // Establecemos el power_type basado en el estándar si es nulo
     connectorsInStation.forEach((connector: any) => {
       if (!connector.power_type) {
         connector.power_type = this.getPowerTypeByStandard(connector.standard);
       }
     });
-
-    const filteredConnectors = connectorsInStation.filter((connector: any) =>
-      this.selectedConnectors.some(selected =>
-        selected.standard === connector.standard &&
-        (selected.power_type === connector.power_type || connector.power_type === null)
-      )
+  
+    const availableConnectors = connectorsInStation.filter(
+      (connector: { status: string }) => connector.status === 'DISPONIBLE'
     );
-
-    const availableConnectors = filteredConnectors.filter((connector: any) => connector.status === 'DISPONIBLE');
-    const chargingConnectors = filteredConnectors.filter((connector: any) => connector.status === 'OCUPADO');
-
-    const acCount = availableConnectors.filter((connector: any) => connector.power_type?.startsWith('AC')).length;
-    const dcCount = availableConnectors.filter((connector: any) => connector.power_type?.startsWith('DC')).length;
-
-    const acChargingCount = chargingConnectors.filter((connector: any) => connector.power_type?.startsWith('AC')).length;
-    const dcChargingCount = chargingConnectors.filter((connector: any) => connector.power_type?.startsWith('DC')).length;
-
+    const chargingConnectors = connectorsInStation.filter(
+      (connector: { status: string }) => connector.status === 'OCUPADO'
+    );
+    const unavailableConnectors = connectorsInStation.filter(
+      (connector: { status: string }) => connector.status === 'NO DISPONIBLE'
+    );
+  
+    const acCount = availableConnectors.filter(
+      (connector: { power_type: string }) => connector.power_type?.startsWith('AC')
+    ).length;
+    const dcCount = availableConnectors.filter(
+      (connector: { power_type: string }) => connector.power_type?.startsWith('DC')
+    ).length;
+  
+    const acChargingCount = chargingConnectors.filter(
+      (connector: { power_type: string }) => connector.power_type?.startsWith('AC')
+    ).length;
+    const dcChargingCount = chargingConnectors.filter(
+      (connector: { power_type: string }) => connector.power_type?.startsWith('DC')
+    ).length;
+  
+    // Agregamos los contadores de no disponibles
+    const acUnavailableCount = unavailableConnectors.filter(
+      (connector: { power_type: string }) => connector.power_type?.startsWith('AC')
+    ).length;
+    const dcUnavailableCount = unavailableConnectors.filter(
+      (connector: { power_type: string }) => connector.power_type?.startsWith('DC')
+    ).length;
+  
     const statusDetails = [
       {
         label: 'Disponible',
@@ -318,16 +334,23 @@ export class SecondSearchPage implements OnInit {
         label: 'Cargando',
         count: chargingConnectors.length,
         color: '#f53d3d'
+      },
+      {
+        label: 'No disponible',
+        count: unavailableConnectors.length,
+        color: '#f53d3d'
       }
     ];
-
+  
     return {
-      totalConnectors: availableConnectors.length + chargingConnectors.length,
+      totalConnectors: availableConnectors.length + chargingConnectors.length + unavailableConnectors.length,
       statusDetails,
       acCount,
       dcCount,
       acChargingCount,
-      dcChargingCount
+      dcChargingCount,
+      acUnavailableCount, // Devolvemos el contador de no disponibles AC
+      dcUnavailableCount  // Devolvemos el contador de no disponibles DC
     };
   }
 

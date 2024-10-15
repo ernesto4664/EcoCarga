@@ -2,152 +2,226 @@
   <div class="container" style="margin-top: 3.5rem;">
     <div class="row" style="padding: 10px;">
       <div class="icon-text" style="margin-left: 3px;">
-        <img style="width: 46px !important; height: 46px !important;" src="assets/icon/electrolineras.png" alt="electrolineras.png Icon" class="icon">
+        <img style="width: 46px; height: 46px;" src="assets/icon/electrolineras.png" alt="Icono de electrolinera" class="icon">
         <p style="font-size: 16px;"><strong>E/S. {{ station.name }}</strong></p>
       </div>
       <div class="icon-text" style="margin-left: 6px;">
-        <img style="width:25px !important; height: 40px !important;" src="assets/icon/location.png" alt="Pin Icon" class="icon">
-        <p style="color:#7C7C7C;"><span>Dirección:</span> {{ station.address }}, <span>Región:</span> {{ station.region }}, {{ station.commune }}</p>
+        <img style="width: 25px; height: 40px;" src="assets/icon/location.png" alt="Pin Icono" class="icon">
+        <p style="color: #7C7C7C;">
+          <span>Dirección:</span> {{ station.address }}, 
+          <span>Región:</span> {{ station.region }}, 
+          {{ station.commune }}
+        </p>
       </div>
     </div>
+
     <div id="map" style="height: 300px;"></div>
     <div class="custom-button">
       <ion-button class="custom-button" [href]="externalMapUrl" target="_blank">Cómo llegar</ion-button>
     </div>
+
     <div class="container">
       <div class="row">
+
         <!-- Barra para Conectores Disponibles -->
-        <div *ngIf="station.evses && station.evses.length > 0" class="available-connectors-bar" style="background-color: #279769; color: white; padding: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; border-radius: 4px;">
+        <div *ngIf="getTotalAvailableConnectors() > 0" class="available-connectors-bar" style="background-color: #279769; color: white; padding: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; border-radius: 4px;">
           <strong>Conectores Disponibles: {{ getTotalAvailableConnectors() }}</strong>
         </div>
 
         <!-- Lista de Conectores Disponibles -->
-        <ion-list *ngIf="station.evses && getTotalAvailableConnectors() > 0">
-          <div *ngFor="let evse of station.evses">
-            <div *ngFor="let connector of evse.connectors">
-              <ng-container *ngIf="connector.status === 'DISPONIBLE'">
-                <ion-item>
-                  <ion-label>
-                    <div class="icon-text" style="padding-bottom: 6px; border-bottom: 1px solid #DBDBDB;">
-                      <img [src]="getIconPath(connector)" alt="{{ connector.standard }}" style="width: 45px; height: 40px; object-fit: contain; margin-right: 10px;">
-                      <h3 style="margin: 0;"><strong>{{ connector.standard }}</strong></h3>
+        <ion-list *ngIf="getTotalAvailableConnectors() > 0">
+          <ng-container *ngFor="let evse of station.evses">
+            <ng-container *ngFor="let connector of evse.connectors">
+              <ion-item *ngIf="connector.status === 'DISPONIBLE'">
+                <ion-label>
+                  <div class="icon-text" style="padding-bottom: 6px; border-bottom: 1px solid #DBDBDB;">
+                    <img [src]="getIconPath(connector)" alt="{{ connector.standard }}" style="width: 45px; height: 40px; margin-right: 10px;">
+                    <h3><strong>{{ connector.standard }}</strong></h3>
+                  </div>
+                  <div class="container" style="padding: 5px 10px;">
+                    <div class="icon-text">
+                      <p style="color: #7C7C7C;">Dirección: {{ evse.directions }}</p>
                     </div>
-                    <div class="container" style="padding: 5px 10px 5px 10px;">
-                      <div class="icon-text">
-                        <p style="color:#7C7C7C;">Dirección: {{ evse.directions }}</p>
-                      </div>
-                      <div class="icon-text">
-                        <p style="color: #279769; font-weight: 700;"><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
-                        <p *ngIf="batteryCapacity && evse.max_electric_power > 0"><strong>Tiempo estimado de carga:</strong> {{ calculateChargingTime(evse.max_electric_power) }}</p>
-                      </div>
-                      <div class="icon-text">
-                        <p><strong>Formato:</strong> {{ connector.format }}</p>
-                      </div>
-                      <div class="icon-text">
-                        <p><strong>Tipo de corriente:</strong> {{ getCurrentType(connector.power_type) }}</p>
-                      </div>
-                      <div class="icon-text">
-                        <p style="color: #279769;"><strong>Estado: {{ getStatusLabel(connector.status) }} </strong></p>
-                      </div>
-                      <!-- Medios de pago -->
-                      <div class="icon-text">
-                        <p><strong>Medios de pago:</strong></p>
-                        <div class="icon-container">
-                          <div *ngFor="let payment of evse.payment_capabilities" class="icon-item">
-                            <img [src]="getPaymentIcon(payment)" alt="{{ payment }}">
-                            <p class="icon-label">{{ payment }}</p> <!-- Mostrar el nombre debajo del ícono -->
-                          </div>
-                        </div>
-                      </div>
-                        <!-- Medios de activación -->
-                        <div class="icon-text">
-                          <p><strong>Medios de activación:</strong></p>
-                          <div class="icon-container">
-                            <div *ngFor="let activation of evse.activation_capabilities" class="icon-item">
-                              <img [src]="getActivationIcon(activation)" alt="{{ activation }}">
-                              <p class="icon-label">{{ activation }}</p> <!-- Mostrar el nombre debajo del ícono -->
-                            </div>
-                          </div>
-                        </div>
-                      <!-- Tarifas -->
-                      <div *ngFor="let tariff of connector.tariffs">
-                        <div *ngFor="let component of tariff.elements.price_components">
-                          <p><strong>Tarifa:</strong> {{ getTariffDescription(component) }}</p>
+                    <div class="icon-text">
+                      <p><strong>Formato:</strong> {{ connector.format }}</p>
+                    </div>
+                    <div class="icon-text">
+                      <p><strong>Tipo de corriente:</strong> {{ getCurrentType(connector.power_type) }}</p>
+                    </div>
+                    <div class="icon-text">
+                      <p style="color: #279769;"><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
+                    </div>
+                    <div class="icon-text">
+                      <p><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
+                      <p *ngIf="batteryCapacity && evse.max_electric_power > 0">
+                        <strong>Tiempo estimado de carga:</strong> {{ calculateChargingTime(evse.max_electric_power) }}
+                      </p>
+                    </div>
+                    <!-- Medios de pago -->
+                    <div class="icon-text">
+                      <p><strong>Medios de pago:</strong></p>
+                      <div class="icon-container">
+                        <div *ngFor="let payment of evse.payment_capabilities" class="icon-item">
+                          <img [src]="getPaymentIcon(payment)" alt="{{ payment }}">
+                          <p class="icon-label">{{ payment }}</p>
                         </div>
                       </div>
                     </div>
-                  </ion-label>
-                </ion-item>
-              </ng-container>
-            </div>
-          </div>
+
+                    <!-- Medios de activación -->
+                    <div class="icon-text">
+                      <p><strong>Medios de activación:</strong></p>
+                      <div class="icon-container">
+                        <div *ngFor="let activation of evse.activation_capabilities" class="icon-item">
+                          <img [src]="getActivationIcon(activation)" alt="{{ activation }}">
+                          <p class="icon-label">{{ activation }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Tarifas -->
+                    <div *ngFor="let tariff of connector.tariffs">
+                      <div *ngFor="let component of tariff.elements.price_components">
+                        <p><strong>Tarifa:</strong> {{ getTariffDescription(component) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </ion-label>
+              </ion-item>
+            </ng-container>
+          </ng-container>
         </ion-list>
 
         <!-- Barra para Conectores Cargando -->
-        <div *ngIf="station.evses && getTotalChargingConnectors() > 0" class="charging-connectors-bar" style="background-color: #dc3545; color: white; padding: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; border-radius: 4px;">
+        <div *ngIf="getTotalChargingConnectors() > 0" class="charging-connectors-bar" style="background-color: #dc3545; color: white; padding: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; border-radius: 4px;">
           <strong>Conectores Cargando: {{ getTotalChargingConnectors() }}</strong>
         </div>
 
         <!-- Lista de Conectores Cargando -->
-        <ion-list *ngIf="station.evses && getTotalChargingConnectors() > 0">
-          <div *ngFor="let evse of station.evses">
-            <div *ngFor="let connector of evse.connectors">
-              <ng-container *ngIf="connector.status === 'OCUPADO'">
-                <ion-item>
-                  <ion-label>
-                    <div class="icon-text" style="padding-bottom: 6px; border-bottom: 1px solid #DBDBDB;">
-                      <img [src]="getIconPath(connector)" alt="{{ connector.standard }}" style="width: 45px; height: 40px; object-fit: contain; margin-right: 10px;">
-                      <h3 style="margin: 0;"><strong>{{ connector.standard }}</strong></h3>
+        <ion-list *ngIf="getTotalChargingConnectors() > 0">
+          <ng-container *ngFor="let evse of station.evses">
+            <ng-container *ngFor="let connector of evse.connectors">
+              <ion-item *ngIf="connector.status === 'OCUPADO'">
+                <ion-label>
+                  <div class="icon-text" style="padding-bottom: 6px; border-bottom: 1px solid #DBDBDB;">
+                    <img [src]="getIconPath(connector)" alt="{{ connector.standard }}" style="width: 45px; height: 40px; margin-right: 10px;">
+                    <h3><strong>{{ connector.standard }}</strong></h3>
+                  </div>
+                  <div class="container">
+                    <div class="icon-text">
+                      <p style="color: #7C7C7C;">Dirección: {{ evse.directions }}</p>
                     </div>
-                    <div class="container" style="padding: 5px 10px 5px 10px;">
-                      <div class="icon-text">
-                        <p style="color:#7C7C7C;">Dirección: {{ evse.directions }}</p>
-                      </div>
-                      <div class="icon-text">
-                        <p style="color: #279769; font-weight: 700;"><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
-                        <p *ngIf="batteryCapacity && evse.max_electric_power > 0"><strong>Tiempo estimado de carga:</strong> {{ calculateChargingTime(evse.max_electric_power) }}</p>
-                      </div>
-                      <div class="icon-text">
-                        <p><strong>Formato:</strong> {{ connector.format }}</p>
-                      </div>
-                      <div class="icon-text">
-                        <p><strong>Tipo de corriente:</strong> {{ getCurrentType(connector.power_type) }}</p>
-                      </div>
-                      <div class="icon-text">
-                        <p style="color: #f53d3d;"><strong>Estado: {{ getStatusLabel(connector.status) }} </strong> </p>
-                      </div>
-                      <!-- Medios de pago -->
-                      <div class="icon-text">
-                        <p><strong>Medios de pago:</strong></p>
-                        <div class="icon-container">
-                          <div *ngFor="let payment of evse.payment_capabilities" class="icon-item">
-                            <img [src]="getPaymentIcon(payment)" alt="{{ payment }}">
-                            <p class="icon-label">{{ payment }}</p> <!-- Mostrar el nombre debajo del ícono -->
-                          </div>
-                        </div>
-                      </div>
-                        <!-- Medios de activación -->
-                        <div class="icon-text">
-                          <p><strong>Medios de activación:</strong></p>
-                          <div class="icon-container">
-                            <div *ngFor="let activation of evse.activation_capabilities" class="icon-item">
-                              <img [src]="getActivationIcon(activation)" alt="{{ activation }}">
-                              <p class="icon-label">{{ activation }}</p> <!-- Mostrar el nombre debajo del ícono -->
-                            </div>
-                          </div>
-                        </div>
-                      <!-- Tarifas -->
-                      <div *ngFor="let tariff of connector.tariffs">
-                        <div *ngFor="let component of tariff.elements.price_components">
-                          <p><strong>Tarifa:</strong> {{ getTariffDescription(component) }}</p>
-                        </div>
+                    <div class="icon-text">
+                      <p><strong>Formato:</strong> {{ connector.format }}</p>
+                    </div>
+                    <div class="icon-text">
+                      <p><strong>Tipo de corriente:</strong> {{ getCurrentType(connector.power_type) }}</p>
+                    </div>
+                    <p style="color: #dc3545;"><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
+                  </div>
+                  <div class="icon-text">
+                    <p><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
+                    <p *ngIf="batteryCapacity && evse.max_electric_power > 0"><strong>Tiempo estimado de carga:</strong> {{ calculateChargingTime(evse.max_electric_power) }}</p>
+                  </div>
+
+                  <!-- Medios de pago -->
+                  <div class="icon-text">
+                    <p><strong>Medios de pago:</strong></p>
+                    <div class="icon-container">
+                      <div *ngFor="let payment of evse.payment_capabilities" class="icon-item">
+                        <img [src]="getPaymentIcon(payment)" alt="{{ payment }}">
+                        <p class="icon-label">{{ payment }}</p>
                       </div>
                     </div>
-                  </ion-label>
-                </ion-item>
-              </ng-container>
-            </div>
-          </div>
+                  </div>
+
+                  <!-- Medios de activación -->
+                  <div class="icon-text">
+                    <p><strong>Medios de activación:</strong></p>
+                    <div class="icon-container">
+                      <div *ngFor="let activation of evse.activation_capabilities" class="icon-item">
+                        <img [src]="getActivationIcon(activation)" alt="{{ activation }}">
+                        <p class="icon-label">{{ activation }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tarifas -->
+                  <div *ngFor="let tariff of connector.tariffs">
+                    <div *ngFor="let component of tariff.elements.price_components">
+                      <p><strong>Tarifa:</strong> {{ getTariffDescription(component) }}</p>
+                    </div>
+                  </div>
+                </ion-label>
+              </ion-item>
+            </ng-container>
+          </ng-container>
+        </ion-list>
+
+        <!-- Barra para Conectores No Disponibles -->
+        <div *ngIf="getTotalUnavailableConnectors() > 0" class="unavailable-connectors-bar" style="background-color: #ffcc00; color: white; padding: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; border-radius: 4px;">
+          <strong>Conectores No Disponibles: {{ getTotalUnavailableConnectors() }}</strong>
+        </div>
+
+        <!-- Lista de Conectores No Disponibles -->
+        <ion-list *ngIf="getTotalUnavailableConnectors() > 0">
+          <ng-container *ngFor="let evse of station.evses">
+            <ng-container *ngFor="let connector of evse.connectors">
+              <ion-item *ngIf="connector.status === 'NO DISPONIBLE'">
+                <ion-label>
+                  <div class="icon-text" style="padding-bottom: 6px; border-bottom: 1px solid #DBDBDB;">
+                    <img [src]="getIconPath(connector)" alt="{{ connector.standard }}" style="width: 45px; height: 40px; margin-right: 10px;">
+                    <h3><strong>{{ connector.standard }}</strong></h3>
+                  </div>
+                  <div class="container">
+                    <div class="icon-text">
+                      <p style="color: #7C7C7C;">Dirección: {{ evse.directions }}</p>
+                    </div>
+                    <div class="icon-text">
+                      <p><strong>Formato:</strong> {{ connector.format }}</p>
+                    </div>
+                    <div class="icon-text">
+                      <p><strong>Tipo de corriente:</strong> {{ getCurrentType(connector.power_type) }}</p>
+                    </div>
+                    <p style="color: #ffcc00;" ><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
+                  </div>
+                  <div class="icon-text">
+                    <p><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
+                    <p *ngIf="batteryCapacity && evse.max_electric_power > 0"><strong>Tiempo estimado de carga:</strong> {{ calculateChargingTime(evse.max_electric_power) }}</p>
+                  </div>
+
+                  <!-- Medios de pago -->
+                  <div class="icon-text">
+                    <p><strong>Medios de pago:</strong></p>
+                    <div class="icon-container">
+                      <div *ngFor="let payment of evse.payment_capabilities" class="icon-item">
+                        <img [src]="getPaymentIcon(payment)" alt="{{ payment }}">
+                        <p class="icon-label">{{ payment }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Medios de activación -->
+                  <div class="icon-text">
+                    <p><strong>Medios de activación:</strong></p>
+                    <div class="icon-container">
+                      <div *ngFor="let activation of evse.activation_capabilities" class="icon-item">
+                        <img [src]="getActivationIcon(activation)" alt="{{ activation }}">
+                        <p class="icon-label">{{ activation }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tarifas -->
+                  <div *ngFor="let tariff of connector.tariffs">
+                    <div *ngFor="let component of tariff.elements.price_components">
+                      <p><strong>Tarifa:</strong> {{ getTariffDescription(component) }}</p>
+                    </div>
+                  </div>
+                </ion-label>
+              </ion-item>
+            </ng-container>
+          </ng-container>
         </ion-list>
       </div>
     </div>

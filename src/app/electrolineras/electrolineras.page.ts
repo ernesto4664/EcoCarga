@@ -133,50 +133,59 @@ private getPowerTypeByStandard(standard: string): string {
 async showStationDetails(station: any) {
   const availableConnectorGroups: { [key: string]: { count: number; power_type: string; icon: string } } = {};
   const occupiedConnectorGroups: { [key: string]: { count: number; power_type: string; icon: string } } = {};
+  const unavailableConnectorGroups: { [key: string]: { count: number; power_type: string; icon: string } } = {};
 
   station.evses.forEach((evse: any) => {
     evse.connectors.forEach((connector: any) => {
-      // Asignar el power_type si es null basado en el estándar
+      // Asignar `power_type` si es nulo usando el estándar
       connector.power_type = connector.power_type || this.getPowerTypeByStandard(connector.standard);
-      connector.format = connector.format || 'CABLE'; // Si no tiene formato, asumimos "CABLE"
+      connector.format = connector.format || 'CABLE';
 
-      // Generar la clave para el ícono
+      // Generar clave para el ícono
       const standard = connector.standard || 'Desconocido';
       const powerType = connector.power_type;
       const key = `${standard} - ${powerType}`;
       const icon = this.getIconPath(connector);
 
-      // Agrupar conectores disponibles y ocupados
+      // Clasificar los conectores según su estado
       if (connector.status === 'DISPONIBLE') {
         if (availableConnectorGroups[key]) {
-          availableConnectorGroups[key].count += 1;
+          availableConnectorGroups[key].count++;
         } else {
           availableConnectorGroups[key] = { count: 1, power_type: powerType, icon };
         }
-      } else {
+      } else if (connector.status === 'OCUPADO') {
         if (occupiedConnectorGroups[key]) {
-          occupiedConnectorGroups[key].count += 1;
+          occupiedConnectorGroups[key].count++;
         } else {
           occupiedConnectorGroups[key] = { count: 1, power_type: powerType, icon };
+        }
+      } else {
+        if (unavailableConnectorGroups[key]) {
+          unavailableConnectorGroups[key].count++;
+        } else {
+          unavailableConnectorGroups[key] = { count: 1, power_type: powerType, icon };
         }
       }
     });
   });
 
-  // Convertir los grupos en arreglos
-  const availableConnectors = Object.entries(availableConnectorGroups)
-  .map(([connector, data]) => ({
+  // Convertir los grupos a arreglos
+  const availableConnectors = Object.entries(availableConnectorGroups).map(([key, data]) => ({
     icon: data.icon,
-    text: `${connector.split(' - ')[0]}, Tipo: ${data.power_type} Disponibles: ${data.count}`,
-    textStyle: data.count > 0 ? 'green-text' : 'green-text' // Aquí puedes asignar una clase basada en la condición
+    text: `${key.split(' - ')[0]}, Tipo: ${data.power_type} Disponibles: ${data.count}`,
+    textStyle: 'green-text',
   }));
 
+  const occupiedConnectors = Object.entries(occupiedConnectorGroups).map(([key, data]) => ({
+    icon: data.icon,
+    text: `${key.split(' - ')[0]}, Tipo: ${data.power_type} Cargando: ${data.count}`,
+  }));
 
-  const occupiedConnectors = Object.entries(occupiedConnectorGroups)
-    .map(([connector, data]) => ({
-      icon: data.icon,
-      text: `${connector.split(' - ')[0]}, Tipo: ${data.power_type} Cargando: ${data.count}`
-    }));
+  const unavailableConnectors = Object.entries(unavailableConnectorGroups).map(([key, data]) => ({
+    icon: data.icon,
+    text: `${key.split(' - ')[0]}, Tipo: ${data.power_type} No disponibles: ${data.count}`,
+  }));
 
   // Mostrar el modal
   const modal = await this.modalCtrl.create({
@@ -184,8 +193,9 @@ async showStationDetails(station: any) {
     componentProps: {
       station,
       availableConnectors,
-      occupiedConnectors
-    }
+      occupiedConnectors,
+      unavailableConnectors,
+    },
   });
 
   await modal.present();

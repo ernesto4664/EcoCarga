@@ -14,22 +14,15 @@ import { ModalController } from '@ionic/angular';
     </ion-header>
 
     <ion-content class="ion-padding">
-    <div class="station-info">
-      <img
-        style="width: 25px; height: 40px;"
-        src="assets/icon/location.png"
-        alt="Pin Icon"
-        class="icon"
-      />
-      <span class="station-name">{{ station.address }}</span>
-    </div>
+      <div class="station-info">
+        <img style="width: 25px; height: 40px;" src="assets/icon/location.png" alt="Pin Icon" />
+        <span class="station-name">{{ station.address }}</span>
+      </div>
 
-      <!-- Barra estilo verde para "Conectores disponibles" -->
+      <!-- Barra verde para "Conectores disponibles" -->
       <div class="available-connectors-bar" *ngIf="availableConnectors.length > 0">
         <strong>Conectores disponibles:</strong>
       </div>
-
-      <!-- Detalles de los conectores disponibles -->
       <div class="connector-details">
         <div *ngFor="let connector of availableConnectors" class="connector-item">
           <img [src]="connector.icon" alt="{{ connector.text }}">
@@ -37,16 +30,25 @@ import { ModalController } from '@ionic/angular';
         </div>
       </div>
 
-      <!-- Barra estilo rojo para "Conectores ocupados" -->
+      <!-- Barra roja para "Conectores cargando" -->
       <div class="occupied-connectors-bar" *ngIf="occupiedConnectors.length > 0">
         <strong>Conectores cargando:</strong>
       </div>
-
-      <!-- Detalles de los conectores ocupados -->
       <div class="connector-details">
         <div *ngFor="let connector of occupiedConnectors" class="connector-item">
           <img [src]="connector.icon" alt="{{ connector.text }}">
           <span style="color: red;">{{ connector.text }}</span>
+        </div>
+      </div>
+
+      <!-- Barra amarilla para "Conectores no disponibles" -->
+      <div class="unavailable-connectors-bar" *ngIf="unavailableConnectors.length > 0">
+        <strong>Conectores no disponibles:</strong>
+      </div>
+      <div class="connector-details">
+        <div *ngFor="let connector of unavailableConnectors" class="connector-item">
+          <img [src]="connector.icon" alt="{{ connector.text }}">
+          <span style="color: #ffcc00;">{{ connector.text }}</span>
         </div>
       </div>
 
@@ -65,8 +67,7 @@ import { ModalController } from '@ionic/angular';
       padding: 10px;
       text-align: center;
       font-size: 16px;
-      margin-top: 15px;
-      margin-bottom: 15px;
+      margin: 15px 0;
       border-radius: 4px;
     }
     .occupied-connectors-bar {
@@ -75,8 +76,16 @@ import { ModalController } from '@ionic/angular';
       padding: 10px;
       text-align: center;
       font-size: 16px;
-      margin-bottom: 15px;
-      margin-top: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    .unavailable-connectors-bar {
+      background-color: #ffcc00;
+      color: black;
+      padding: 10px;
+      text-align: center;
+      font-size: 16px;
+      margin: 15px 0;
       border-radius: 4px;
     }
     .connector-details {
@@ -104,13 +113,9 @@ import { ModalController } from '@ionic/angular';
 })
 export class StationDetailsModalComponent {
   @Input() station: any;
-  @Input() availableConnectors: Array<{
-textStyle: string|string[]|Set<string>|{ [klass: string]: any; }|null|undefined;
-standard: any; icon: string, text: string 
-}> = [];
-  @Input() occupiedConnectors: Array<{
-standard: any; icon: string, text: string 
-}> = [];
+  @Input() availableConnectors: any[] = [];
+  @Input() occupiedConnectors: any[] = [];
+  @Input() unavailableConnectors: any[] = [];
 
   constructor(private modalCtrl: ModalController) {}
 
@@ -120,39 +125,5 @@ standard: any; icon: string, text: string
 
   goToStation() {
     this.modalCtrl.dismiss({ action: 'goToStation' });
-  }
-
-  getIconPath(connector: any): string {
-    if (!connector.power_type) {
-      connector.power_type = this.getPowerTypeByStandard(connector.standard);
-    }
-
-    const iconMap: { [key: string]: string } = {
-      'GB/T AC (CABLE - AC)': 'GBT_AC.png',
-      'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
-      'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
-      'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
-      'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
-      'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
-      'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
-      'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
-      'GB/T DC (CABLE - DC)': 'GBT_DC.png',
-    };
-
-    const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
-    return 'assets/icon/' + (iconMap[key] || 'default.jpeg');
-  }
-
-  getPowerTypeByStandard(standard: string): string {
-    const acStandards = ['Tipo 2', 'Tipo 1', 'GB/T AC'];
-    const dcStandards = ['CCS 2', 'CCS 1', 'CHAdeMO', 'GB/T DC'];
-
-    if (acStandards.includes(standard)) {
-      return 'AC';
-    }
-    if (dcStandards.includes(standard)) {
-      return 'DC';
-    }
-    return 'Desconocido';
   }
 }

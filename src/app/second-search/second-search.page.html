@@ -9,19 +9,23 @@
 </ion-header>-->
 
 <ion-content [fullscreen]="true">
-  <!-- Contenedor para la selección de capacidad de batería -->
   <div class="container" style="background: #31B17D !important;">
-    <p class="msj-principal">Selecciona la capacidad de la batería de tu vehículo en kWh; opción obligatoria!</p>
+    <p class="msj-principal">
+      Selecciona la capacidad de la batería de tu vehículo en kWh; opción obligatoria!
+    </p>
   </div>
 
-  <!-- Selección de Capacidad de Batería -->
   <div class="container">
     <ion-item class="capacidad">
       <ion-label position="floating">Capacidad de la Batería (kWh)</ion-label>
-      <ion-input [(ngModel)]="batteryCapacity" (ionInput)="searchBatteryCapacities($event)" type="text" debounce="300"></ion-input>
+      <ion-input
+        [(ngModel)]="batteryCapacity"
+        (ionInput)="searchBatteryCapacities($event)"
+        type="text"
+        debounce="300">
+      </ion-input>
     </ion-item>
-    
-    <!-- Mostrar sugerencias de capacidades -->
+
     <ion-list *ngIf="suggestedCapacities.length > 0">
       <ion-item *ngFor="let capacity of suggestedCapacities" (click)="selectCapacity(capacity)">
         {{ capacity }} kWh
@@ -29,7 +33,6 @@
     </ion-list>
   </div>
 
-  <!-- Muestra el detalle de la batería seleccionada -->
   <div *ngIf="selectedBattery">
     <ion-item>
       <ion-thumbnail slot="start">
@@ -42,7 +45,6 @@
     </ion-item>
   </div>
 
-  <!-- Acordeón de filtros opcionales -->
   <ion-accordion-group>
     <ion-accordion value="filters">
       <ion-item class="filter" slot="header">
@@ -68,12 +70,10 @@
     </ion-accordion>
   </ion-accordion-group>
 
-  <!-- Botón para buscar cargadores -->
   <div class="custom-button">
     <ion-button class="custom-button" (click)="getFilteredStations()">Buscar Cargadores</ion-button>
   </div>
 
-  <!-- Resultados de estaciones -->
   <div class="container">
     <div class="row">
       <div *ngIf="stations.length > 0">
@@ -82,51 +82,64 @@
           <ion-item class="result-station" *ngFor="let station of stations" (click)="selectStation(station)">
             <ion-label>
               <div class="icon-text">
-                <img src="assets/icon/electrolineras.png" alt="electrolineras.png Icon" class="icon">
+                <img src="assets/icon/electrolineras.png" alt="Icon" class="icon">
                 <h2><strong>E/S. {{ station.name }}</strong> / {{ station.distance }} km</h2>
               </div>
-              
+
               <div class="icon-text">
-                <img style="width: 17px !important;" src="assets/icon/location.png" alt="ubicacion Icon" class="icon">
-                <p><span>Dirección:</span> {{ station.address }}, <span>Región:</span> {{ station.region }}, {{ station.commune }}</p>
+                <img style="width: 17px;" src="assets/icon/location.png" alt="Ubicación" class="icon">
+                <p>
+                  <span>Dirección:</span> {{ station.address }},
+                  <span>Región:</span> {{ station.region }}, {{ station.commune }}
+                </p>
+              </div>
+
+              <div class="mt-2 mb-2">
+                <!-- Mostrar bloque de Conectores AC si hay disponibles, cargando o no disponibles -->
+                <div class="icon-text" 
+                     *ngIf="getConnectorStatus(station).acCount > 0 || 
+                            getConnectorStatus(station).acChargingCount > 0 || 
+                            getConnectorStatus(station).acUnavailableCount > 0">
+                  <img src="assets/icon/iconoAC.png" alt="AC Icon" class="icon">
+                  <p>Conectores AC</p>
+                </div>
               </div>
               
-              <div  *ngIf="getConnectorStatus(station).totalConnectors > 0">
-                <div class="status-container" *ngFor="let status of getConnectorStatus(station).statusDetails">
-                  <p [style.background-color]="status.color" class="status-pill">
-                    {{ status.count }} Conectores: {{ status.label }}
-                  </p>
-                </div>
-                <div class="mt-2 mb-2" *ngIf="true">
-                  <div class="icon-text">
-                    <img src="assets/icon/iconoAC.png" alt="electrolineraAC.png Icon" class="icon">
-                    <p>Conectores AC: {{ getConnectorStatus(station).acCount }}</p>
-                    <p *ngIf="getConnectorStatus(station).acChargingCount > 0"> &nbsp;/&nbsp;Cargando: {{ getConnectorStatus(station).acChargingCount }}</p>
-                  </div>
-                  <div class="icon-text">
-                    <img src="assets/icon/iconoDC.png" alt="electrolineraDC.png Icon" class="icon">
-                    <p>Conectores DC: {{ getConnectorStatus(station).dcCount }}</p>
-                    <p *ngIf="getConnectorStatus(station).dcChargingCount > 0"> &nbsp;/&nbsp;Cargando: {{ getConnectorStatus(station).dcChargingCount }}</p>
-                  </div>
+              <!-- Mostrar bloque de Conectores DC si hay disponibles, cargando o no disponibles -->
+              <div class="icon-text" 
+                   *ngIf="getConnectorStatus(station).dcCount > 0 || 
+                          getConnectorStatus(station).dcChargingCount > 0 || 
+                          getConnectorStatus(station).dcUnavailableCount > 0">
+                <img src="assets/icon/iconoDC.png" alt="DC Icon" class="icon">
+                <p>Conectores DC</p>
+              </div>
+
+              <div *ngIf="getConnectorStatus(station).totalConnectors > 0">
+                <div class="status-container">
+                  <ng-container *ngFor="let status of getConnectorStatus(station).statusDetails">
+                    <div *ngIf="status.count > 0">
+                      <p [style.background-color]="status.color" class="status-pill">
+                        {{ status.count }} Conectores: {{ status.label }}
+                      </p>
+                    </div>
+                  </ng-container>
                 </div>
               </div>
 
               <div class="icon-text">
-                <img src="assets/icon/hours.png" alt="horarios" class="icon">
+                <img src="assets/icon/hours.png" alt="Horarios" class="icon">
                 <div class="hours-container">
                   <p>Horarios:</p>
                   <div [innerHTML]="getOpeningHours(station)"></div>
                 </div>
               </div>
+
               <div *ngIf="station.opening_times.exceptional_openings.length > 0">
-                <div class="icon-text">
-                  <p>Excepcionales Aperturas: {{ getExceptionalOpenings(station) }}</p>
-                </div>
+                <p>Excepcionales Aperturas: {{ getExceptionalOpenings(station) }}</p>
               </div>
+
               <div *ngIf="station.opening_times.exceptional_closings.length > 0">
-                <div class="icon-text">
-                  <p>Excepcionales Cierres: {{ getExceptionalClosings(station) }}</p>
-                </div>
+                <p>Excepcionales Cierres: {{ getExceptionalClosings(station) }}</p>
               </div>
             </ion-label>
           </ion-item>
@@ -136,4 +149,3 @@
   </div>
 </ion-content>
 
-<app-layout></app-layout>

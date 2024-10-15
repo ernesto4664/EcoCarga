@@ -125,11 +125,25 @@ export class StationDetailsPage implements OnInit {
   }
 
   calculateChargingTime(maxPower: number): string {
-    if (this.batteryCapacity && maxPower > 0) {
-      const chargingTime = this.batteryCapacity / maxPower;
-      return `${chargingTime.toFixed(2)} horas`;
+    if (!this.batteryCapacity || maxPower <= 0) {
+      return 'No disponible';
     }
-    return 'No disponible';
+  
+    const totalHours = this.batteryCapacity / maxPower; // Tiempo total en horas (decimal)
+    const hours = Math.floor(totalHours); // Parte entera de las horas
+    const minutes = Math.round((totalHours - hours) * 60); // Parte decimal convertida a minutos
+  
+    let result = '';
+  
+    if (hours > 0) {
+      result += `${hours} hrs`;
+    }
+  
+    if (minutes > 0) {
+      result += `${hours > 0 ? ' y ' : ''}${minutes} min`; // Añadir 'y' solo si hay horas
+    }
+  
+    return result || 'Menos de un minuto';
   }
 
   getStatusLabel(status: string): string {
@@ -193,6 +207,15 @@ export class StationDetailsPage implements OnInit {
     })).filter((evse: any) => evse.connectors.length > 0);
   }
 
+  getTotalUnavailableConnectors(): number {
+    if (!this.station || !this.station.evses) {
+      return 0;
+    }
+    return this.station.evses
+      .map((evse: { connectors: { filter: (arg0: (connector: any) => boolean) => { (): any; new(): any; length: any; }; }; }) => evse.connectors.filter(connector => connector.status === 'NO DISPONIBLE').length)
+      .reduce((a: any, b: any) => a + b, 0);
+  }
+
   getIconPath(connector: any): string {
     if (!connector.power_type) {
       connector.power_type = this.getPowerTypeByStandard(connector.standard);
@@ -200,6 +223,7 @@ export class StationDetailsPage implements OnInit {
 
     const iconMap: { [key: string]: string } = {
       'GB/T AC (CABLE - AC)': 'GBT_AC.png',
+      'GB/T AC (SOCKET - AC)': 'GBT_AC.png',
       'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
       'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
       'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
@@ -208,6 +232,7 @@ export class StationDetailsPage implements OnInit {
       'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
       'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
       'GB/T DC (CABLE - DC)': 'GBT_DC.png',
+      'GB/T DC (SOCKET - DC)': 'GBT_DC.png',
     };
 
     const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;

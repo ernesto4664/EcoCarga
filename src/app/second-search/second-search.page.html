@@ -125,8 +125,30 @@
                   </ng-container>
                 </div>
               </div>
-
-              <div class="icon-text">
+              <ion-accordion-group [value]="accordionValue">
+                <ion-accordion value="horarios">
+                  <ion-item class="horarios" slot="header" (click)="stopEventAndToggleAccordion($event, 'horarios')">
+                    <ion-label style="display: flex;">
+                      <img src="assets/icon/hours.png" alt="Horarios" class="icon">
+                      <p>Horarios:</p>
+                    </ion-label>
+                  </ion-item>
+              
+                  <div class="ion-padding" slot="content">
+                    <ion-item class="show-item custom-item" (click)="stopEvent($event)">
+                      <div [innerHTML]="getOpeningHours(station)"></div>
+                      <div *ngIf="station.opening_times.exceptional_openings.length > 0">
+                        <p>Excepcionales Aperturas: {{ getExceptionalOpenings(station) }}</p>
+                      </div>
+                      
+                      <div *ngIf="station.opening_times.exceptional_closings.length > 0">
+                        <p>Excepcionales Cierres: {{ getExceptionalClosings(station) }}</p>
+                      </div>
+                    </ion-item>
+                  </div>
+                </ion-accordion>
+              </ion-accordion-group>
+              <!--<div class="icon-text">
                 <img src="assets/icon/hours.png" alt="Horarios" class="icon">
                 <div class="hours-container">
                   <p>Horarios:</p>
@@ -140,7 +162,7 @@
 
               <div *ngIf="station.opening_times.exceptional_closings.length > 0">
                 <p>Excepcionales Cierres: {{ getExceptionalClosings(station) }}</p>
-              </div>
+              </div>-->
             </ion-label>
           </ion-item>
         </ion-list>

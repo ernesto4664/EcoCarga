@@ -37,6 +37,21 @@ export class SecondSearchPage implements OnInit {
 
   ngOnInit() {
     this.getUserLocation();
+    
+  }
+
+  accordionValue: string | null = null; // Controla qué acordeón está abierto
+
+  // Detener la propagación del evento y alternar el acordeón seleccionado
+  stopEventAndToggleAccordion(event: Event, value: string) {
+    event.stopPropagation(); // Detiene la propagación del evento
+
+    // Alternar el valor del acordeón; si ya está abierto, lo cierra
+    this.accordionValue = this.accordionValue === value ? null : value;
+  }
+
+  stopEvent(event: Event) {
+    event.stopPropagation(); // Evitar que el clic se propague
   }
 
   // Obtener ubicación del usuario

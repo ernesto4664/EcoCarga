@@ -76,7 +76,7 @@ export class SecondSearchPage implements OnInit {
     const query = event.target.value;
     if (query && query.length > 0) {
       // Llamada a la API correcta para obtener las capacidades de baterías
-      this.http.get<any[]>(`http://18.116.216.219/api/BateriasApi`).subscribe(
+      this.http.get<any[]>(`https://ecocargaqa.minenergia.cl/api/BateriasApi`).subscribe(
         (capacities) => {
           // Filtramos las capacidades que coincidan con el input del usuario
           this.suggestedCapacities = capacities
@@ -114,7 +114,7 @@ export class SecondSearchPage implements OnInit {
 
   // Filtrar estaciones por distancia
   filterByDistance() {
-    console.log('Filtrar por distancia:', this.selectedDistance);
+    //console.log('Filtrar por distancia:', this.selectedDistance);
     this.applyAllFilters();
   }
 
@@ -233,7 +233,7 @@ export class SecondSearchPage implements OnInit {
   printConnectorTotals() {
     this.stations.forEach(station => {
       const { acCount, dcCount, totalConnectors } = this.getConnectorTotals(station);
-      console.log(`Estación ${station.name} tiene ${totalConnectors} conectores: ${acCount} AC y ${dcCount} DC`);
+    //  console.log(`Estación ${station.name} tiene ${totalConnectors} conectores: ${acCount} AC y ${dcCount} DC`);
     });
   }
 

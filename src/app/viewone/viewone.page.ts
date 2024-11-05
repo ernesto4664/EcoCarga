@@ -33,9 +33,9 @@ export class ViewonePage implements OnInit {
         if (data.data && data.data.accepted) {
           this.termsAccepted = true;
           localStorage.setItem('termsAccepted', 'true');
-          console.log("Términos aceptados");
+         // console.log("Términos aceptados");
         } else {
-          console.log("Términos no aceptados");
+         // console.log("Términos no aceptados");
         }
       });
 
@@ -53,12 +53,12 @@ export class ViewonePage implements OnInit {
 
   navigateToInformacionPreliminar() {
     if (this.termsAccepted) {
-      console.log("Navegando a la página de primera busqueda");
+      //console.log("Navegando a la página de primera busqueda");
       this.router.navigateByUrl('/first-search').then(success => {
         if (success) {
-          console.log('Navegación exitosa');
+        //  console.log('Navegación exitosa');
         } else {
-          console.log('Error de navegación');
+         // console.log('Error de navegación');
         }
       });
     } else {

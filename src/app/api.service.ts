@@ -83,7 +83,7 @@ export class ApiService {
     try {
       localStorage.setItem('cacheFirst-Search', JSON.stringify(data));
       localStorage.setItem('firstSearchCacheTime', Date.now().toString());
-      console.log('Filtros almacenados en cacheFirst-Search:', data);
+    //  console.log('Filtros almacenados en cacheFirst-Search:', data);
     } catch (error) {
       console.error('Error al almacenar en cacheFirst-Search:', error);
     }
@@ -113,7 +113,7 @@ export class ApiService {
   clearFirstSearchCache() {
     localStorage.removeItem('cacheFirst-Search');
     localStorage.removeItem('firstSearchCacheTime');
-    console.log('cacheFirst-Search cleared');
+  //  console.log('cacheFirst-Search cleared');
   }
 
   // Métodos para la cache de las ubicaciones y conectores
@@ -122,7 +122,7 @@ export class ApiService {
     localStorage.clear();
     this.cache = [];
     this.lastFetchTime = 0;
-    console.log('Cache cleared');
+   // console.log('Cache cleared');
   }
 
   updateCacheWithConnectorStatus(updatedConnector: any) {

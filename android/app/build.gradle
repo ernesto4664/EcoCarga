@@ -1,31 +1,38 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "io.ionic.starter"
+    namespace "mn.ecocarga.starter" // Asegúrate de que coincide con tu configuración en capacitor.config.ts
     compileSdk rootProject.ext.compileSdkVersion
+    
     defaultConfig {
-        applicationId "io.ionic.starter"
+        applicationId "mn.ecocarga.starter"  // Actualizado para coincidir con capacitor.config.ts
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        aaptOptions {
-             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
-             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
-            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+    }
+    
+    signingConfigs {
+        release {
+            storeFile file("C:/Users/marce/Desktop/EcoCarga/ecocargaF-release.keystore")  // Ruta completa del keystore
+            storePassword "16863601Ev"   // Reemplaza con tu contraseña del keystore
+            keyAlias "ecocargaF-key-alias"  // Alias del keystore
+            keyPassword "16863601Ev"  // Reemplaza con la contraseña de tu clave
         }
     }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 repositories {
-    flatDir{
+    flatDir {
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
 }

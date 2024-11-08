@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Geolocation } from '@capacitor/geolocation';
 import { ApiService } from '../api.service';
+import { LoadingController } from '@ionic/angular'; // Importación necesaria
 
 @Component({
   selector: 'app-second-search',
@@ -25,7 +26,8 @@ export class SecondSearchPage implements OnInit {
     private http: HttpClient,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private loadingController: LoadingController  // Inyectar LoadingController
   ) {
     this.activatedRoute.queryParams.subscribe(() => {
       const navigation = this.router.getCurrentNavigation();
@@ -487,4 +489,65 @@ export class SecondSearchPage implements OnInit {
     });
     return Array.from(stationMap.values());
   }
-}
+
+    // Nueva función para refrescar la lista de estaciones manteniendo los filtros
+    async refreshStationsWithFilters() {
+      // Mostrar el preloader
+      const loading = await this.loadingController.create({
+        message: 'Actualizando estaciones...',
+        spinner: 'circles',
+      });
+      await loading.present();
+    
+      // Obtener los filtros y conectores seleccionados previamente
+      const connectorIds = this.selectedConnectors.map(c => c.connector_id);
+      const distance = this.selectedDistance;
+      const pse = this.selectedPSE;
+    
+      // Llamar a la API con la URL proporcionada y los filtros aplicados
+      this.http.get<any[]>(`${this.apiUrl}/locations`).subscribe(
+        (response) => {
+          // Verificar si response es un array antes de continuar
+          if (!Array.isArray(response)) {
+            console.error('La respuesta de la API no es un array:', response);
+            loading.dismiss();
+            return;
+          }
+    
+          // Procesar y aplicar filtros como en la función original
+          this.stations = this.removeDuplicateStations(this.sortStationsByDistance(response))
+            .filter(station => station.evses.length > 0); // Mantener solo estaciones válidas
+    
+          // Aplicar filtros adicionales de conectores, distancia y PSE
+          this.stations.forEach(station => {
+            station.evses.forEach((evse: { connectors: any[]; }) => {
+              evse.connectors = evse.connectors.filter(connector =>
+                this.selectedConnectors.some(selected =>
+                  selected.standard === connector.standard &&
+                  (selected.power_type === connector.power_type || connector.power_type === null)
+                )
+              );
+            });
+            station.evses = station.evses.filter((evse: { connectors: string | any[]; }) => evse.connectors.length > 0);
+          });
+    
+          // Filtrar por distancia y PSE si están seleccionados
+          if (distance > 0) {
+            this.stations = this.stations.filter(station => parseFloat(station.distance) <= distance);
+          }
+          if (pse) {
+            this.stations = this.stations.filter(station => station.pse && station.pse.includes(pse));
+          }
+    
+          // Ocultar el preloader después de obtener y procesar los datos
+          loading.dismiss();
+        },
+        (error) => {
+          console.error('Error al refrescar las estaciones:', error);
+          loading.dismiss();
+        }
+      );
+    }
+
+  }
+

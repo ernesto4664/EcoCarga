@@ -11,7 +11,7 @@
 <ion-content [fullscreen]="true">
   <div class="container" style="background: #31B17D !important;">
     <p class="msj-principal">
-      Selecciona la capacidad de la batería de tu vehículo en kWh; opción obligatoria!
+      Selecciona la capacidad de la batería de tu vehículo en kWh; opción obligatoria
     </p>
   </div>
 
@@ -74,6 +74,10 @@
     <ion-button class="custom-button" (click)="getFilteredStations()">Buscar Cargadores</ion-button>
   </div>
 
+  <div class="custom-button" *ngIf="stations.length > 0">
+    <ion-button class="custom-button" (click)="refreshStationsWithFilters()">Refrescar</ion-button>
+  </div>
+  
   <div class="container">
     <div class="row">
       <div *ngIf="stations.length > 0">
@@ -83,7 +87,7 @@
             <ion-label>
               <div class="icon-text">
                 <img src="assets/icon/electrolineras.png" alt="Icon" class="icon">
-                <h2 class="htwo">E/S. {{ station.name }} / {{ station.distance }} km</h2>
+                <p><strong style="font-weight: 700;">E/S. {{ station.name }} / {{ station.distance }} km</strong></p>
               </div>
 
               <div class="icon-text">

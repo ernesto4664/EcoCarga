@@ -298,7 +298,6 @@ ion-button {
 }
 
 /* Estilos para el texto y paginación en modo oscuro */
-:host-context(.ion-color-dark) h2 .htwo,
-:host-context(.ion-color-dark) p {
-  color: white !important;
+:host-context(.ion-color-dark) h2.htwo {
+  color: black !important;
 }

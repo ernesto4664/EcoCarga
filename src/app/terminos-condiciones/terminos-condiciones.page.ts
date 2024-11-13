@@ -18,7 +18,7 @@ export class TerminosCondicionesPage implements OnInit {
         this.latestTerms = data[0]; // Obtener el término más reciente
       },
       error => {
-        console.error('Error fetching terms and conditions:', error);
+        console.error('Error en el componente:', error);
       }
     );
   }

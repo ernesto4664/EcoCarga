@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Geolocation } from '@capacitor/geolocation';
+import { GoogleMapsService } from '../services/google-maps.service'; // Importar el servicio
 
 declare var google: any;
 
@@ -9,7 +10,7 @@ declare var google: any;
   templateUrl: './station-details.page.html',
   styleUrls: ['./station-details.page.scss'],
 })
-export class StationDetailsPage implements OnInit {
+export class StationDetailsPage implements OnInit, AfterViewInit {
   station: any;
   selectedConnectors: any[] = [];
   externalMapUrl: string = '';
@@ -21,7 +22,11 @@ export class StationDetailsPage implements OnInit {
   availableConnectors: any[] = [];
   chargingConnectors: any[] = [];
 
-  constructor(private route: ActivatedRoute, private router: Router) {
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private googleMapsService: GoogleMapsService // Inyección del servicio
+  ) {
     this.route.queryParams.subscribe(() => {
       const navigation = this.router.getCurrentNavigation();
       if (navigation?.extras.state) {
@@ -30,18 +35,14 @@ export class StationDetailsPage implements OnInit {
         this.batteryCapacity = navigation.extras.state['batteryCapacity'] || 0;
       }
     });
+  }
 
-    this.directionsService = new google.maps.DirectionsService();
-    this.directionsRenderer = new google.maps.DirectionsRenderer();
+  ngOnInit() {
+    this.setMapUrl();
   }
 
   ngAfterViewInit() {
     this.observeMapVisibility();
-  }
-
-  ngOnInit() {
-    this.loadMap();
-    this.setMapUrl();
   }
 
   observeMapVisibility() {
@@ -60,10 +61,7 @@ export class StationDetailsPage implements OnInit {
   }
 
   async loadMap() {
-    if (!window.google || !window.google.maps) {
-      console.error('Google Maps no está cargado correctamente');
-      return;
-    }
+    await this.googleMapsService.loadGoogleMaps(); // Usar el servicio para cargar Google Maps
 
     if (this.station?.coordinates) {
       const mapElement = document.getElementById('map');
@@ -79,7 +77,9 @@ export class StationDetailsPage implements OnInit {
           };
 
           this.map = new google.maps.Map(mapElement, mapOptions);
+          this.directionsRenderer = new google.maps.DirectionsRenderer();
           this.directionsRenderer.setMap(this.map);
+          this.directionsService = new google.maps.DirectionsService();
 
           const request = {
             origin: new google.maps.LatLng(userLatitude, userLongitude),
@@ -128,22 +128,40 @@ export class StationDetailsPage implements OnInit {
     if (!this.batteryCapacity || maxPower <= 0) {
       return 'No disponible';
     }
-  
-    const totalHours = this.batteryCapacity / maxPower; // Tiempo total en horas (decimal)
-    const hours = Math.floor(totalHours); // Parte entera de las horas
-    const minutes = Math.round((totalHours - hours) * 60); // Parte decimal convertida a minutos
-  
+    const totalHours = this.batteryCapacity / maxPower;
+    const hours = Math.floor(totalHours);
+    const minutes = Math.round((totalHours - hours) * 60);
+
     let result = '';
-  
     if (hours > 0) {
       result += `${hours} hrs`;
     }
-  
     if (minutes > 0) {
-      result += `${hours > 0 ? ' y ' : ''}${minutes} min`; // Añadir 'y' solo si hay horas
+      result += `${hours > 0 ? ' y ' : ''}${minutes} min`;
     }
-  
     return result || 'Menos de un minuto';
+  }
+
+  getTotalAvailableConnectors(): number {
+    return this.station?.evses?.reduce((total: number, evse: any) => {
+      return total + evse.connectors.filter((connector: any) => connector.status === 'DISPONIBLE').length;
+    }, 0) || 0;
+  }
+
+  getTotalChargingConnectors(): number {
+    return this.station?.evses?.reduce((total: number, evse: any) => {
+      return total + evse.connectors.filter((connector: any) => connector.status === 'OCUPADO').length;
+    }, 0) || 0;
+  }
+
+  getTotalUnavailableConnectors(): number {
+    return this.station?.evses?.reduce((total: number, evse: any) => {
+      return total + evse.connectors.filter((connector: any) => connector.status === 'NO DISPONIBLE').length;
+    }, 0) || 0;
+  }
+
+  getCurrentType(powerType: string): string {
+    return powerType.startsWith('AC') ? 'AC' : powerType.startsWith('DC') ? 'DC' : powerType;
   }
 
   getStatusLabel(status: string): string {
@@ -171,89 +189,13 @@ export class StationDetailsPage implements OnInit {
         return '#f53d3d';
       case 'INOPERATIVO':
       case 'BLOQUEADO':
-      case 'REMOVIDO':
+      case 'REMOVED':
       case 'FUERA DE LINEA':
       case 'NO DISPONIBLE':
         return 'red';
       default:
         return 'gray';
     }
-  }
-
-  getConnectorStatus() {
-    const connectorsInStation = this.station.evses.map((evse: any) => evse.connectors).flat();
-    const filteredConnectors = connectorsInStation.filter((connector: any) =>
-      this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
-    );
-
-    const statusCounts = filteredConnectors.reduce((acc: any, connector: any) => {
-      acc[connector.status] = (acc[connector.status] || 0) + 1;
-      return acc;
-    }, {});
-
-    return Object.keys(statusCounts).map(status => ({
-      label: this.getStatusLabel(status),
-      count: statusCounts[status],
-      color: this.getStatusColor(status)
-    }));
-  }
-
-  getDetailedConnectors() {
-    return this.station.evses.map((evse: any) => ({
-      ...evse,
-      connectors: evse.connectors.filter((connector: any) =>
-        this.selectedConnectors.some(selected => selected.standard === connector.standard && selected.power_type === connector.power_type)
-      )
-    })).filter((evse: any) => evse.connectors.length > 0);
-  }
-
-  getTotalUnavailableConnectors(): number {
-    if (!this.station || !this.station.evses) {
-      return 0;
-    }
-    return this.station.evses
-      .map((evse: { connectors: { filter: (arg0: (connector: any) => boolean) => { (): any; new(): any; length: any; }; }; }) => evse.connectors.filter(connector => connector.status === 'NO DISPONIBLE').length)
-      .reduce((a: any, b: any) => a + b, 0);
-  }
-
-  getIconPath(connector: any): string {
-    if (!connector.power_type) {
-      connector.power_type = this.getPowerTypeByStandard(connector.standard);
-    }
-
-    const iconMap: { [key: string]: string } = {
-      'GB/T AC (CABLE - AC)': 'GBT_AC.png',
-      'GB/T AC (SOCKET - AC)': 'GBT_AC.png',
-      'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
-      'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
-      'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
-      'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
-      'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
-      'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
-      'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
-      'GB/T DC (CABLE - DC)': 'GBT_DC.png',
-      'GB/T DC (SOCKET - DC)': 'GBT_DC.png',
-    };
-
-    const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
-    return this.iconPath + (iconMap[key] || 'default.jpeg');
-  }
-
-  getPowerTypeByStandard(standard: string): string {
-    const acStandards = ['Tipo 2', 'Tipo 1', 'GB/T AC'];
-    const dcStandards = ['CCS 2', 'CCS 1', 'CHAdeMO', 'GB/T DC'];
-
-    if (acStandards.includes(standard)) {
-      return 'AC';
-    }
-    if (dcStandards.includes(standard)) {
-      return 'DC';
-    }
-    return 'Desconocido';
-  }
-
-  getCurrentType(powerType: string): string {
-    return powerType.startsWith('AC') ? 'AC' : powerType.startsWith('DC') ? 'DC' : powerType;
   }
 
   getPaymentIcon(capability: string): string {
@@ -291,33 +233,54 @@ export class StationDetailsPage implements OnInit {
     }
   }
 
+  getIconPath(connector: any): string {
+    if (!connector.power_type) {
+      connector.power_type = this.getPowerTypeByStandard(connector.standard);
+    }
+    const iconMap: { [key: string]: string } = {
+      'GB/T AC (CABLE - AC)': 'GBT_AC.png',
+      'GB/T AC (SOCKET - AC)': 'GBT_AC.png',
+      'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
+      'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
+      'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
+      'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
+      'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
+      'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
+      'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
+      'GB/T DC (CABLE - DC)': 'GBT_DC.png',
+      'GB/T DC (SOCKET - DC)': 'GBT_DC.png',
+    };
+    const key = `${connector.standard} (${connector.format} - ${connector.power_type})`;
+    return this.iconPath + (iconMap[key] || 'default.jpeg');
+  }
+
+  getPowerTypeByStandard(standard: string): string {
+    const acStandards = ['Tipo 2', 'Tipo 1', 'GB/T AC'];
+    const dcStandards = ['CCS 2', 'CCS 1', 'CHAdeMO', 'GB/T DC'];
+    return acStandards.includes(standard) ? 'AC' : dcStandards.includes(standard) ? 'DC' : 'Desconocido';
+  }
+
   getOpeningHours(station: any): string {
     if (station.opening_times.twentyfourseven) {
       return 'Abierto 24/7';
     }
-
     const regularHours = station.opening_times.regular_hours;
     if (regularHours.length > 0) {
       const weekdays = regularHours.filter((hour: { weekday: number }) => hour.weekday >= 1 && hour.weekday <= 5);
       const weekend = regularHours.filter((hour: { weekday: number }) => hour.weekday === 6 || hour.weekday === 7);
-
       let result = '';
-
       if (weekdays.length > 0) {
         const firstWeekday = weekdays[0];
         const lastWeekday = weekdays[weekdays.length - 1];
         result += `De ${this.getDayName(firstWeekday.weekday)} ${firstWeekday.period_begin} a ${this.getDayName(lastWeekday.weekday)} ${lastWeekday.period_end}`;
       }
-
       if (weekend.length > 0) {
         const firstWeekend = weekend[0];
         const lastWeekend = weekend[weekend.length - 1];
         result += `\nSábado ${firstWeekend.period_begin} a Domingo ${lastWeekend.period_end}`;
       }
-
       return result;
     }
-
     return 'No disponible';
   }
 
@@ -326,21 +289,4 @@ export class StationDetailsPage implements OnInit {
     return days[weekday - 1];
   }
 
-  getTotalAvailableConnectors(): number {
-    if (!this.station || !this.station.evses) {
-      return 0;
-    }
-    return this.station.evses
-      .map((evse: { connectors: { filter: (arg0: (connector: any) => boolean) => { (): any; new(): any; length: any; }; }; }) => evse.connectors.filter(connector => connector.status === 'DISPONIBLE').length)
-      .reduce((a: any, b: any) => a + b, 0);
-  }
-  
-  getTotalChargingConnectors(): number {
-    if (!this.station || !this.station.evses) {
-      return 0;
-    }
-    return this.station.evses
-      .map((evse: { connectors: { filter: (arg0: (connector: any) => boolean) => { (): any; new(): any; length: any; }; }; }) => evse.connectors.filter(connector => connector.status === 'OCUPADO').length)
-      .reduce((a: any, b: any) => a + b, 0);
-  }
 }

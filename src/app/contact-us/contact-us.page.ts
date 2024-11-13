@@ -24,7 +24,7 @@ export class ContactUsPage implements OnInit {
   composeEmail() {
     if (this.contactForm.valid) {
       const formData = this.contactForm.value;
-      const email = 'admin@example.com'; 
+      const email = 'Transporte_Eficiente@minenergia.cl'; 
       const subject = encodeURIComponent('Nuevo mensaje de contacto');
       const body = encodeURIComponent(
         `Nombre: ${formData.firstName} ${formData.lastName}\n` +

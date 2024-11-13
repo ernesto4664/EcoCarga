@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { ModalController } from '@ionic/angular';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-station-details-modal',
@@ -14,12 +15,39 @@ import { ModalController } from '@ionic/angular';
     </ion-header>
 
     <ion-content class="ion-padding">
-      <div class="station-info">
-        <img style="width: 25px; height: 40px;" src="assets/icon/location.png" alt="Pin Icon" />
-        <span class="station-name">{{ station.address }}</span>
+      <div class="station-info" style="display: flex; align-items: center;">
+        <img style="width: 25px; height: 40px; margin-right: 10px;" src="assets/icon/location.png" alt="Pin Icon" />
+        <p>
+          <strong>Dirección:</strong> {{ station.address }}<br>
+          <strong>Región:</strong> {{ station.region }}<br>
+          <strong>Comuna:</strong> {{ station.commune }}
+        </p>
       </div>
 
-      <!-- Barra verde para "Conectores disponibles" -->
+      <!-- Acordeón para los horarios -->
+      <ion-accordion-group>
+        <ion-accordion value="horarios">
+          <ion-item slot="header">
+            <ion-label style="display: flex;">
+              <img src="assets/icon/hours.png" alt="Horarios" class="icon">
+              <p>Horarios:</p>
+            </ion-label>
+          </ion-item>
+          <div class="ion-padding" slot="content">
+            <ion-item class="show-item custom-item">
+              <div [innerHTML]="getOpeningHours(station)"></div>
+              <div *ngIf="station.opening_times?.exceptional_openings?.length > 0">
+                <p>Excepcionales Aperturas: {{ getExceptionalOpenings(station) }}</p>
+              </div>
+              <div *ngIf="station.opening_times?.exceptional_closings?.length > 0">
+                <p>Excepcionales Cierres: {{ getExceptionalClosings(station) }}</p>
+              </div>
+            </ion-item>
+          </div>
+        </ion-accordion>
+      </ion-accordion-group>
+
+      <!-- Conectores disponibles -->
       <div class="available-connectors-bar" *ngIf="availableConnectors.length > 0">
         <strong>Conectores disponibles:</strong>
       </div>
@@ -30,7 +58,7 @@ import { ModalController } from '@ionic/angular';
         </div>
       </div>
 
-      <!-- Barra roja para "Conectores cargando" -->
+      <!-- Conectores cargando -->
       <div class="occupied-connectors-bar" *ngIf="occupiedConnectors.length > 0">
         <strong>Conectores cargando:</strong>
       </div>
@@ -41,7 +69,7 @@ import { ModalController } from '@ionic/angular';
         </div>
       </div>
 
-      <!-- Barra amarilla para "Conectores no disponibles" -->
+      <!-- Conectores no disponibles -->
       <div class="unavailable-connectors-bar" *ngIf="unavailableConnectors.length > 0">
         <strong>Conectores no disponibles:</strong>
       </div>
@@ -109,15 +137,22 @@ import { ModalController } from '@ionic/angular';
     ion-content {
       background-color: #dff3eb;
     }
+    .icon {
+      margin-right: 8px; 
+      width: 24px; 
+      height: 24px; 
+    }
   `]
 })
+
 export class StationDetailsModalComponent {
   @Input() station: any;
   @Input() availableConnectors: any[] = [];
   @Input() occupiedConnectors: any[] = [];
   @Input() unavailableConnectors: any[] = [];
+  accordionValue = ''; // Inicialización del valor del acordeón
 
-  constructor(private modalCtrl: ModalController) {}
+  constructor(private modalCtrl: ModalController, private sanitizer: DomSanitizer) {}
 
   dismiss() {
     this.modalCtrl.dismiss();
@@ -126,4 +161,95 @@ export class StationDetailsModalComponent {
   goToStation() {
     this.modalCtrl.dismiss({ action: 'goToStation' });
   }
+
+  stopEventAndToggleAccordion(event: Event, accordionValue: string) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.accordionValue = this.accordionValue === accordionValue ? '' : accordionValue;
+  }
+
+  stopEvent(event: Event) {
+    event.stopPropagation();
+  }
+
+  // Métodos para horarios de aperturas y cierres
+  getOpeningHours(station: any): SafeHtml {
+    const regularHours = station.opening_times.regular_hours;
+
+    if (station.opening_times.twentyfourseven) {
+      return this.sanitizer.bypassSecurityTrustHtml('Abierto 24/7');
+    }
+
+    if (regularHours.length === 0) {
+      return this.sanitizer.bypassSecurityTrustHtml('No disponible');
+    }
+
+    let result: string[] = [];
+    let weekdayRanges: { start: number; end: number; period_begin: string; period_end: string }[] = [];
+
+    const diasCubiertos = new Set(regularHours.map((h: { weekday: any }) => h.weekday));
+
+    for (let i = 1; i <= 7; i++) {
+      if (!diasCubiertos.has(i)) {
+        regularHours.push({
+          weekday: i,
+          period_begin: 'Cerrado',
+          period_end: 'Cerrado'
+        });
+      }
+    }
+
+    for (let i = 0; i < regularHours.length; i++) {
+      const currentDay = regularHours[i];
+      const lastRange = weekdayRanges[weekdayRanges.length - 1];
+
+      if (
+        lastRange &&
+        lastRange.period_begin === currentDay.period_begin &&
+        lastRange.period_end === currentDay.period_end &&
+        lastRange.end === currentDay.weekday - 1
+      ) {
+        lastRange.end = currentDay.weekday;
+      } else {
+        weekdayRanges.push({
+          start: currentDay.weekday,
+          end: currentDay.weekday,
+          period_begin: currentDay.period_begin,
+          period_end: currentDay.period_end,
+        });
+      }
+    }
+
+    weekdayRanges.forEach((range) => {
+      const dayStart = this.getDayName(range.start);
+      const dayEnd = this.getDayName(range.end);
+      const hours = range.period_begin === 'Cerrado' ? 'Cerrado' : `${range.period_begin} a ${range.period_end}`;
+
+      if (dayStart === dayEnd) {
+        result.push(`${dayStart}: ${hours}`);
+      } else {
+        result.push(`De ${dayStart} ${range.period_begin} a ${dayEnd} ${range.period_end}`);
+      }
+    });
+
+    return this.sanitizer.bypassSecurityTrustHtml(result.join('<br>'));
+  }
+
+  getDayName(weekday: number): string {
+    const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    return days[weekday - 1];
+  }
+
+  getExceptionalOpenings(station: any): string {
+    return station.opening_times.exceptional_openings.map((opening: any) => {
+      return `${opening.period_begin} a ${opening.period_end}`;
+    }).join(', ');
+  }
+
+  getExceptionalClosings(station: any): string {
+    return station.opening_times.exceptional_closings.map((closing: any) => {
+      return `${closing.period_begin} a ${closing.period_end}`;
+    }).join(', ');
+  }
+
 }

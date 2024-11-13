@@ -45,13 +45,14 @@ export class TermsModalComponent implements OnInit {
 
   accept() {
     if (this.termsAccepted) {
-      localStorage.setItem('termsAccepted', 'true');
-      this.globalDataService.fetchAllConnectors();
-      this.modalController.dismiss({ accepted: true });
+        localStorage.setItem('termsAccepted', 'true');
+        localStorage.setItem('termsAcceptedDate', new Date().toISOString()); // Guardar fecha de aceptación
+        this.globalDataService.fetchAllConnectors();
+        this.modalController.dismiss({ accepted: true });
     } else {
-      this.showAlert = true;
+        this.showAlert = true;
     }
-  }
+}
 
   onAlertDismiss() {
     this.showAlert = false;

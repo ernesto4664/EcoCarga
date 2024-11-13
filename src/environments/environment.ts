@@ -1,18 +1,12 @@
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build` replaces `environment.ts` with `environment.prod.ts`.
-// The list of file replacements can be found in `angular.json`.
+// src/environments/environment.ts
+import { Environment } from './environment.d';
 
-export const environment = {
+export const environment: Environment = {
   production: false,
-  googleMapsApiKey: 'AIzaSyBcpB4-Tq5jXCLIsrvlWmKsnv1Et6ZQ7mU', // Reemplaza con tu clave API de Google Maps
- 
+  googleMapsApiKey: 'AIzaSyC68WH6r39VEl-d3vP_h2XOT4hNs7KSmH4',
+  googleMapsApiKeyIos: 'AIzaSyA7Hxp4ZsqFI8Mny-mydfmieGvqJhd_AsY', // Clave para iOS
+  apiUrlSec: 'https://backend.electromovilidadenlinea.cl/locations',
+  token: 'eyJraWQiOiJvSWM1K3NpU25yWnZ3...', // Token (truncado por seguridad)
+  apiUrlWeb: 'https://ecocarga.minenergia.cl/api/TermsAndConditionsApi',
+  apiUrlWebBateries: 'https://ecocarga.minenergia.cl/api/BateriasApi'
 };
-
-/*
- * For AIzaSyCNM9lXDeD3hLfe7Es4KNqkL8J2jsZ_W8I easier debugging in development mode, you can import the following file
- * to AIzaSyBcpB4-Tq5jXCLIsrvlWmKsnv1Et6ZQ7mU  ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
-// import 'zone.js/plugins/zone-error';  // Included with Angular CLI.

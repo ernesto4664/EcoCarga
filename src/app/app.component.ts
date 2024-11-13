@@ -26,9 +26,10 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+
     this.loadGoogleMaps();
   }
-
+  
   loadGoogleMaps() {
     if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
       const script = document.createElement('script');
@@ -122,4 +123,6 @@ export class AppComponent implements OnInit {
   clearCache() {
     this.apiService.clearCache();
   }
+
+  
 }

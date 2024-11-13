@@ -1,12 +1,6 @@
-<!--<ion-header class="custom-header" style="margin-top: 3rem;">
-  <ion-toolbar>
-    <ion-title>CONECTORES</ion-title>
-  </ion-toolbar>
-</ion-header>-->
-
 <ion-content [fullscreen]="false">
   <div class="container" style="background: #31B17D !important;">
-    <p class="msj-principal">Selecciona el o los conectores disponibles en tu vehículo; opción obligatoria!</p>
+    <p class="msj-principal">Selecciona el o los conectores disponibles en tu vehículo; opción obligatoria</p>
   </div>
 
   <div class="container checkbox-grid-container">
@@ -22,7 +16,12 @@
     </div>
   </div>
 
-  <!-- Preloader -->
+  <!-- Preloader específico para "Sí, mantener filtros" 
+  <div *ngIf="secondaryLoading" class="secondary-loader">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>-->
+
+  <!-- Contenido principal con el preloader principal -->
   <div *ngIf="loading" class="loader">
     <div class="spinner"></div>
   </div>
@@ -35,12 +34,12 @@
               (click)="selectConnector(i)" 
               [ngClass]="{'selected': selectedIndexes.includes(i)}">
         <ion-thumbnail slot="start">
-        <img [src]="getIconPath(connector)" alt="Icono Conector">
+          <img [src]="getIconPath(connector)" alt="Icono Conector">
         </ion-thumbnail>
         <div class="connector-info">
-        <p style="margin-bottom:10px;">{{ getConnectorDisplayName(connector) }}</p>
+          <p style="margin-bottom:10px;">{{ getConnectorDisplayName(connector) }}</p>
         </div>
-        </ion-item>
+      </ion-item>
     </ion-list>
   </div>
 </ion-content>

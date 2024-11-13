@@ -2,14 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, forkJoin, interval, Subscription } from 'rxjs';
 import { tap, mergeMap, switchMap } from 'rxjs/operators';
+import { environment } from '../environments/environment'; 
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
   // Variables de configuración
-  private apiUrl = 'https://backend.electromovilidadenlinea.cl/locations';
-  private token = 'eyJraWQiOiJvSWM1K3NpU25yWnZ3...'; // Token (truncado por seguridad)
+  private apiUrlSec = environment.apiUrlSec; 
+  private token = environment.token; // Usar token desde environment
 
   private cache: any[] = [];
   private cacheLifetime = 2 * 3600 * 1000; // 2 horas
@@ -39,7 +40,7 @@ export class ApiService {
   }
 
   private fetchLocations(page: number): Observable<any> {
-    const url = `${this.apiUrl}?page=${page}`;
+    const url = `${this.apiUrlSec}?page=${page}`;
     return this.http.get<any>(url, { headers: this.getHeaders() });
   }
 
@@ -83,7 +84,7 @@ export class ApiService {
     try {
       localStorage.setItem('cacheFirst-Search', JSON.stringify(data));
       localStorage.setItem('firstSearchCacheTime', Date.now().toString());
-      console.log('Filtros almacenados en cacheFirst-Search:', data);
+    //  console.log('Filtros almacenados en cacheFirst-Search:', data);
     } catch (error) {
       console.error('Error al almacenar en cacheFirst-Search:', error);
     }
@@ -113,7 +114,7 @@ export class ApiService {
   clearFirstSearchCache() {
     localStorage.removeItem('cacheFirst-Search');
     localStorage.removeItem('firstSearchCacheTime');
-    console.log('cacheFirst-Search cleared');
+  //  console.log('cacheFirst-Search cleared');
   }
 
   // Métodos para la cache de las ubicaciones y conectores
@@ -122,7 +123,7 @@ export class ApiService {
     localStorage.clear();
     this.cache = [];
     this.lastFetchTime = 0;
-    console.log('Cache cleared');
+   // console.log('Cache cleared');
   }
 
   updateCacheWithConnectorStatus(updatedConnector: any) {
@@ -208,7 +209,7 @@ export class ApiService {
   }
 
   getConnectorStatus(connectorId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/connector-status?connectorId=${connectorId}`);
+    return this.http.get<any>(`${this.apiUrlSec}/connector-status?connectorId=${connectorId}`);
   }
 
   stopConnectorStatusUpdates() {

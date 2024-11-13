@@ -3,6 +3,35 @@ import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Geolocation } from '@capacitor/geolocation';
 import { ApiService } from '../api.service';
+import { LoadingController } from '@ionic/angular'; // Importación necesaria
+import { environment } from '../../environments/environment';
+
+interface Connector {
+  connector_id: number; // o string dependiendo de tu API
+  order_number: number;
+  status: string;
+  standard: string;
+  format: string;
+}
+
+interface EVSE {
+  evse_uid: number; // o string dependiendo de tu API
+  evse_id: string;
+  directions: string;
+  order_number: number;
+  payment_capabilities: any[]; // Ajusta el tipo si conoces la estructura
+  activation_capabilities: any[]; // Ajusta el tipo si conoces la estructura
+  last_updated: string;
+  status: string;
+  connectors: Connector[];
+}
+
+interface Station {
+  pse: any;
+  evses: EVSE[];
+  distance: string; // o number dependiendo de tu API
+  // Agrega otros campos de la estación si los necesitas
+}
 
 @Component({
   selector: 'app-second-search',
@@ -19,13 +48,15 @@ export class SecondSearchPage implements OnInit {
   userLocation: { latitude: number; longitude: number } | null = null;
   selectedConnectors: any[] = [];
   stations: any[] = [];  // Para almacenar las estaciones filtradas
-  private apiUrl = 'https://backend.electromovilidadenlinea.cl';  // URL del backend de las estaciones
+  private apiUrlSec = environment.apiUrlSec;   // URL del backend de las estaciones
+  private apiUrlWebBateries = environment.apiUrlWebBateries;
 
   constructor(
     private http: HttpClient,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private loadingController: LoadingController  // Inyectar LoadingController
   ) {
     this.activatedRoute.queryParams.subscribe(() => {
       const navigation = this.router.getCurrentNavigation();
@@ -37,6 +68,21 @@ export class SecondSearchPage implements OnInit {
 
   ngOnInit() {
     this.getUserLocation();
+    
+  }
+
+  accordionValue: string | null = null; // Controla qué acordeón está abierto
+
+  // Detener la propagación del evento y alternar el acordeón seleccionado
+  stopEventAndToggleAccordion(event: Event, value: string) {
+    event.stopPropagation(); // Detiene la propagación del evento
+
+    // Alternar el valor del acordeón; si ya está abierto, lo cierra
+    this.accordionValue = this.accordionValue === value ? null : value;
+  }
+
+  stopEvent(event: Event) {
+    event.stopPropagation(); // Evitar que el clic se propague
   }
 
   // Obtener ubicación del usuario
@@ -61,7 +107,7 @@ export class SecondSearchPage implements OnInit {
     const query = event.target.value;
     if (query && query.length > 0) {
       // Llamada a la API correcta para obtener las capacidades de baterías
-      this.http.get<any[]>(`http://18.116.216.219/api/BateriasApi`).subscribe(
+      this.http.get<any[]>(this.apiUrlWebBateries).subscribe(
         (capacities) => {
           // Filtramos las capacidades que coincidan con el input del usuario
           this.suggestedCapacities = capacities
@@ -87,7 +133,7 @@ export class SecondSearchPage implements OnInit {
 
   // Obtener detalles de la batería seleccionada
   fetchBatteryDetails(capacity: string) {
-    this.http.get<any>(`${this.apiUrl}/battery-details?capacity=${capacity}`).subscribe(
+    this.http.get<any>(`${this.apiUrlWebBateries}/battery-details?capacity=${capacity}`).subscribe(
       (battery) => {
         this.selectedBattery = battery;
       },
@@ -99,7 +145,7 @@ export class SecondSearchPage implements OnInit {
 
   // Filtrar estaciones por distancia
   filterByDistance() {
-    console.log('Filtrar por distancia:', this.selectedDistance);
+    //console.log('Filtrar por distancia:', this.selectedDistance);
     this.applyAllFilters();
   }
 
@@ -218,7 +264,7 @@ export class SecondSearchPage implements OnInit {
   printConnectorTotals() {
     this.stations.forEach(station => {
       const { acCount, dcCount, totalConnectors } = this.getConnectorTotals(station);
-      console.log(`Estación ${station.name} tiene ${totalConnectors} conectores: ${acCount} AC y ${dcCount} DC`);
+    //  console.log(`Estación ${station.name} tiene ${totalConnectors} conectores: ${acCount} AC y ${dcCount} DC`);
     });
   }
 
@@ -472,4 +518,79 @@ export class SecondSearchPage implements OnInit {
     });
     return Array.from(stationMap.values());
   }
-}
+
+    // Nueva función para refrescar la lista de estaciones manteniendo los filtros
+    async refreshStationsWithFilters() {
+      const loading = await this.loadingController.create({
+          message: 'Actualizando estaciones...',
+          spinner: 'circles',
+      });
+      await loading.present();
+  
+      const connectorIds = this.selectedConnectors.map(c => c.connector_id);
+      const distance = this.selectedDistance;
+      const pse = this.selectedPSE;
+  
+      console.log('Conectores seleccionados:', connectorIds);
+      console.log('Distancia seleccionada:', distance);
+      console.log('PSE seleccionado:', pse);
+  
+      let allStations: Station[] = [];
+      let currentPage = 1;
+      const totalPages = 10; // Consultar las primeras 10 páginas
+  
+      while (currentPage <= totalPages) {
+          try {
+              const response = await this.http.get<{ items: Station[] }>(`${this.apiUrlSec}?page=${currentPage}`).toPromise();
+  
+              console.log('Respuesta de la API:', response);
+  
+              if (response && Array.isArray(response.items)) {
+                  allStations = allStations.concat(response.items);
+              } else {
+                  console.error('La respuesta de la API no tiene un array en "items":', response);
+              }
+          } catch (error) {
+              console.error('Error al obtener la página', currentPage, error);
+              break; // Salir en caso de error
+          }
+          currentPage++;
+      }
+  
+      // Filtrar las estaciones obtenidas
+      this.stations = allStations.filter((station: Station) => {
+          return station.evses.some((evse: EVSE) => {
+              return evse.status === 'DISPONIBLE' && 
+                  evse.connectors.some((connector: Connector) => 
+                      connectorIds.includes(connector.connector_id)
+                  );
+          });
+      });
+  
+      this.stations.forEach((station: Station) => {
+          station.evses.forEach((evse: EVSE) => {
+              evse.connectors = evse.connectors.filter((connector: Connector) => 
+                (connector.status === 'DISPONIBLE' || connector.status === 'NO DISPONIBLE' || connector.status === 'OCUPADO') && 
+                  connectorIds.includes(connector.connector_id)
+              );
+          });
+          station.evses = station.evses.filter((evse: EVSE) => evse.connectors.length > 0);
+      });
+  
+      // Filtrar por distancia
+      if (distance > 0) {
+          this.stations = this.stations.filter((station: Station) => parseFloat(station.distance) <= distance);
+      }
+  
+      // Filtrar por PSE
+      if (pse) {
+          this.stations = this.stations.filter((station: Station) => station.pse && station.pse.includes(pse));
+      }
+  
+      console.log('Estaciones después de aplicar filtros:', this.stations);
+      loading.dismiss();
+      console.log(`Llamada a la API realizada a: ${this.apiUrlSec}/locations`);
+  }
+
+  }
+

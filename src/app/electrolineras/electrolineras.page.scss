@@ -1,12 +1,51 @@
-.alert-custom-class .alert-message img {
-    margin-right: 10px;
-    vertical-align: middle;
-  }
+// Define colores globales
+$colors: (
+  primary: #3880ff,
+  secondary: #3dc2ff,
+  tertiary: #5260ff,
+  success: #2dd36f,
+  warning: #ffc409,
+  danger: #eb445a,
+  dark: #222428,
+  medium: #92949c,
+  light: #f4f5f8
+) !default;
 
-  .green-text {
-    color: green;
-  }
-  
-  .red-text {
-    color: red;
-  }
+// Estilos personalizados para alertas
+.alert-custom-class .alert-message img {
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+// Clases de texto por estado
+.green-text {
+  color: map-get($colors, success); // Verde
+}
+
+.red-text {
+  color: map-get($colors, danger); // Rojo
+}
+
+// Estilos para el loader
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+}
+
+.spinner {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3dc2ff; /* Primary color */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

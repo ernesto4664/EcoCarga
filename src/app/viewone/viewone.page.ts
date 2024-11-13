@@ -33,9 +33,9 @@ export class ViewonePage implements OnInit {
         if (data.data && data.data.accepted) {
           this.termsAccepted = true;
           localStorage.setItem('termsAccepted', 'true');
-          console.log("Términos aceptados");
+         // console.log("Términos aceptados");
         } else {
-          console.log("Términos no aceptados");
+         // console.log("Términos no aceptados");
         }
       });
 
@@ -47,18 +47,36 @@ export class ViewonePage implements OnInit {
 
   ngOnInit() {
     const termsAccepted = localStorage.getItem('termsAccepted') === 'true';
-    this.termsAccepted = termsAccepted;
+    const termsAcceptedDate = localStorage.getItem('termsAcceptedDate'); // Fecha de aceptación
+
+    if (termsAccepted && termsAcceptedDate) {
+        const currentTime = new Date().getTime();
+        const acceptedTime = new Date(termsAcceptedDate).getTime();
+        const fiveDaysInMillis = 5 * 24 * 60 * 60 * 1000; // 5 días en milisegundos
+
+        // Verificar si han pasado más de 5 días desde que se aceptaron los términos
+        if ((currentTime - acceptedTime) > fiveDaysInMillis) {
+            this.termsAccepted = false; // Forzar al usuario a volver a aceptar
+            localStorage.removeItem('termsAccepted'); // Eliminar el estado anterior
+            localStorage.removeItem('termsAcceptedDate'); // Eliminar la fecha anterior
+        } else {
+            this.termsAccepted = true; // Aceptación válida dentro de los 5 días
+        }
+    } else {
+        this.termsAccepted = false; // No se han aceptado los términos
+    }
+
     this.route.url.subscribe(url => console.log('URL actual:', url));
-  }
+}
 
   navigateToInformacionPreliminar() {
     if (this.termsAccepted) {
-      console.log("Navegando a la página de primera busqueda");
+      //console.log("Navegando a la página de primera busqueda");
       this.router.navigateByUrl('/first-search').then(success => {
         if (success) {
-          console.log('Navegación exitosa');
+        //  console.log('Navegación exitosa');
         } else {
-          console.log('Error de navegación');
+         // console.log('Error de navegación');
         }
       });
     } else {

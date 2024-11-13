@@ -11,6 +11,10 @@ h2{
   font-weight: 700;
 }
 
+h2 .htwo{
+  font-weight: 700;
+}
+
 p.msj-principal{
     margin-top: 3.5rem;
     padding: 20px;
@@ -271,6 +275,17 @@ ion-button {
   }
 }
 
+.custom-item {
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+  color: #7C7C7C;
+ 
+}
+
+.custom-item p {
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+  color: #7C7C7C;
+}
+
 .hours-container {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
   color: #7C7C7C;
@@ -280,4 +295,9 @@ ion-button {
 
 .hours-container p:first-child {
   margin-bottom: 5px; /* Espacio entre "Horarios:" y el contenido */
+}
+
+/* Estilos para el texto y paginación en modo oscuro */
+:host-context(.ion-color-dark) h2.htwo {
+  color: black !important;
 }

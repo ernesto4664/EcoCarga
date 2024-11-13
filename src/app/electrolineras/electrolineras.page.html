@@ -1,4 +1,7 @@
 <ion-content>
-  <div id="map" style="height: 100%;"></div>
+  <div *ngIf="loading" class="loader">
+    <div class="spinner"></div>
+  </div>
+  
+  <div id="mapdetail" style="height: 100%; width: 100%;"></div>
 </ion-content>
-<app-layout></app-layout>

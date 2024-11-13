@@ -1,24 +1,24 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "mn.ecocarga.starter" // Asegúrate de que coincide con tu configuración en capacitor.config.ts
+    namespace 'cl.gob.energia.electrolineras2' // Asegúrate de que coincide con tu configuración en capacitor.config.ts
     compileSdk rootProject.ext.compileSdkVersion
     
     defaultConfig {
-        applicationId "mn.ecocarga.starter"  // Actualizado para coincidir con capacitor.config.ts
+        applicationId "cl.gob.energia.electrolineras2"  // Actualizado para coincidir con capacitor.config.ts
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 27
+        versionName "2.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     
     signingConfigs {
         release {
-            storeFile file("C:/Users/marce/Desktop/EcoCarga/ecocargaF-release.keystore")  // Ruta completa del keystore
-            storePassword "16863601Ev"   // Reemplaza con tu contraseña del keystore
-            keyAlias "ecocargaF-key-alias"  // Alias del keystore
-            keyPassword "16863601Ev"  // Reemplaza con la contraseña de tu clave
+            storeFile file("D:/ecocarga-key.keystore")  // Ruta completa del keystore
+            storePassword "zekepass"   // Reemplaza con tu contraseña del keystore
+            keyAlias "ecocarga"  // Alias del keystore
+            keyPassword "zekepass"  // Reemplaza con la contraseña de tu clave
         }
     }
 

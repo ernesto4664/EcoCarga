@@ -1,4 +1,4 @@
-package mn.ecocarga.starter;
+package cl.gob.energia.electrolineras2;
 
 import android.os.Bundle;
 import android.webkit.WebView;

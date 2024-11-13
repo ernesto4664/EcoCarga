@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'mn.ecocarga.starter', // Asegúrate de que este appId sea el correcto para tu proyecto
+  appId: 'cl.gob.energia.electrolineras2', // Asegúrate de que este appId sea el correcto para tu proyecto
   appName: 'EcoCarga', // Nombre de la app
   webDir: 'www', // Directorio donde se encuentra la app compilada
   bundledWebRuntime: false,

@@ -1,5 +1,5 @@
 {
-    "appId": "com.ministerio.ecocarga",
+    "appId": "cl.gob.energia.electrolineras2",
     "appName": "EcoCarga",
     "webDir": "www",
     "bundledWebRuntime": false

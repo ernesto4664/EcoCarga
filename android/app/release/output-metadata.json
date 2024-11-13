@@ -4,15 +4,15 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "mn.ecocarga.starter",
+  "applicationId": "cl.gob.energia.electrolineras2",
   "variantName": "release",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 1,
-      "versionName": "1.0",
+      "versionCode": 27,
+      "versionName": "2.1",
       "outputFile": "app-release.apk"
     }
   ],

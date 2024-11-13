@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../environments/environment'; 
 
 @Injectable({
   providedIn: 'root'
 })
 export class TermsAndConditionsService {
 
-  private apiUrl = 'https://ecocargaqa.minenergia.cl/api/TermsAndConditionsApi';
+  private apiUrlWeb = environment.apiUrlWeb;
 
   constructor(private http: HttpClient) { }
 
@@ -22,7 +23,7 @@ export class TermsAndConditionsService {
     // Imprimir la URL para verificar que es correcta
    // console.log('Consultando la URL de la API:', this.apiUrl);
   
-    return this.http.get<any[]>(this.apiUrl, { headers })
+    return this.http.get<any[]>(this.apiUrlWeb, { headers })
       .pipe(
         map(data => {
           // Procesar datos aquí si es necesario

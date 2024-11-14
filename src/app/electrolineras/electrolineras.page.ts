@@ -3,8 +3,8 @@ import { Geolocation } from '@capacitor/geolocation';
 import { ApiService } from '../api.service';
 import { ModalController } from '@ionic/angular';
 import { StationDetailsModalComponent } from '../station-details-modal/station-details-modal.component';
-import { environment } from 'src/environments/environment';
 import { Loader } from '@googlemaps/js-api-loader';
+import { GoogleMapsService } from '../services/google-maps.service';
 
 @Component({
   selector: 'app-electrolineras',
@@ -19,21 +19,15 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
 
   constructor(
     private apiService: ApiService,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private googleMapsService: GoogleMapsService // Inyectamos el servicio
   ) {}
 
-  ngOnInit() {
-    //console.log('Electrolineras Página cargada');
-  }
+  ngOnInit() {}
 
   async ngAfterViewInit() {
     try {
-     // console.log('Inicializando mapa...');
-  
-      // Espera a que el contenedor del mapa esté disponible en el DOM
       await this.waitForMapElement();
-  
-      // Inicializa el mapa después de que el contenedor esté disponible
       await this.initializeMap();
   
       // Obtén la ubicación actual del usuario
@@ -46,15 +40,14 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
       console.error('Error al inicializar la página de electrolineras:', error);
     } finally {
       this.loading = false; // Oculta el preloader después de que el mapa esté listo
-      //console.log('Preloader oculto');
     }
   }
 
   async waitForMapElement(): Promise<void> {
     return new Promise((resolve, reject) => {
       let retries = 0;
-      const maxRetries = 50; // Máximo número de intentos
-      
+      const maxRetries = 50;
+
       const checkExist = setInterval(() => {
         const mapElement = document.getElementById('mapdetail');
         if (mapElement) {
@@ -62,52 +55,48 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
           resolve();
         } else {
           retries++;
-         // console.log('Esperando que el elemento del mapa esté disponible en el DOM...');
           if (retries >= maxRetries) {
             clearInterval(checkExist);
             reject(new Error('El mapa no se pudo cargar en el DOM después de varios intentos'));
           }
         }
-      }, 100); // Revisa cada 100ms
+      }, 100);
     });
   }
 
   // Inicializar el mapa de Google
   async initializeMap() {
     this.loading = true; // Muestra el spinner de carga
-  
+
     const loader = new Loader({
-      apiKey: environment.googleMapsApiKey,
+      apiKey: this.googleMapsService.googleMapsApiKey, // Usamos la API Key desde el servicio
       version: 'weekly',
       libraries: ['places']
     });
-  
+
     try {
-      await loader.load(); // Carga Google Maps
-  
-      // Esperar hasta que el elemento del mapa esté en el DOM
+      await loader.load();
+
       let mapElement: HTMLElement | null = null;
       let attempts = 0;
       while (!mapElement && attempts < 10) {
         mapElement = document.getElementById('mapdetail');
         attempts++;
-        await new Promise(resolve => setTimeout(resolve, 500)); // Espera 500 ms antes de intentar de nuevo
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
-  
+
       if (!mapElement) {
         throw new Error('El mapa no se pudo cargar en el DOM después de varios intentos');
       }
-  
-      // Inicializa el mapa en el contenedor
+
       this.map = new google.maps.Map(mapElement, {
         center: { lat: -34.929, lng: 138.601 },
         zoom: 15,
       });
-     // console.log("Mapa inicializado correctamente");
     } catch (error) {
       console.error('Error al cargar o inicializar Google Maps:', error);
     } finally {
-      this.loading = false; // Oculta el spinner de carga
+      this.loading = false;
     }
   }
 
@@ -115,7 +104,6 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
   async getCurrentLocation() {
     try {
       const coordinates = await Geolocation.getCurrentPosition();
-     // console.log('Posición actual:', coordinates);
   
       const userPosition = {
         lat: coordinates.coords.latitude,
@@ -126,7 +114,6 @@ export class ElectrolinerasPage implements OnInit, AfterViewInit {
       if (this.map) {
         this.map.setCenter(userPosition); // Centrar el mapa en la ubicación actual
         this.map.setZoom(12);  // Ajustar el nivel de zoom
-       // console.log('Mapa centrado en la ubicación del usuario:', userPosition);
       }
     } catch (error) {
       console.error('Error al obtener la ubicación actual:', error);
@@ -143,9 +130,6 @@ getNearbyStations() {
       )
     );
 
-    //console.log('Estaciones disponibles y otras:', this.availableStations);
-
-    // Recorremos cada estación y añadimos marcadores según su estado
     this.availableStations.forEach(station => {
       const { latitude, longitude } = station.coordinates;
 
@@ -153,9 +137,7 @@ getNearbyStations() {
         const lat = parseFloat(latitude);
         const lng = parseFloat(longitude);
 
-        // Validamos que las coordenadas estén dentro del rango válido
         if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-          // Añadimos un marcador con información del estado
           this.addMarker(lat, lng, station.name, station);
         } else {
           console.error("Coordenadas fuera de rango:", station);
@@ -170,10 +152,9 @@ getNearbyStations() {
 // Añadir un marcador al mapa
 async addMarker(lat: number, lng: number, title: string, station: any) {
   if (this.map && !isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-    // Determinar el icono según el estado de la estación
     const iconUrl = station.evses.some((evse: { status: string }) => evse.status === 'DISPONIBLE')
-      ? 'assets/icon/electrolineras.png' // Icono para estaciones disponibles
-      : 'assets/icon/red1.png'; // Icono para estaciones con otros estados
+      ? 'assets/icon/electrolineras.png'
+      : 'assets/icon/red1.png';
 
     const marker = new google.maps.Marker({
       position: { lat, lng },

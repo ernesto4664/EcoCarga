@@ -30,6 +30,10 @@ interface Station {
   pse: any;
   evses: EVSE[];
   distance: string; // o number dependiendo de tu API
+  coordinates: {
+    latitude: string; // La API devuelve latitud como string
+    longitude: string; // La API devuelve longitud como string
+  };
   // Agrega otros campos de la estación si los necesitas
 }
 
@@ -50,6 +54,9 @@ export class SecondSearchPage implements OnInit {
   stations: any[] = [];  // Para almacenar las estaciones filtradas
   private apiUrlSec = environment.apiUrlSec;   // URL del backend de las estaciones
   private apiUrlWebBateries = environment.apiUrlWebBateries;
+  loading: boolean = false; // Indicador de carga
+  buttonVisible: boolean = true; // El botón es visible al inicio
+  hasActiveFilter: boolean = false; 
 
   constructor(
     private http: HttpClient,
@@ -67,7 +74,13 @@ export class SecondSearchPage implements OnInit {
   }
 
   ngOnInit() {
+    this.buttonVisible = true; // Mostrar el botón al entrar en la vista
+    this.loading = true; // Activar el preloader al entrar a la vista
     this.getUserLocation();
+      // Desactivar el preloader después de un tiempo (por ejemplo, 5 segundos) si no hay otros procesos pendientes
+      setTimeout(() => {
+        this.loading = false;
+      }, 5000);
     
   }
 
@@ -145,6 +158,7 @@ export class SecondSearchPage implements OnInit {
 
   // Filtrar estaciones por distancia
   filterByDistance() {
+    this.hasActiveFilter = this.selectedDistance > 0;
     //console.log('Filtrar por distancia:', this.selectedDistance);
     this.applyAllFilters();
   }
@@ -167,6 +181,9 @@ export class SecondSearchPage implements OnInit {
       console.error('Ubicación del usuario no disponible');
       return;
     }
+
+      // Ocultar el botón al iniciar la búsqueda
+      this.buttonVisible = false;
   
     const connectorIds = this.selectedConnectors.map(c => c.connector_id);
   
@@ -314,13 +331,12 @@ export class SecondSearchPage implements OnInit {
       case 'DISPONBILE':
         return 'green';
       case 'OCUPADO':
-        return 'orange';
+        return 'yellow';
       case 'INOPERATIVO':
       case 'BLOQUEADO':
       case 'REMOVED':
       case 'FUERA DE LINEA':
       case 'NO DISPONIBLE':
-      case 'OCUPADO':
         return 'red';
       default:
         return 'gray';
@@ -379,7 +395,7 @@ export class SecondSearchPage implements OnInit {
       {
         label: 'Cargando',
         count: chargingConnectors.length,
-        color: '#f53d3d'
+        color: '#ffcc00'
       },
       {
         label: 'No disponible',
@@ -521,76 +537,105 @@ export class SecondSearchPage implements OnInit {
 
     // Nueva función para refrescar la lista de estaciones manteniendo los filtros
     async refreshStationsWithFilters() {
+      if (!this.userLocation) {
+        console.error('Ubicación del usuario no disponible');
+        return;
+      }
+    
       const loading = await this.loadingController.create({
-          message: 'Actualizando estaciones...',
-          spinner: 'circles',
+        message: 'Actualizando estaciones...',
+        spinner: 'circles',
       });
       await loading.present();
-  
-      const connectorIds = this.selectedConnectors.map(c => c.connector_id);
-      const distance = this.selectedDistance;
-      const pse = this.selectedPSE;
-  
-      console.log('Conectores seleccionados:', connectorIds);
-      console.log('Distancia seleccionada:', distance);
-      console.log('PSE seleccionado:', pse);
-  
-      let allStations: Station[] = [];
-      let currentPage = 1;
-      const totalPages = 10; // Consultar las primeras 10 páginas
-  
-      while (currentPage <= totalPages) {
+    
+      try {
+        const connectorIds = this.selectedConnectors.map(c => c.connector_id); // Mantener filtro de conectores
+        const pse = this.selectedPSE; // Mantener filtro PSE
+        const originalDistance = this.selectedDistance; // Guardar el filtro de distancia actual
+        this.selectedDistance = 0; // Restaurar el filtro de distancia a 0
+    
+        let allStations: Station[] = [];
+        let currentPage = 1;
+        const totalPages = 10; // Limitar la consulta a las primeras 10 páginas
+    
+        // Realizar la consulta por páginas
+        while (currentPage <= totalPages) {
           try {
-              const response = await this.http.get<{ items: Station[] }>(`${this.apiUrlSec}?page=${currentPage}`).toPromise();
-  
-              console.log('Respuesta de la API:', response);
-  
-              if (response && Array.isArray(response.items)) {
-                  allStations = allStations.concat(response.items);
-              } else {
-                  console.error('La respuesta de la API no tiene un array en "items":', response);
-              }
+            const response = await this.http
+              .get<{ items: Station[] }>(`${this.apiUrlSec}?page=${currentPage}`)
+              .toPromise();
+    
+            if (response && Array.isArray(response.items)) {
+              allStations = allStations.concat(response.items);
+            } else {
+              console.error('La respuesta de la API no tiene un array en "items":', response);
+            }
           } catch (error) {
-              console.error('Error al obtener la página', currentPage, error);
-              break; // Salir en caso de error
+            console.error('Error al obtener la página', currentPage, error);
+            break; // Salir del bucle en caso de error
           }
           currentPage++;
-      }
-  
-      // Filtrar las estaciones obtenidas
-      this.stations = allStations.filter((station: Station) => {
-          return station.evses.some((evse: EVSE) => {
-              return evse.status === 'DISPONIBLE' && 
-                  evse.connectors.some((connector: Connector) => 
-                      connectorIds.includes(connector.connector_id)
-                  );
-          });
-      });
-  
-      this.stations.forEach((station: Station) => {
+        }
+    
+        // Filtrar las estaciones obtenidas según conectores válidos
+        this.stations = allStations.filter((station: Station) => {
+          const hasValidEVSEs = station.evses.some((evse: EVSE) =>
+            evse.status === 'DISPONIBLE' &&
+            evse.connectors.some((connector: Connector) => connectorIds.includes(connector.connector_id))
+          );
+    
+          // Mantener únicamente los EVSEs y conectores válidos
           station.evses.forEach((evse: EVSE) => {
-              evse.connectors = evse.connectors.filter((connector: Connector) => 
-                (connector.status === 'DISPONIBLE' || connector.status === 'NO DISPONIBLE' || connector.status === 'OCUPADO') && 
-                  connectorIds.includes(connector.connector_id)
-              );
+            evse.connectors = evse.connectors.filter((connector: Connector) =>
+              connectorIds.includes(connector.connector_id)
+            );
           });
           station.evses = station.evses.filter((evse: EVSE) => evse.connectors.length > 0);
-      });
-  
-      // Filtrar por distancia
-      if (distance > 0) {
-          this.stations = this.stations.filter((station: Station) => parseFloat(station.distance) <= distance);
-      }
-  
-      // Filtrar por PSE
-      if (pse) {
+    
+          return hasValidEVSEs;
+        });
+    
+        // Filtrar por PSE si está activo
+        if (pse) {
           this.stations = this.stations.filter((station: Station) => station.pse && station.pse.includes(pse));
+        }
+    
+        // Ordenar por cercanía usando la ubicación del usuario
+        this.stations = this.stations
+          .map(station => {
+            station.distance = this.calculateDistanceForRefresh(
+              this.userLocation!.latitude,
+              this.userLocation!.longitude,
+              parseFloat(station.coordinates.latitude),
+              parseFloat(station.coordinates.longitude)
+            ).toFixed(1); // Calcular y redondear distancia
+            return station;
+          })
+          .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance)); // Ordenar por distancia ascendente
+    
+        console.log('Estaciones después de aplicar filtros y ordenar por distancia:', this.stations);
+      } catch (error) {
+        console.error('Error al refrescar estaciones:', error);
+      } finally {
+        await loading.dismiss();
+        console.log(`Refresco completado. El filtro de distancia fue restaurado a 0, los otros filtros permanecen activos.`);
       }
-  
-      console.log('Estaciones después de aplicar filtros:', this.stations);
-      loading.dismiss();
-      console.log(`Llamada a la API realizada a: ${this.apiUrlSec}/locations`);
-  }
+    }
 
+    calculateDistanceForRefresh(lat1: number, lon1: number, lat2: number, lon2: number): number {
+      const R = 6371; // Radio de la Tierra en km
+      const dLat = this.deg2radForRefresh(lat2 - lat1);
+      const dLon = this.deg2radForRefresh(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(this.deg2radForRefresh(lat1)) * Math.cos(this.deg2radForRefresh(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c; // Distancia en kilómetros
+    }
+    
+    deg2radForRefresh(deg: number): number {
+      return deg * (Math.PI / 180);
+    }
   }
 

@@ -41,6 +41,20 @@ export class StationDetailsPage implements OnInit, AfterViewInit {
     this.setMapUrl();
   }
 
+  accordionValue: string | null = null; // Controla qué acordeón está abierto
+
+  // Detener la propagación del evento y alternar el acordeón seleccionado
+  stopEventAndToggleAccordion(event: Event, value: string) {
+    event.stopPropagation(); // Detiene la propagación del evento
+
+    // Alternar el valor del acordeón; si ya está abierto, lo cierra
+    this.accordionValue = this.accordionValue === value ? null : value;
+  }
+
+  stopEvent(event: Event) {
+    event.stopPropagation(); // Evitar que el clic se propague
+  }
+
   ngAfterViewInit() {
     this.observeMapVisibility();
   }
@@ -167,7 +181,7 @@ export class StationDetailsPage implements OnInit, AfterViewInit {
   getStatusLabel(status: string): string {
     switch (status) {
       case 'DISPONIBLE':
-        return 'Disponibles';
+        return 'Disponible';
       case 'OCUPADO':
         return 'Cargando';
       case 'INOPERATIVO':
@@ -175,7 +189,7 @@ export class StationDetailsPage implements OnInit, AfterViewInit {
       case 'REMOVED':
       case 'FUERA DE LINEA':
       case 'NO DISPONIBLE':
-        return 'No disponibles';
+        return 'No disponible';
       default:
         return 'Desconocido';
     }
@@ -186,13 +200,13 @@ export class StationDetailsPage implements OnInit, AfterViewInit {
       case 'DISPONIBLE':
         return '#279769';
       case 'OCUPADO':
-        return '#f53d3d';
+        return '#ffcc00';
+        case 'NO DISPONIBLE':
+          return '#dc3545';
       case 'INOPERATIVO':
       case 'BLOQUEADO':
       case 'REMOVED':
       case 'FUERA DE LINEA':
-      case 'NO DISPONIBLE':
-        return 'red';
       default:
         return 'gray';
     }
@@ -260,7 +274,7 @@ export class StationDetailsPage implements OnInit, AfterViewInit {
     return acStandards.includes(standard) ? 'AC' : dcStandards.includes(standard) ? 'DC' : 'Desconocido';
   }
 
-  getOpeningHours(station: any): string {
+ /* getOpeningHours(station: any): string {
     if (station.opening_times.twentyfourseven) {
       return 'Abierto 24/7';
     }
@@ -282,11 +296,100 @@ export class StationDetailsPage implements OnInit, AfterViewInit {
       return result;
     }
     return 'No disponible';
-  }
+  }*/
 
-  getDayName(weekday: number): string {
+ /* getDayName(weekday: number): string {
     const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     return days[weekday - 1];
-  }
+  }*/
 
+    // Métodos para horarios de aperturas y cierres
+    getOpeningHours(station: any): string {
+      const regularHours = station.opening_times.regular_hours;
+    
+      if (station.opening_times.twentyfourseven) {
+        return 'Abierto 24/7';
+      }
+    
+      if (regularHours.length === 0) {
+        return 'No disponible';
+      }
+    
+      let result = '';
+      let weekdayRanges: { start: number; end: number; period_begin: string; period_end: string }[] = [];
+    
+      // Asegurarse de que todos los días de la semana se cubran, incluso los que no están en el arreglo regularHours
+      const diasCubiertos = new Set(regularHours.map((h: { weekday: any; }) => h.weekday));
+    
+      // Agregar días faltantes como "Cerrado"
+      for (let i = 1; i <= 7; i++) {
+        if (!diasCubiertos.has(i)) {
+          regularHours.push({
+            weekday: i,
+            period_begin: 'Cerrado',
+            period_end: 'Cerrado'
+          });
+        }
+      }
+    
+      // Agrupar días consecutivos con el mismo horario
+      for (let i = 0; i < regularHours.length; i++) {
+        const currentDay = regularHours[i];
+        const lastRange = weekdayRanges[weekdayRanges.length - 1];
+    
+        if (
+          lastRange &&
+          lastRange.period_begin === currentDay.period_begin &&
+          lastRange.period_end === currentDay.period_end &&
+          lastRange.end === currentDay.weekday - 1
+        ) {
+          // Extender el rango de días si tienen el mismo horario
+          lastRange.end = currentDay.weekday;
+        } else {
+          // Agregar un nuevo rango de días
+          weekdayRanges.push({
+            start: currentDay.weekday,
+            end: currentDay.weekday,
+            period_begin: currentDay.period_begin,
+            period_end: currentDay.period_end,
+          });
+        }
+      }
+    
+      // Formatear el resultado
+      weekdayRanges.forEach((range, index) => {
+        const dayStart = this.getDayName(range.start);
+        const dayEnd = this.getDayName(range.end);
+        const hours = range.period_begin === 'Cerrado' ? 'Cerrado' : `${range.period_begin} a ${range.period_end}`;
+    
+        if (dayStart === dayEnd) {
+          result += `${dayStart}: ${hours}`;
+        } else {
+          result += `De ${dayStart} ${range.period_begin} a ${dayEnd} ${range.period_end}`;
+        }
+    
+        if (index < weekdayRanges.length - 1) {
+          result += '<br>'; // Agregar salto de línea HTML
+        }
+      });
+    
+      return result;
+    }
+    
+    getDayName(weekday: number): string {
+      const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+      return days[weekday - 1]; // Ajustar el índice para que el día 1 sea Lunes
+    }
+  
+    getExceptionalOpenings(station: any): string {
+      return station.opening_times.exceptional_openings.map((opening: any) => {
+        return `${opening.period_begin} a ${opening.period_end}`;
+      }).join(', ');
+    }
+  
+    getExceptionalClosings(station: any): string {
+      return station.opening_times.exceptional_closings.map((closing: any) => {
+        return `${closing.period_begin} a ${closing.period_end}`;
+      }).join(', ');
+    }
 }

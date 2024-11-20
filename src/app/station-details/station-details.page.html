@@ -1,6 +1,6 @@
 <ion-content [fullscreen]="true">
   <div class="container" style="margin-top: 3.5rem;">
-    <div class="row" style="padding: 10px;">
+    <div class="row" style="padding: 10px 10px 0px;">
       <div class="icon-text" style="margin-left: 3px;">
         <img style="width: 46px; height: 46px;" src="assets/icon/electrolineras.png" alt="Icono de electrolinera" class="icon">
         <p style="font-size: 16px;"><strong>E/S. {{ station.name }}</strong></p>
@@ -15,6 +15,30 @@
       </div>
     </div>
 
+    <ion-accordion-group [value]="accordionValue">
+      <ion-accordion value="horarios">
+        <ion-item class="horarios" slot="header" (click)="stopEventAndToggleAccordion($event, 'horarios')">
+          <ion-label style="display: flex;">
+            <img src="assets/icon/hours.png" alt="Horarios" class="iconh" style="margin-right: 10px; width:24px; height: 24px;">
+            <p>Horarios:</p>
+          </ion-label>
+        </ion-item>
+    
+        <div class="ion-padding" slot="content">
+          <ion-item class="show-item custom-item" (click)="stopEvent($event)">
+            <div [innerHTML]="getOpeningHours(station)"></div>
+            <div *ngIf="station.opening_times.exceptional_openings.length > 0">
+              <p>Excepcionales Aperturas: {{ getExceptionalOpenings(station) }}</p>
+            </div>
+            
+            <div *ngIf="station.opening_times.exceptional_closings.length > 0">
+              <p>Excepcionales Cierres: {{ getExceptionalClosings(station) }}</p>
+            </div>
+          </ion-item>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+
     <div id="map" style="height: 300px;"></div>
     <div class="custom-button">
       <ion-button class="custom-button" [href]="externalMapUrl" target="_blank">Cómo llegar</ion-button>
@@ -25,7 +49,7 @@
 
         <!-- Barra para Conectores Disponibles -->
         <div *ngIf="getTotalAvailableConnectors() > 0" class="available-connectors-bar" style="background-color: #279769; color: white; padding: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; border-radius: 4px;">
-          <strong>Conectores Disponibles: {{ getTotalAvailableConnectors() }}</strong>
+          <strong>Conector Disponible: {{ getTotalAvailableConnectors() }}</strong>
         </div>
 
         <!-- Lista de Conectores Disponibles -->
@@ -93,8 +117,8 @@
         </ion-list>
 
         <!-- Barra para Conectores Cargando -->
-        <div *ngIf="getTotalChargingConnectors() > 0" class="charging-connectors-bar" style="background-color: #dc3545; color: white; padding: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; border-radius: 4px;">
-          <strong>Conectores Cargando: {{ getTotalChargingConnectors() }}</strong>
+        <div *ngIf="getTotalChargingConnectors() > 0" class="charging-connectors-bar" style="background-color: #ffcc00; color: white; padding: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; border-radius: 4px;">
+          <strong>Conector Cargando: {{ getTotalChargingConnectors() }}</strong>
         </div>
 
         <!-- Lista de Conectores Cargando -->
@@ -117,7 +141,7 @@
                     <div class="icon-text">
                       <p><strong>Tipo de corriente:</strong> {{ getCurrentType(connector.power_type) }}</p>
                     </div>
-                    <p style="color: #dc3545;"><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
+                    <p style="color: #ffcc00;"><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
                   </div>
                   <div class="icon-text">
                     <p><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>
@@ -159,8 +183,8 @@
         </ion-list>
 
         <!-- Barra para Conectores No Disponibles -->
-        <div *ngIf="getTotalUnavailableConnectors() > 0" class="unavailable-connectors-bar" style="background-color: #ffcc00; color: white; padding: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; border-radius: 4px;">
-          <strong>Conectores No Disponibles: {{ getTotalUnavailableConnectors() }}</strong>
+        <div *ngIf="getTotalUnavailableConnectors() > 0" class="unavailable-connectors-bar" style="background-color: #dc3545; color: white; padding: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; border-radius: 4px;">
+          <strong>Conector No Disponible: {{ getTotalUnavailableConnectors() }}</strong>
         </div>
 
         <!-- Lista de Conectores No Disponibles -->
@@ -183,7 +207,7 @@
                     <div class="icon-text">
                       <p><strong>Tipo de corriente:</strong> {{ getCurrentType(connector.power_type) }}</p>
                     </div>
-                    <p style="color: #ffcc00;" ><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
+                    <p style="color: #dc3545;" ><strong>Estado:</strong> {{ getStatusLabel(connector.status) }}</p>
                   </div>
                   <div class="icon-text">
                     <p><strong>Máxima potencia eléctrica:</strong> {{ evse.max_electric_power }} kW</p>

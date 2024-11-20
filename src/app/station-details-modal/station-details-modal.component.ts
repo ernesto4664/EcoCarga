@@ -65,7 +65,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       <div class="connector-details">
         <div *ngFor="let connector of occupiedConnectors" class="connector-item">
           <img [src]="connector.icon" alt="{{ connector.text }}">
-          <span style="color: red;">{{ connector.text }}</span>
+          <span style="color: #a6a649;">{{ connector.text }}</span>
         </div>
       </div>
 
@@ -76,7 +76,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       <div class="connector-details">
         <div *ngFor="let connector of unavailableConnectors" class="connector-item">
           <img [src]="connector.icon" alt="{{ connector.text }}">
-          <span style="color: #ffcc00;">{{ connector.text }}</span>
+          <span style="color: red;">{{ connector.text }}</span>
         </div>
       </div>
 
@@ -99,7 +99,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       border-radius: 4px;
     }
     .occupied-connectors-bar {
-      background-color: #f53d3d;
+      background-color: #ffcc00;
       color: white;
       padding: 10px;
       text-align: center;
@@ -108,8 +108,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       border-radius: 4px;
     }
     .unavailable-connectors-bar {
-      background-color: #ffcc00;
-      color: black;
+      background-color: #dc3545;
+      color: white;
       padding: 10px;
       text-align: center;
       font-size: 16px;

@@ -1,13 +1,3 @@
-<!-- Comentado como lo solicitaste -->
-<!--<ion-header class="custom-header">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/second-search"></ion-back-button>
-    </ion-buttons>
-    <ion-title>ESTACIONES</ion-title>
-  </ion-toolbar>
-</ion-header>-->
-
 <ion-content [fullscreen]="true">
   <div class="container" style="background: #31B17D !important;">
     <p class="msj-principal">
@@ -70,13 +60,20 @@
     </ion-accordion>
   </ion-accordion-group>
 
-  <div class="custom-button">
+  <div class="custom-button" *ngIf="buttonVisible">
     <ion-button class="custom-button" (click)="getFilteredStations()">Buscar Cargadores</ion-button>
   </div>
 
   <div class="custom-button" *ngIf="stations.length > 0">
-    <ion-button class="custom-button" (click)="refreshStationsWithFilters()">Refrescar</ion-button>
+    <ion-button class="custom-button" (click)="refreshStationsWithFilters()">
+      Refrescar
+    </ion-button>
   </div>
+
+    <!-- Contenido principal con el preloader principal -->
+    <div *ngIf="loading" class="loader">
+      <div class="spinner"></div>
+    </div>
   
   <div class="container">
     <div class="row">
@@ -123,7 +120,7 @@
                   <ng-container *ngFor="let status of getConnectorStatus(station).statusDetails">
                     <div *ngIf="status.count > 0">
                       <p [style.background-color]="status.color" class="status-pill">
-                        {{ status.count }} Conectores: {{ status.label }}
+                        {{ status.count }} Conector: {{ status.label }}
                       </p>
                     </div>
                   </ng-container>
@@ -152,21 +149,6 @@
                   </div>
                 </ion-accordion>
               </ion-accordion-group>
-              <!--<div class="icon-text">
-                <img src="assets/icon/hours.png" alt="Horarios" class="icon">
-                <div class="hours-container">
-                  <p>Horarios:</p>
-                  <div [innerHTML]="getOpeningHours(station)"></div>
-                </div>
-              </div>
-
-              <div *ngIf="station.opening_times.exceptional_openings.length > 0">
-                <p>Excepcionales Aperturas: {{ getExceptionalOpenings(station) }}</p>
-              </div>
-
-              <div *ngIf="station.opening_times.exceptional_closings.length > 0">
-                <p>Excepcionales Cierres: {{ getExceptionalClosings(station) }}</p>
-              </div>-->
             </ion-label>
           </ion-item>
         </ion-list>

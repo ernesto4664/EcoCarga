@@ -48,26 +48,26 @@ export class ViewonePage implements OnInit {
   ngOnInit() {
     const termsAccepted = localStorage.getItem('termsAccepted') === 'true';
     const termsAcceptedDate = localStorage.getItem('termsAcceptedDate'); // Fecha de aceptación
-
+  
     if (termsAccepted && termsAcceptedDate) {
-        const currentTime = new Date().getTime();
-        const acceptedTime = new Date(termsAcceptedDate).getTime();
-        const fiveDaysInMillis = 5 * 24 * 60 * 60 * 1000; // 5 días en milisegundos
-
-        // Verificar si han pasado más de 5 días desde que se aceptaron los términos
-        if ((currentTime - acceptedTime) > fiveDaysInMillis) {
-            this.termsAccepted = false; // Forzar al usuario a volver a aceptar
-            localStorage.removeItem('termsAccepted'); // Eliminar el estado anterior
-            localStorage.removeItem('termsAcceptedDate'); // Eliminar la fecha anterior
-        } else {
-            this.termsAccepted = true; // Aceptación válida dentro de los 5 días
-        }
+      const currentTime = new Date().getTime();
+      const acceptedTime = new Date(termsAcceptedDate).getTime();
+      const oneYearInMillis = 365 * 24 * 60 * 60 * 1000; // 1 año en milisegundos
+  
+      // Verificar si han pasado más de 1 año desde que se aceptaron los términos
+      if ((currentTime - acceptedTime) > oneYearInMillis) {
+        this.termsAccepted = false; // Forzar al usuario a volver a aceptar
+        localStorage.removeItem('termsAccepted'); // Eliminar el estado anterior
+        localStorage.removeItem('termsAcceptedDate'); // Eliminar la fecha anterior
+      } else {
+        this.termsAccepted = true; // Aceptación válida dentro del año
+      }
     } else {
-        this.termsAccepted = false; // No se han aceptado los términos
+      this.termsAccepted = false; // No se han aceptado los términos
     }
-
+  
     this.route.url.subscribe(url => console.log('URL actual:', url));
-}
+  }
 
   navigateToInformacionPreliminar() {
     if (this.termsAccepted) {

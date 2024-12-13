@@ -3,14 +3,14 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, forkJoin, interval, Subscription } from 'rxjs';
 import { tap, mergeMap, switchMap } from 'rxjs/operators';
 import { environment } from '../environments/environment'; 
+import { ConfigService } from './services/config.service'; // Importa el ConfigService
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  // Variables de configuración
-  private apiUrlSec = environment.apiUrlSec; 
-  private token = environment.token; // Usar token desde environment
+  private apiUrlSec = environment.apiUrlSec; // Inicializa con el valor del environment
+  private token = environment.token;
 
   private cache: any[] = [];
   private cacheLifetime = 2 * 3600 * 1000; // 2 horas
@@ -19,14 +19,14 @@ export class ApiService {
   private cacheFirstSearchLifetime = 7 * 24 * 3600 * 1000; // 7 días
   private updateSubscription: Subscription | null = null;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private configService: ConfigService) {
+    const dynamicApiUrl = this.configService.getApiUrlSec();
+    if (dynamicApiUrl) {
+      this.apiUrlSec = dynamicApiUrl; // Usa la URL dinámica si está disponible
+    }
     this.startConnectorStatusUpdates();
   }
 
-  // -------------------------------------------------------------------------
-  //  Métodos Privados
-  // -------------------------------------------------------------------------
-  
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       Authorization: `Bearer ${this.token}`,
@@ -34,14 +34,14 @@ export class ApiService {
     });
   }
 
+  private fetchLocations(page: number): Observable<any> {
+    const url = `${this.apiUrlSec}?page=${page}`; // Usa la URL dinámica
+    return this.http.get<any>(url, { headers: this.getHeaders() });
+  }
+
   private isCacheValid(): boolean {
     const cacheValid = Date.now() - this.lastFetchTime < this.cacheLifetime;
     return cacheValid;
-  }
-
-  private fetchLocations(page: number): Observable<any> {
-    const url = `${this.apiUrlSec}?page=${page}`;
-    return this.http.get<any>(url, { headers: this.getHeaders() });
   }
 
   private startConnectorStatusUpdates() {

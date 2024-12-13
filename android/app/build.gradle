@@ -3,16 +3,16 @@ apply plugin: 'com.android.application'
 android {
     namespace 'cl.gob.energia.electrolineras2' // Asegúrate de que coincide con tu configuración en capacitor.config.ts
     compileSdk rootProject.ext.compileSdkVersion
-    
+
     defaultConfig {
         applicationId "cl.gob.energia.electrolineras2"  // Actualizado para coincidir con capacitor.config.ts
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 27
-        versionName "2.1"
+        versionCode 29
+        versionName '2.3'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-    
+
     signingConfigs {
         release {
             storeFile file("D:/ecocarga-key.keystore")  // Ruta completa del keystore

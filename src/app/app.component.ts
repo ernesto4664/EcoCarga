@@ -108,7 +108,7 @@ export class AppComponent implements OnInit {
 
   navigateToinformation() {
     this.showMenu = false;
-    this.router.navigate(['/informacionpreliminar']);
+    this.router.navigate(['/informacionpreliminar/menu']);
   }
 
   navigateToterminos() {

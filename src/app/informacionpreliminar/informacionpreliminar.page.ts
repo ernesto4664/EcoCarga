@@ -1,32 +1,49 @@
-import { Component, AfterViewInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-informacionpreliminar',
   templateUrl: './informacionpreliminar.page.html',
   styleUrls: ['./informacionpreliminar.page.scss'],
 })
-export class InformacionpreliminarPage implements AfterViewInit {
-  showSkipButton = false; // Variable para controlar la visibilidad del botón "Continuar"
-  showPrevButton = false; // Variable para controlar la visibilidad del botón "Atrás"
-  nextButtonText = 'Empezar'; // Texto del botón "Siguiente" o "Empezar"
+export class InformacionpreliminarPage implements AfterViewInit, OnInit {
+  showSkipButton = false; 
+  showPrevButton = false; 
+  nextButtonText = 'Empezar'; 
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private route: ActivatedRoute) {}
+
+  ngOnInit() {
+    // Verificar si se accede desde el menú
+    const fromMenu = this.route.snapshot.paramMap.get('fromMenu');
+
+    // Si no se accede desde el menú, aplicar lógica de caché
+    if (!fromMenu || fromMenu !== 'menu') {
+      const pageViewedDate = localStorage.getItem('informacionPreliminarViewedDate');
+      if (pageViewedDate) {
+        const currentTime = new Date().getTime();
+        const viewedTime = new Date(pageViewedDate).getTime();
+        const oneYearInMillis = 365 * 24 * 60 * 60 * 1000;
+
+        if ((currentTime - viewedTime) < oneYearInMillis) {
+          this.router.navigate(['/viewone']);
+        }
+      }
+    }
+  }
 
   ngAfterViewInit() {
-    // Acceder a Swiper aquí
     const swiper = (document.querySelector('swiper-container') as any)?.swiper;
     if (swiper) {
       swiper.on('slideChange', () => {
-        this.showSkipButton = swiper.isEnd; // Mostrar el botón "Continuar" solo en el último slide
-        this.showPrevButton = swiper.activeIndex > 0; // Mostrar el botón "Atrás" solo si no es el primer slide
-        this.nextButtonText = swiper.activeIndex > 0 ? 'Siguiente' : 'Empezar'; // Cambiar el texto del botón a "Siguiente" a partir de la segunda diapositiva
+        this.showSkipButton = swiper.isEnd; 
+        this.showPrevButton = swiper.activeIndex > 0; 
+        this.nextButtonText = swiper.activeIndex > 0 ? 'Siguiente' : 'Empezar'; 
       });
     }
   }
 
   next() {
-    // Lógica para la diapositiva siguiente
     const swiper = (document.querySelector('swiper-container') as any)?.swiper;
     if (swiper) {
       swiper.slideNext();
@@ -34,7 +51,6 @@ export class InformacionpreliminarPage implements AfterViewInit {
   }
 
   prev() {
-    // Lógica para la diapositiva anterior
     const swiper = (document.querySelector('swiper-container') as any)?.swiper;
     if (swiper) {
       swiper.slidePrev();
@@ -42,7 +58,7 @@ export class InformacionpreliminarPage implements AfterViewInit {
   }
 
   skip() {
-    // Redirigir a otra página
+    localStorage.setItem('informacionPreliminarViewedDate', new Date().toISOString());
     this.router.navigate(['/viewone']);
   }
 }

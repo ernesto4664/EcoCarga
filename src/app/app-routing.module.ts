@@ -20,6 +20,7 @@ const routes: Routes = [
     path: 'informacionpreliminar',
     loadChildren: () => import('./informacionpreliminar/informacionpreliminar.module').then(m => m.InformacionpreliminarPageModule) 
   },
+  { path: 'informacionpreliminar/:fromMenu', component: InformacionpreliminarPage },
   {
     path: 'electrolineras',
     loadChildren: () => import('./electrolineras/electrolineras.module').then( m => m.ElectrolinerasPageModule)

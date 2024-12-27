@@ -8,8 +8,8 @@ android {
         applicationId "cl.gob.energia.electrolineras2"  // Actualizado para coincidir con capacitor.config.ts
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 29
-        versionName '2.3'
+        versionCode 30
+        versionName '2.4'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

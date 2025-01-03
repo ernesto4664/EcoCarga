@@ -50,6 +50,7 @@ export class ViewonePage implements OnInit {
     const termsAcceptedDate = localStorage.getItem('termsAcceptedDate'); // Fecha de aceptación
   
     if (termsAccepted && termsAcceptedDate) {
+     
       const currentTime = new Date().getTime();
       const acceptedTime = new Date(termsAcceptedDate).getTime();
       const oneYearInMillis = 365 * 24 * 60 * 60 * 1000; // 1 año en milisegundos
@@ -61,12 +62,15 @@ export class ViewonePage implements OnInit {
         localStorage.removeItem('termsAcceptedDate'); // Eliminar la fecha anterior
       } else {
         this.termsAccepted = true; // Aceptación válida dentro del año
+        this.navigateToInformacionPreliminar();
       }
     } else {
       this.termsAccepted = false; // No se han aceptado los términos
     }
   
     this.route.url.subscribe(url => console.log('URL actual:', url));
+
+    
   }
 
   navigateToInformacionPreliminar() {

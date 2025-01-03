@@ -456,12 +456,15 @@ getIconPath(connector: any): string {
     'Tipo 2 (SOCKET - AC)': 'Tipo2AC.png',
     'Tipo 2 (CABLE - AC)': 'Tipo2AC.png',
     'CCS 2 (CABLE - DC)': 'combinadotipo2.png',
+    'CCS 2 (SOCKET - DC)': 'combinadotipo2.png',
     'CCS 1 (CABLE - DC)': 'Tipo1DC.png',
+    'CCS 1 (SOCKET - DC)': 'Tipo1DC.png',
     'GB/T AC (CABLE - AC)': 'GBT_AC.png',
     'GB/T AC (SOCKET - AC)': 'GBT_AC.png',
     'Tipo 1 (CABLE - AC)': 'Tipo1AC.png',
     'Tipo 1 (SOCKET - AC)': 'Tipo1AC.png',
     'CHAdeMO (CABLE - DC)': 'CHADEMO.png',
+    'CHAdeMO (SOCKET - DC)': 'CHADEMO.png',
     'GB/T DC (CABLE - DC)': 'GBT_DC.png',
   };
 
